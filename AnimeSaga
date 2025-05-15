@@ -37,87 +37,17 @@ Rayfield:Notify({
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 local GameTab = Window:CreateTab("Game", 4483362458)
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-
-local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
-
-LobbyTab:CreateButton({
-    Name = "Redeem All Codes (Final)",
-    Callback = function()
-        local index = 1
-
-        local function redeemNext()
-            if index > #codeList then
-                Rayfield:Notify({
-                    Title = "✅ Hoàn tất",
-                    Content = "Đã thử redeem toàn bộ mã.",
-                    Duration = 4
-                })
-                return
-            end
-
-            local code = codeList[index]
-            print("🔁 Đang thử mã:", code)
-
-            -- Kết nối chờ phản hồi
-            local received = false
-            local connection
-            connection = CodesEvent.OnClientEvent:Connect(function(response)
-                received = true
-                connection:Disconnect()
-
-                Rayfield:Notify({
-                    Title = "📨 Mã: " .. code,
-                    Content = "Phản hồi: " .. tostring(response),
-                    Duration = 3
-                })
-
-                index += 1
-                task.wait(1.2)
-                redeemNext()
-            end)
-
-            -- Gửi mã
-            local ok, err = pcall(function()
-                CodesEvent:FireServer(code)
-            end)
-
-            if not ok then
-                connection:Disconnect()
-                Rayfield:Notify({
-                    Title = "❌ Không gửi được",
-                    Content = code .. ": " .. tostring(err),
-                    Duration = 3
-                })
-                index += 1
-                task.wait(1.2)
-                redeemNext()
-            else
-                -- Timeout nếu không có phản hồi sau 3 giây
-                task.delay(3, function()
-                    if not received then
-                        if connection.Connected then
-                            connection:Disconnect()
-                        end
-                        Rayfield:Notify({
-                            Title = "⚠️ Không phản hồi từ server",
-                            Content = "Mã \"" .. code .. "\" có thể đã gửi, nhưng server không trả về kết quả.",
-                            Duration = 4
-                        })
-                        index += 1
-                        redeemNext()
-                    end
-                end)
-            end
-        end
-
-        redeemNext()
-    end
-})
-
+-- Đặt biến autoFarm là false mặc định
 local autoFarm = false
 
+-- Lấy các dịch vụ cần thiết
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+-- Tạo toggle bật/tắt auto farm
 GameTab:CreateToggle({
     Name = "Bay đánh quái (Auto)",
     CurrentValue = false,
@@ -131,12 +61,14 @@ GameTab:CreateToggle({
             Duration = 3
         })
 
+        -- Bắt đầu auto farm khi bật toggle
         while autoFarm do
             local mobs = workspace:WaitForChild("Enemy"):GetChildren()
 
             for _, mob in pairs(mobs) do
-                if not autoFarm then break end
-                -- Kiểm tra nếu mob có HumanoidRootPart và Humanoid
+                if not autoFarm then break end  -- Dừng vòng lặp khi tắt autoFarm
+
+                -- Kiểm tra nếu mob có HumanoidRootPart và Humanoid (có thể tấn công)
                 if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
                     local mobHitbox = mob:FindFirstChild("HumanoidRootPart")
                     if mobHitbox then
@@ -158,7 +90,7 @@ GameTab:CreateToggle({
                 end
             end
 
-            task.wait(1)
+            task.wait(1)  -- Đợi một chút trước khi kiểm tra lại các quái vật
         end
     end
 })
