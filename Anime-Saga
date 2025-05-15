@@ -39,7 +39,7 @@ local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
 ---------Lobby----------
 LobbyTab:CreateButton({
-	Name = "⚡ Redeem All Codes)",
+	Name = "⚡ Auto Redeem All Codes (Pro)",
 	Callback = function()
 		local codes = {
 			"Release",
@@ -50,44 +50,49 @@ LobbyTab:CreateButton({
 		}
 
 		local ReplicatedStorage = game:GetService("ReplicatedStorage")
-		local codeEvent = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Codes")
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+		local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 
-		if not codeEvent or not codeEvent:IsA("RemoteEvent") then
-			Rayfield:Notify({
-				Title = "❌ Lỗi",
-				Content = "Không tìm thấy RemoteEvent Codes!",
-				Duration = 4
-			})
+		local eventFolder = ReplicatedStorage:FindFirstChild("Event")
+		if not eventFolder then warn("Không tìm thấy 'Event'") return end
+
+		local codeRemote = eventFolder:FindFirstChild("Codes")
+		if not codeRemote or not codeRemote:IsA("RemoteEvent") then
+			warn("Không tìm thấy RemoteEvent 'Codes'")
 			return
 		end
 
-		-- Dùng BindableEvent để chờ phản hồi
-		local responseReceived = Instance.new("BindableEvent")
+		-- Mở GUI nhập code bằng ProximityPrompt
+		local prompt = workspace:FindFirstChild("ProximityPrompt", true)
+		if prompt and prompt:FindFirstChild("OpenUI") then
+			if root then
+				root.CFrame = prompt.OpenUI.Parent.CFrame + Vector3.new(0, 2, 0)
+				task.wait(0.5)
+				fireproximityprompt(prompt.OpenUI)
+				task.wait(1)
+			end
+		else
+			warn("❌ Không tìm thấy ProximityPrompt OpenUI")
+		end
 
-		-- Kết nối nhận phản hồi từ server
-		codeEvent.OnClientEvent:Connect(function(response)
-			print("📩 Phản hồi từ server:", response)
-			responseReceived:Fire(response)
+		-- Bắt phản hồi
+		local responseReceived = Instance.new("BindableEvent")
+		codeRemote.OnClientEvent:Connect(function(msg)
+			print("📩 Server phản hồi:", msg)
+			responseReceived:Fire(msg)
 		end)
 
+		-- Gửi từng code 1 cách tuần tự
 		task.spawn(function()
 			for _, code in ipairs(codes) do
-				Rayfield:Notify({
-					Title = "🚀 Đang gửi code",
-					Content = code,
-					Duration = 2
-				})
+				print("🔥 Đang gửi code:", code)
+				codeRemote:FireServer(code)
 
-				print("🔁 Đang nhập code:", code)
-				codeEvent:FireServer(code)
-
-				-- Đợi phản hồi (hoặc timeout sau 5s)
-				local response = nil
+				-- Đợi phản hồi (timeout 5s)
 				local responded = false
-
 				local conn
-				conn = responseReceived.Event:Connect(function(msg)
-					response = msg
+				conn = responseReceived.Event:Connect(function()
 					responded = true
 					conn:Disconnect()
 				end)
@@ -99,17 +104,25 @@ LobbyTab:CreateButton({
 				end
 
 				if responded then
-					print("✅ Server phản hồi:", response)
+					Rayfield:Notify({
+						Title = "✅ Thành công",
+						Content = "Đã gửi: " .. code,
+						Duration = 2
+					})
 				else
-					print("⚠️ Không nhận được phản hồi từ server sau 5s")
+					Rayfield:Notify({
+						Title = "⚠️ Không phản hồi",
+						Content = code,
+						Duration = 2
+					})
 				end
 
-				task.wait(0.5) -- nghỉ thêm trước khi gửi tiếp
+				task.wait(0.5)
 			end
 
 			Rayfield:Notify({
-				Title = "✅ Hoàn tất",
-				Content = "Đã gửi tuần tự tất cả code",
+				Title = "🎉 Xong!",
+				Content = "Tất cả code đã được gửi.",
 				Duration = 4
 			})
 		end)
