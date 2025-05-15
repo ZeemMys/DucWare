@@ -35,65 +35,76 @@ Rayfield:Notify({
 })
 
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
-local GameTab = Window:CreateTab("Game", 4483362458)
+local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
+local autoFarm = false
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-local autoFarm = false
+local function getHRP()
+	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	return char:FindFirstChild("HumanoidRootPart")
+end
 
--- Tạo toggle bật/tắt auto farm
-GameTab:CreateToggle({
-    Name = "Bay đánh quái (Auto)",
-    CurrentValue = false,
-    Callback = function(Value)
-        autoFarm = Value
+local function getMobs()
+	local enemyFolder = workspace:WaitForChild("Enemy"):WaitForChild("Mob")
+	local mobs = {}
 
-        -- Thông báo bật/tắt
-        Rayfield:Notify({
-            Title = autoFarm and "🌀 Auto Farm Đã Bật" or "⛔ Auto Farm Đã Tắt",
-            Content = autoFarm and "Đang bay đánh quái..." or "Dừng farm.",
-            Duration = 3
-        })
+	for _, mob in ipairs(enemyFolder:GetChildren()) do
+		local hrp = mob:FindFirstChild("HumanoidRootPart")
+		local hum = mob:FindFirstChild("Humanoid")
+		if hrp and hum and hum.Health > 0 then
+			table.insert(mobs, mob)
+		end
+	end
 
-        -- Bắt đầu auto farm khi bật toggle
-        while autoFarm do
-            -- Duyệt qua các quái vật trong workspace.Enemy.Mob
-            local mobs = workspace:WaitForChild("Enemy"):WaitForChild("Mob"):GetChildren()
+	return mobs
+end
 
-            -- Nếu có quái vật, di chuyển và tấn công
-            for _, mob in pairs(mobs) do
-                if not autoFarm then break end  -- Nếu tắt auto farm, dừng lại
+Game1Tab:CreateToggle({
+	Name = "Auto Farm Quái (Bay tới Mist Ninja)",
+	CurrentValue = false,
+	Callback = function(Value)
+		autoFarm = Value
 
-                -- Kiểm tra nếu mob có HumanoidRootPart và Humanoid
-                if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                    local mobPos = mob.HumanoidRootPart.Position
-                    local targetPosition = mobPos + Vector3.new(0, 5, 0)  -- Bay lên trên quái vật một chút
+		Rayfield:Notify({
+			Title = autoFarm and "✅ Auto Farm BẬT" or "⛔ Đã TẮT",
+			Content = autoFarm and "Đang farm quái..." or "Đã dừng auto.",
+			Duration = 4
+		})
 
-                    -- Tính khoảng cách và di chuyển tới quái vật
-                    local distance = (HumanoidRootPart.Position - targetPosition).magnitude
-                    if distance > 5 then
-                        HumanoidRootPart.CFrame = CFrame.new(targetPosition)
-                    end
+		task.spawn(function()
+			while autoFarm do
+				local mobs = getMobs()
+				if #mobs == 0 then
+					task.wait(1)
+				else
+					for _, mob in ipairs(mobs) do
+						if not autoFarm then break end
 
-                    -- Giả lập tấn công (sửa theo yêu cầu của game)
-                    local attackRemote = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Attack")
-                    if attackRemote then
-                        attackRemote:FireServer(mob)  -- Tấn công quái vật
-                    else
-                        print("Không tìm thấy RemoteEvent tấn công.")
-                    end
+						local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+						if mobHRP then
+							local hrp = getHRP()
+							if hrp then
+								-- Bay lên trên đầu quái
+								hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 5, 0)
+								task.wait(0.3)
 
-                    -- Đợi một chút rồi chuyển sang quái khác
-                    task.wait(1)
-                end
-            end
+								-- Tấn công nếu có Remote
+								local atkRemote = ReplicatedStorage:FindFirstChild("Event")
+								if atkRemote and atkRemote:FindFirstChild("Attack") then
+									atkRemote.Attack:FireServer(mob)
+								end
 
-            -- Đợi một chút trước khi kiểm tra lại
-            task.wait(1)
-        end
-    end
+								-- Đợi tấn công
+								task.wait(1)
+							end
+						end
+					end
+				end
+				task.wait(0.5)
+			end
+		end)
+	end
 })
