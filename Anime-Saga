@@ -39,7 +39,7 @@ local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
 ---------Lobby----------
 LobbyTab:CreateButton({
-	Name = "⚡ Auto Redeem Codes",
+	Name = "⚡ Redeem All Codes)",
 	Callback = function()
 		local codes = {
 			"Release",
@@ -49,7 +49,6 @@ LobbyTab:CreateButton({
 			"1MVisits"
 		}
 
-		-- Kết nối lắng nghe phản hồi từ server
 		local ReplicatedStorage = game:GetService("ReplicatedStorage")
 		local codeEvent = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Codes")
 
@@ -62,29 +61,55 @@ LobbyTab:CreateButton({
 			return
 		end
 
-		-- In phản hồi từ server nếu có
+		-- Dùng BindableEvent để chờ phản hồi
+		local responseReceived = Instance.new("BindableEvent")
+
+		-- Kết nối nhận phản hồi từ server
 		codeEvent.OnClientEvent:Connect(function(response)
 			print("📩 Phản hồi từ server:", response)
+			responseReceived:Fire(response)
 		end)
 
-		-- Gửi từng code cách nhau 2 giây
 		task.spawn(function()
 			for _, code in ipairs(codes) do
-				print("🔁 Gửi code:", code)
-				codeEvent:FireServer(code)
-
 				Rayfield:Notify({
 					Title = "🚀 Đang gửi code",
 					Content = code,
 					Duration = 2
 				})
 
-				task.wait(2)
+				print("🔁 Đang nhập code:", code)
+				codeEvent:FireServer(code)
+
+				-- Đợi phản hồi (hoặc timeout sau 5s)
+				local response = nil
+				local responded = false
+
+				local conn
+				conn = responseReceived.Event:Connect(function(msg)
+					response = msg
+					responded = true
+					conn:Disconnect()
+				end)
+
+				local timer = 0
+				while not responded and timer < 5 do
+					task.wait(0.2)
+					timer += 0.2
+				end
+
+				if responded then
+					print("✅ Server phản hồi:", response)
+				else
+					print("⚠️ Không nhận được phản hồi từ server sau 5s")
+				end
+
+				task.wait(0.5) -- nghỉ thêm trước khi gửi tiếp
 			end
 
 			Rayfield:Notify({
 				Title = "✅ Hoàn tất",
-				Content = "Tất cả code đã được gửi bằng FireServer",
+				Content = "Đã gửi tuần tự tất cả code",
 				Duration = 4
 			})
 		end)
