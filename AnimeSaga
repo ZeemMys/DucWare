@@ -37,16 +37,24 @@ Rayfield:Notify({
 -- Tạo tab Lobby
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
--- Hàm gửi mã và kiểm tra phản hồi
+-- Tạo biến để lắng nghe phản hồi từ server một lần duy nhất
+local redeemed = {}
+
+-- Hàm gửi mã và xử lý phản hồi
 local function redeemCode(code)
     local success, response = pcall(function()
         game:GetService("ReplicatedStorage").Event.Codes:FireServer(code)
     end)
 
     if success then
-        -- Lắng nghe phản hồi từ server
+        -- Lắng nghe phản hồi từ server một lần duy nhất
         game:GetService("ReplicatedStorage").Event.Codes.OnClientEvent:Connect(function(response)
-            -- Chỉ thông báo nếu mã này đã redeem thành công
+            if redeemed[code] then
+                return -- Đảm bảo không nhận phản hồi nhiều lần cho mã này
+            end
+
+            redeemed[code] = true
+
             if response == "Thành công" then
                 print("✅ Mã " .. code .. " đã redeem thành công!")
             else
@@ -67,7 +75,6 @@ LobbyTab:CreateButton({
 
         -- Gửi từng mã và kiểm tra phản hồi
         local codesToRedeem = {"Release", "SorryForDelay", "SorryForShutdown"}
-        local redeemSuccess = true
 
         for _, code in ipairs(codesToRedeem) do
             redeemCode(code)
