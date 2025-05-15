@@ -38,92 +38,60 @@ Rayfield:Notify({
 
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
--- Button to redeem specific code
-LobbyTab:CreateButton({
-    Name = "Redeem Release Code",
-    Callback = function()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+-- Danh sách các mã code cần redeem
+local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
 
-        -- Gửi mã code Release
-        local success, err = pcall(function()
-            CodesEvent:FireServer("Release")
+-- Callback function for sending the code and getting confirmation
+local function sendCode(code)
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+
+    local success, err = pcall(function()
+        -- Gửi mã code đến server
+        CodesEvent:FireServer(code)
+    end)
+
+    if success then
+        -- Wait for a confirmation message from the server
+        CodesEvent.OnClientEvent:Connect(function(response)
+            if response == "success" then
+                -- Notify Rayfield rằng mã code đã được redeem thành công
+                Rayfield:Notify({
+                    Title = "Code Redeemed",
+                    Content = "Mã code " .. code .. " đã được nhập thành công!",
+                    Duration = 3
+                })
+            else
+                -- Notify Rayfield rằng mã code không hợp lệ
+                Rayfield:Notify({
+                    Title = "Lỗi",
+                    Content = "Mã code " .. code .. " không hợp lệ hoặc đã được sử dụng.",
+                    Duration = 3
+                })
+            end
         end)
+    else
+        warn("[✘] Lỗi khi gửi mã code:", code, err)
+        Rayfield:Notify({
+            Title = "Lỗi",
+            Content = "Không thể gửi mã code: " .. code,
+            Duration = 3
+        })
+    end
+end
 
-        if success then
-            print("[✔] Đã gửi code: Release")
-            Rayfield:Notify({
-                Title = "Code Redeemed",
-                Content = "Đã gửi code: Release",
-                Duration = 3
-            })
-        else
-            warn("[✘] Lỗi khi gửi code: Release", err)
-            Rayfield:Notify({
-                Title = "Lỗi",
-                Content = "Không thể gửi code: Release",
-                Duration = 3
-            })
-        end
-    end,
-})
+-- Hàm để redeem tất cả các mã code
+local function redeemAllCodes()
+    for _, code in ipairs(codeList) do
+        sendCode(code)  -- Gửi mã code mỗi lần
+        wait(1)  -- Thêm một chút thời gian giữa mỗi lần gửi
+    end
+end
 
--- Button to redeem "SorryForDelay"
+-- Button để redeem tất cả mã code
 LobbyTab:CreateButton({
-    Name = "Redeem SorryForDelay Code",
+    Name = "Redeem All Codes",
     Callback = function()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-
-        -- Gửi mã code SorryForDelay
-        local success, err = pcall(function()
-            CodesEvent:FireServer("SorryForDelay")
-        end)
-
-        if success then
-            print("[✔] Đã gửi code: SorryForDelay")
-            Rayfield:Notify({
-                Title = "Code Redeemed",
-                Content = "Đã gửi code: SorryForDelay",
-                Duration = 3
-            })
-        else
-            warn("[✘] Lỗi khi gửi code: SorryForDelay", err)
-            Rayfield:Notify({
-                Title = "Lỗi",
-                Content = "Không thể gửi code: SorryForDelay",
-                Duration = 3
-            })
-        end
-    end,
-})
-
--- Button to redeem "SorryForShutdown"
-LobbyTab:CreateButton({
-    Name = "Redeem SorryForShutdown Code",
-    Callback = function()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-
-        -- Gửi mã code SorryForShutdown
-        local success, err = pcall(function()
-            CodesEvent:FireServer("SorryForShutdown")
-        end)
-
-        if success then
-            print("[✔] Đã gửi code: SorryForShutdown")
-            Rayfield:Notify({
-                Title = "Code Redeemed",
-                Content = "Đã gửi code: SorryForShutdown",
-                Duration = 3
-            })
-        else
-            warn("[✘] Lỗi khi gửi code: SorryForShutdown", err)
-            Rayfield:Notify({
-                Title = "Lỗi",
-                Content = "Không thể gửi code: SorryForShutdown",
-                Duration = 3
-            })
-        end
+        redeemAllCodes()
     end,
 })
