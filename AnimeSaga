@@ -47,50 +47,41 @@ local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 LobbyTab:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
-        local codes = {"Release", "SorryForDelay", "SorryForShutdown"}
-        local Remote = game:GetService("ReplicatedStorage"):FindFirstChild("Packages")
-        if not Remote then
-            Rayfield:Notify({
-                Title = "Lỗi",
-                Content = "Không tìm thấy folder 'Packages'",
-                Duration = 4
-            })
-            return
-        end
+        local RemoteModule = require(game:GetService("ReplicatedStorage").Packages.RemoteFunction)  -- Require module
 
-        local Func = Remote:FindFirstChild("RemoteFunction")
-        if not Func or not Func:IsA("RemoteFunction") then
-            Rayfield:Notify({
-                Title = "Lỗi",
-                Content = "Không tìm thấy 'RemoteFunction' đúng loại",
-                Duration = 4
-            })
-            return
-        end
+        -- Kiểm tra hàm redeemCode trong module
+        if RemoteModule and RemoteModule.redeemCode then
+            local codes = {"Release", "SorryForDelay", "SorryForShutdown"}
 
-        for _, code in ipairs(codes) do
-            local success, result = pcall(function()
-                return Func:InvokeServer({
-                    action = "redeemCode",
-                    code = code
-                })
-            end)
+            -- Lặp qua từng mã code và gửi
+            for _, code in ipairs(codes) do
+                local success, err = pcall(function()
+                    RemoteModule.redeemCode(code)  -- Gọi hàm redeemCode trong module
+                end)
 
-            if success then
-                Rayfield:Notify({
-                    Title = "Code Sent",
-                    Content = "Đã gửi code: " .. code,
-                    Duration = 2
-                })
-            else
-                Rayfield:Notify({
-                    Title = "Lỗi",
-                    Content = "Không gửi được code: " .. code,
-                    Duration = 3
-                })
+                -- Thông báo thành công hoặc lỗi
+                if success then
+                    Rayfield:Notify({
+                        Title = "Code Redeemed",
+                        Content = "Đã gửi code: " .. code,
+                        Duration = 3
+                    })
+                else
+                    Rayfield:Notify({
+                        Title = "Lỗi",
+                        Content = "Không gửi được code: " .. code .. "\n" .. err,
+                        Duration = 3
+                    })
+                end
+
+                wait(1)  -- Đợi 1 giây giữa các lần nhập code
             end
-
-            wait(1)
+        else
+            Rayfield:Notify({
+                Title = "Lỗi",
+                Content = "Không tìm thấy hàm redeemCode trong Module",
+                Duration = 4
+            })
         end
     end,
 })
