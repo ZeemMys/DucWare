@@ -110,7 +110,7 @@ Game1Tab:CreateToggle({
 
 		Rayfield:Notify({
 			Title = autoFarm and "🟢 Auto Farm BẬT" or "🔴 Auto Farm TẮT",
-			Content = autoFarm and "Đang farm Mist/Sand Ninja..." or "Đã dừng.",
+			Content = autoFarm and "Đang farm map 1..." or "Đã dừng.",
 			Duration = 3
 		})
 
