@@ -36,54 +36,63 @@ Rayfield:Notify({
 
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
-local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
-local redeemedCodes = {}
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
 
+local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
+
 LobbyTab:CreateButton({
-    Name = "Redeem All 1 Codes",
+    Name = "Redeem All Codes (Safe)",
     Callback = function()
-        for _, rawCode in ipairs(codeList) do
-            -- Xử lý chuẩn hóa mã
-            local code = tostring(rawCode):gsub("^%s*(.-)%s*$", "%1") -- xóa khoảng trắng đầu/cuối
-            print("🔥 Gửi mã:", "[" .. code .. "]")
+        local index = 1
 
-            if not redeemedCodes[code] then
-                local success, err = pcall(function()
-                    CodesEvent:FireServer(code)
-                end)
-
-                if success then
-                    redeemedCodes[code] = true
-                    Rayfield:Notify({
-                        Title = "✅ Thành công",
-                        Content = "Đã gửi mã: " .. code,
-                        Duration = 3
-                    })
-                else
-                    Rayfield:Notify({
-                        Title = "❌ Lỗi",
-                        Content = "Không gửi được mã: " .. code .. " (" .. tostring(err) .. ")",
-                        Duration = 3
-                    })
-                end
-
-                task.wait(1.5)
-            else
+        local function redeemNextCode()
+            if index > #codeList then
                 Rayfield:Notify({
-                    Title = "⏭️ Bỏ qua",
-                    Content = "Mã đã redeem trước đó: " .. code,
-                    Duration = 2
+                    Title = "🎉 Hoàn tất",
+                    Content = "Đã redeem toàn bộ mã",
+                    Duration = 5
                 })
+                return
+            end
+
+            local code = codeList[index]
+            print("🔁 Đang gửi mã:", code)
+
+            -- Lắng nghe phản hồi đúng 1 lần
+            local connection
+            connection = CodesEvent.OnClientEvent:Connect(function(response)
+                connection:Disconnect() -- Ngắt kết nối để không bị gọi lại lần sau
+
+                Rayfield:Notify({
+                    Title = "✅ Mã " .. code,
+                    Content = "Phản hồi: " .. tostring(response),
+                    Duration = 4
+                })
+
+                index += 1
+                task.wait(1)
+                redeemNextCode()
+            end)
+
+            -- Gửi mã
+            local ok, err = pcall(function()
+                CodesEvent:FireServer(code)
+            end)
+
+            if not ok then
+                Rayfield:Notify({
+                    Title = "❌ Lỗi",
+                    Content = "Không gửi được mã: " .. code,
+                    Duration = 3
+                })
+                connection:Disconnect()
+                index += 1
+                task.wait(1)
+                redeemNextCode()
             end
         end
 
-        Rayfield:Notify({
-            Title = "🎉 Hoàn tất",
-            Content = "Tất cả mã đã xử lý xong.",
-            Duration = 5
-        })
+        redeemNextCode()
     end
 })
