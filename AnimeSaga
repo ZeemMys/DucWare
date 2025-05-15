@@ -45,34 +45,43 @@ local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
 ------ Lobby ------
 LobbyTab:CreateButton({
-    Name = "Redeem Valid Codes Only",
+    Name = "Redeem All Codes",
     Callback = function()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
 
-        -- Dùng toàn bộ code viết thường (đề phòng check lowercase)
-        local codeList = {"Release", "sorryfordelay", "sorryforshutdown"}
+        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+        local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
 
         for _, code in ipairs(codeList) do
+            -- 🔓 Mở GUI lại mỗi lần
+            local prompt = workspace:FindFirstChild("ProximityPrompt") and workspace.ProximityPrompt:FindFirstChild("Codes")
+            if prompt then
+                fireproximityprompt(prompt)
+                wait(1)
+            end
+
+            -- 🔁 Gửi code
             local success, err = pcall(function()
                 CodesEvent:FireServer(code)
             end)
 
             if success then
                 Rayfield:Notify({
-                    Title = "Code Sent",
-                    Content = "Đã gửi: " .. code,
-                    Duration = 3
+                    Title = "Đã gửi code",
+                    Content = code,
+                    Duration = 2
                 })
             else
                 Rayfield:Notify({
-                    Title = "Lỗi",
-                    Content = "Không gửi được: " .. code,
+                    Title = "Lỗi gửi code",
+                    Content = code .. "\n" .. tostring(err),
                     Duration = 3
                 })
             end
 
-            wait(2)
+            wait(1.2) -- Delay dài hơn chút để tránh lỗi spam
         end
     end,
 })
