@@ -39,92 +39,38 @@ Rayfield:Notify({
 
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
-local Window = Rayfield:CreateWindow({
-    Name = "DucWare — Anime Saga",
-    Icon = 0,
-    LoadingTitle = "Wait a minute, the script is loading",
-    LoadingSubtitle = "by DucWare",
-    Theme = "Amethyst",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "DucWare",
-        FileName = "DucWareZ"
-    },
-    Discord = {
-        Enabled = true,
-        Invite = "PnHj485p",
-        RememberJoins = false
-    },
-    KeySystem = true,
-    KeySettings = {
-        Title = "Get Key",
-        Subtitle = "Key System",
-        Note = "Key: DucWare",
-        FileName = "Key",
-        SaveKey = true,
-        Key = {"DucWare"}
-    }
-})
-
-Rayfield:Notify({
-    Title = "Enjoy",
-    Content = "Have Fun :)",
-    Duration = 5,
-    Image = "number"
-})
-
-local LobbyTab = Window:CreateTab("Lobby", 4483362458)
-
+-- Danh sách mã
 local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
-local redeemedCodes = {}
 
+-- Hàm redeem chạy giống tay người dùng
+local function RedeemLikeHuman(code)
+    -- chuẩn hóa
+    code = tostring(code):gsub("^%s*(.-)%s*$", "%1")
+    print("💥 Đang redeem:", code)
+    CodesEvent:FireServer(code)
+end
+
+-- Nút redeem
 LobbyTab:CreateButton({
-    Name = "Redeem All Codes",
+    Name = "🔥 Redeem All Codes",
     Callback = function()
-        for _, rawCode in ipairs(codeList) do
-            -- Xử lý chuẩn hóa mã
-            local code = tostring(rawCode):gsub("^%s*(.-)%s*$", "%1") -- xóa khoảng trắng đầu/cuối
-            print("🔥 Gửi mã:", "[" .. code .. "]")
-
-            if not redeemedCodes[code] then
-                local success, err = pcall(function()
-                    CodesEvent:FireServer(code)
-                end)
-
-                if success then
-                    redeemedCodes[code] = true
-                    Rayfield:Notify({
-                        Title = "✅ Thành công",
-                        Content = "Đã gửi mã: " .. code,
-                        Duration = 3
-                    })
-                else
-                    Rayfield:Notify({
-                        Title = "❌ Lỗi",
-                        Content = "Không gửi được mã: " .. code .. " (" .. tostring(err) .. ")",
-                        Duration = 3
-                    })
-                end
-
-                task.wait(1.5)
-            else
+        -- chạy độc lập khỏi UI context
+        spawn(function()
+            for _, code in ipairs(codeList) do
+                RedeemLikeHuman(code)
                 Rayfield:Notify({
-                    Title = "⏭️ Bỏ qua",
-                    Content = "Mã đã redeem trước đó: " .. code,
+                    Title = "Đã gửi mã",
+                    Content = code,
                     Duration = 2
                 })
+                wait(1.5)
             end
-        end
 
-        Rayfield:Notify({
-            Title = "🎉 Hoàn tất",
-            Content = "Tất cả mã đã xử lý xong.",
-            Duration = 5
-        })
+            Rayfield:Notify({
+                Title = "✅ Hoàn tất",
+                Content = "Tất cả mã đã được gửi.",
+                Duration = 5
+            })
+        end)
     end
 })
