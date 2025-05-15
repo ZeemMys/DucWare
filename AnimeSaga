@@ -34,4 +34,86 @@ local Window = Rayfield:CreateWindow({
     }
 })
 
+Rayfield:Notify({
+   Title = "Enjoy",
+   Content = "Have Fun:)",
+   Duration = 5,
+   Image = "number",
+})
+
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield/library.lua"))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "DucWare",
+    Icon = 0,
+    LoadingTitle = "Wait a minutes to loading the script",
+    LoadingSubtitle = "by DucWare",
+    Theme = "Amethyst",
+
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
+
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "DucWare",
+        FileName = "DucWareZ"
+    },
+
+    Discord = {
+        Enabled = false,
+        Invite = "noinvitelink",
+        RememberJoins = true
+    },
+
+    KeySystem = true,
+    KeySettings = {
+        Title = "Get Key",
+        Subtitle = "Key System",
+        Note = "Key: DucWare",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = {"DucWare"}
+    }
+})
+
+Rayfield:Notify({
+   Title = "Enjoy",
+   Content = "Have Fun :)",
+   Duration = 5,
+   Image = "number",
+})
+
+local LobbyTab = Window:CreateTab("Lobby", 4483362458)
+
+------Lobby-------
+LobbyTab:CreateButton({
+    Name = "Redeem All Codes",
+    Callback = function()
+        local codes = {"Release", "SorryForDelay", "SorryForShutdown"}
+
+        for _, code in ipairs(codes) do
+            -- ⚠️ Giả định là RemoteEvent nằm ở đây:
+            local success, err = pcall(function()
+                game:GetService("ReplicatedStorage").Event.RedeemCode:FireServer(code)
+            end)
+
+            if success then
+                Rayfield:Notify({
+                    Title = "Code Redeemed",
+                    Content = "Đã gửi code: " .. code,
+                    Duration = 3
+                })
+            else
+                Rayfield:Notify({
+                    Title = "Lỗi",
+                    Content = "Không gửi được code: " .. code,
+                    Duration = 3
+                })
+            end
+
+            wait(1)
+        end
+    end,
+})
