@@ -39,52 +39,50 @@ local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
 ---------Lobby----------
 LobbyTab:CreateButton({
-    Name = "✅ Nhập tất cả code qua GUI thật",
-    Callback = function()
-        local success, err = pcall(function()
-            local codes = {
-                "Release",
-                "SorryForDelay",
-                "SorryForShutdown",
-                "50KActive",
-                "1MVisits"
-            }
-            
-            local player = game:GetService("Players").LocalPlayer
-            local gui = player:WaitForChild("PlayerGui")
-            local window = gui:WaitForChild("Window")
-            local codesUI = window:WaitForChild("Codes")
-            local codeFrame = codesUI:WaitForChild("Frame")
-            local codeSubFrame = codeFrame:WaitForChild("code")
-            local enterBox = codeSubFrame:WaitForChild("entercode")
-            local redeemBtn = codeFrame:WaitForChild("redeem")
-            
-            -- Hiển thị GUI nhập code nếu chưa hiện
-            codesUI.Visible = true
+	Name = "✅ Nhập tất cả code qua GUI thật",
+	Callback = function()
+		local success, err = pcall(function()
+			local codes = {
+				"Release",
+				"SorryForDelay",
+				"SorryForShutdown",
+				"50KActive",
+				"1MVisits"
+			}
 
-            for _, code in ipairs(codes) do
-                enterBox.Text = code
-                redeemBtn:Activate()  -- Giả lập click
-                print("📨 Đã gửi code:", code)
-                task.wait(1.2)
-            end
+			local player = game:GetService("Players").LocalPlayer
+			local gui = player:WaitForChild("PlayerGui")
+			local window = gui:WaitForChild("Window")
+			local codeFrame = window:WaitForChild("Codes"):WaitForChild("Frame")
+			local enterBox = codeFrame:WaitForChild("code"):WaitForChild("entercode")
+			local redeemBtn = codeFrame:WaitForChild("redeem")
 
-            Rayfield:Notify({
-                Title = "🎉 Hoàn tất!",
-                Content = "Tất cả code đã được gửi qua GUI gốc!",
-                Duration = 4
-            })
-        end)
+			-- Mở GUI nếu đang ẩn
+			window.Codes.Visible = true
 
-        if not success then
-            warn("❌ Callback error: ", err)
-            Rayfield:Notify({
-                Title = "❌ Lỗi!",
-                Content = "Callback error: " .. tostring(err),
-                Duration = 5
-            })
-        end
-    end
+			for _, code in ipairs(codes) do
+				enterBox.Text = code
+				redeemBtn:Activate()
+				print("📨 Đã gửi code:", code)
+				task.wait(1.2)
+			end
+
+			Rayfield:Notify({
+				Title = "🎉 Hoàn tất!",
+				Content = "Tất cả code đã được gửi thành công.",
+				Duration = 4
+			})
+		end)
+
+		if not success then
+			warn("❌ Callback error:", err)
+			Rayfield:Notify({
+				Title = "❌ Lỗi khi nhập code",
+				Content = tostring(err),
+				Duration = 5
+			})
+		end
+	end
 })
 
 -----------Tab farm 1----------------
