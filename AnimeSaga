@@ -42,7 +42,7 @@ local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
 local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
 
 LobbyTab:CreateButton({
-    Name = "Redeem All Codes ( 1 code 5s)",
+    Name = "Redeem All Codes ( 1 code 5s )",
     Callback = function()
         local index = 1
 
