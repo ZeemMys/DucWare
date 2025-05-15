@@ -47,6 +47,9 @@ local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 LobbyTab:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
+        -- Debug thông báo để kiểm tra hàm callback có hoạt động hay không
+        print("Button clicked. Starting to redeem codes...")
+
         -- Kiểm tra module trước khi sử dụng
         local RemoteModule = require(game:GetService("ReplicatedStorage").Packages.RemoteFunction)
         
