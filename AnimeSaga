@@ -68,7 +68,7 @@ end
 local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
 
 LobbyTab:CreateButton({
-    Name = "Redeem All Codes (Fixed Execution)",
+    Name = "Redeem All Codes",
     Callback = function()
         task.spawn(function() -- chạy trong thread độc lập
             for _, code in ipairs(codeList) do
