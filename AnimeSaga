@@ -6,7 +6,6 @@ local Window = Rayfield:CreateWindow({
     LoadingTitle = "Wait a minutes to loading the script",
     LoadingSubtitle = "by DucWare",
     Theme = "Amethyst",
-
     DisableRayfieldPrompts = false,
     DisableBuildWarnings = false,
 
