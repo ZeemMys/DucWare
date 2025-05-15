@@ -39,64 +39,64 @@ local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
 ---------Lobby----------
 LobbyTab:CreateButton({
-	Name = "✅ Nhập tất cả code qua GUI thật (an toàn)",
+	Name = "🧾 Redeem All Codes",
 	Callback = function()
-		local success, err = pcall(function()
-			local codes = {
-				"Release",
-				"SorryForDelay",
-				"SorryForShutdown",
-				"50KActive",
-				"1MVisits"
-			}
+		-- Các code cần nhập
+		local codes = {
+			"Release",
+			"SorryForDelay",
+			"SorryForShutdown",
+			"50KActive",
+			"1MVisits"
+		}
 
-			local player = game:GetService("Players").LocalPlayer
-			local gui = player:WaitForChild("PlayerGui")
-			local window = gui:FindFirstChild("Window")
-			if not window then error("❌ Không tìm thấy 'Window' trong PlayerGui") end
-
-			local codesGui = window:FindFirstChild("Codes")
-			if not codesGui then error("❌ Không tìm thấy 'Codes' trong Window") end
-
-			local codeFrame = codesGui:FindFirstChild("Frame")
-			if not codeFrame then error("❌ Không tìm thấy 'Frame' trong Codes") end
-
-			local codeInputFrame = codeFrame:FindFirstChild("code")
-			if not codeInputFrame then error("❌ Không tìm thấy 'code' trong Frame") end
-
-			local enterBox = codeInputFrame:FindFirstChild("entercode")
-			if not enterBox then error("❌ Không tìm thấy 'entercode' trong code frame") end
-
-			local redeemBtn = codeFrame:FindFirstChild("redeem")
-			if not redeemBtn then error("❌ Không tìm thấy 'redeem' button trong Frame") end
-
-			-- Optional: cố gắng hiện GUI nếu đang ẩn (có thể game tự làm)
-			if codeFrame:IsA("Frame") then
-				codeFrame.Visible = true
-			end
-
-			for _, code in ipairs(codes) do
-				enterBox.Text = code
-				redeemBtn:Activate()
-				print("📨 Đã nhập code:", code)
-				task.wait(1.2)
-			end
-
+		-- 1. Mở GUI nhập code
+		local prompt = workspace:FindFirstChild("ProximityPrompt", true)
+		if prompt and prompt:FindFirstChild("OpenUI") then
+			fireproximityprompt(prompt.OpenUI)
+			task.wait(1.2)
+		else
 			Rayfield:Notify({
-				Title = "✅ Thành công!",
-				Content = "Tất cả code đã được gửi!",
+				Title = "❌ Không tìm thấy ProximityPrompt",
+				Content = "Không thể mở GUI nhập code",
 				Duration = 4
 			})
-		end)
-
-		if not success then
-			warn("❌ Callback Error:", err)
-			Rayfield:Notify({
-				Title = "❌ Lỗi",
-				Content = tostring(err),
-				Duration = 5
-			})
+			return
 		end
+
+		-- 2. Tìm GUI nhập code và nút
+		local gui = game.Players.LocalPlayer.PlayerGui
+		local codeBox = gui:FindFirstChild("Window", true):FindFirstChild("entercode", true)
+		local redeemFrame = gui:FindFirstChild("Window", true):FindFirstChild("redeem", true)
+		local redeemButton = redeemFrame and redeemFrame:FindFirstChildWhichIsA("TextButton", true)
+
+		if not codeBox or not redeemButton then
+			Rayfield:Notify({
+				Title = "❌ Không tìm thấy GUI nhập code",
+				Content = "Không tìm thấy input hoặc nút",
+				Duration = 4
+			})
+			return
+		end
+
+		-- 3. Nhập và redeem từng code
+		for _, code in ipairs(codes) do
+			codeBox.Text = code
+			redeemButton:Activate()
+			print("✅ Đã nhập:", code)
+			Rayfield:Notify({
+				Title = "✅ Nhập code",
+				Content = code,
+				Duration = 2
+			})
+			task.wait(1.2)
+		end
+
+		Rayfield:Notify({
+			Title = "🎉 Hoàn tất",
+			Content = "Tất cả code đã được nhập!",
+			Duration = 4
+		})
 	end
 })
 
