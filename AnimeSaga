@@ -50,23 +50,28 @@ LobbyTab:CreateButton({
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Players = game:GetService("Players")
         local player = Players.LocalPlayer
-        
+
+        -- Kiểm tra RemoteEvent CodesEvent
         local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+
+        -- Danh sách các mã code
         local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
 
-        -- Bắt lỗi trước khi gửi mã
+        -- Lặp qua từng code
         for _, code in ipairs(codeList) do
+            -- Sử dụng pcall để bắt lỗi callback
             local success, err = pcall(function()
-                -- Kiểm tra nếu ProximityPrompt tồn tại
-                local prompt = workspace:FindFirstChild("ProximityPrompt") and workspace.ProximityPrompt:FindFirstChild("Codes")
-                if prompt then
-                    fireproximityprompt(prompt)  -- Mở GUI mỗi lần
-                    wait(1)
+                -- Kiểm tra xem RemoteEvent có tồn tại và gọi đúng
+                if not CodesEvent then
+                    error("Không tìm thấy RemoteEvent Codes.")
                 end
+
                 -- Gửi code vào RemoteEvent
                 CodesEvent:FireServer(code)
+                print("[✔] Đã gửi code: " .. code)
             end)
 
+            -- Kiểm tra thành công và thông báo lỗi
             if success then
                 Rayfield:Notify({
                     Title = "Code Redeemed",
@@ -74,6 +79,8 @@ LobbyTab:CreateButton({
                     Duration = 3
                 })
             else
+                -- In ra lỗi chi tiết trong console và thông báo cho người dùng
+                warn("[✘] Lỗi khi gửi code:", code, err)
                 Rayfield:Notify({
                     Title = "Lỗi",
                     Content = "Không gửi được code: " .. code .. "\n" .. tostring(err),
@@ -81,7 +88,7 @@ LobbyTab:CreateButton({
                 })
             end
 
-            wait(1.2)  -- Delay giữa các code để tránh lỗi
+            wait(1)  -- Delay giữa các code để tránh gửi quá nhanh
         end
     end,
 })
