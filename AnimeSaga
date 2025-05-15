@@ -84,7 +84,7 @@ end
 local function redeemAllCodes()
     for _, code in ipairs(codeList) do
         sendCode(code)  -- Gửi mã code mỗi lần
-        wait(1)  -- Thêm một chút thời gian giữa mỗi lần gửi
+        wait(2)  -- Thêm một chút thời gian giữa mỗi lần gửi
     end
 end
 
