@@ -39,9 +39,8 @@ local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
 ---------Lobby----------
 LobbyTab:CreateButton({
-	Name = "🧾 Redeem All Codes",
+	Name = "⚡ Auto Redeem Codes",
 	Callback = function()
-		-- Các code cần nhập
 		local codes = {
 			"Release",
 			"SorryForDelay",
@@ -50,53 +49,45 @@ LobbyTab:CreateButton({
 			"1MVisits"
 		}
 
-		-- 1. Mở GUI nhập code
-		local prompt = workspace:FindFirstChild("ProximityPrompt", true)
-		if prompt and prompt:FindFirstChild("OpenUI") then
-			fireproximityprompt(prompt.OpenUI)
-			task.wait(1.2)
-		else
+		-- Kết nối lắng nghe phản hồi từ server
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local codeEvent = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Codes")
+
+		if not codeEvent or not codeEvent:IsA("RemoteEvent") then
 			Rayfield:Notify({
-				Title = "❌ Không tìm thấy ProximityPrompt",
-				Content = "Không thể mở GUI nhập code",
+				Title = "❌ Lỗi",
+				Content = "Không tìm thấy RemoteEvent Codes!",
 				Duration = 4
 			})
 			return
 		end
 
-		-- 2. Tìm GUI nhập code và nút
-		local gui = game.Players.LocalPlayer.PlayerGui
-		local codeBox = gui:FindFirstChild("Window", true):FindFirstChild("entercode", true)
-		local redeemFrame = gui:FindFirstChild("Window", true):FindFirstChild("redeem", true)
-		local redeemButton = redeemFrame and redeemFrame:FindFirstChildWhichIsA("TextButton", true)
+		-- In phản hồi từ server nếu có
+		codeEvent.OnClientEvent:Connect(function(response)
+			print("📩 Phản hồi từ server:", response)
+		end)
 
-		if not codeBox or not redeemButton then
+		-- Gửi từng code cách nhau 2 giây
+		task.spawn(function()
+			for _, code in ipairs(codes) do
+				print("🔁 Gửi code:", code)
+				codeEvent:FireServer(code)
+
+				Rayfield:Notify({
+					Title = "🚀 Đang gửi code",
+					Content = code,
+					Duration = 2
+				})
+
+				task.wait(2)
+			end
+
 			Rayfield:Notify({
-				Title = "❌ Không tìm thấy GUI nhập code",
-				Content = "Không tìm thấy input hoặc nút",
+				Title = "✅ Hoàn tất",
+				Content = "Tất cả code đã được gửi bằng FireServer",
 				Duration = 4
 			})
-			return
-		end
-
-		-- 3. Nhập và redeem từng code
-		for _, code in ipairs(codes) do
-			codeBox.Text = code
-			redeemButton:Activate()
-			print("✅ Đã nhập:", code)
-			Rayfield:Notify({
-				Title = "✅ Nhập code",
-				Content = code,
-				Duration = 2
-			})
-			task.wait(1.2)
-		end
-
-		Rayfield:Notify({
-			Title = "🎉 Hoàn tất",
-			Content = "Tất cả code đã được nhập!",
-			Duration = 4
-		})
+		end)
 	end
 })
 
