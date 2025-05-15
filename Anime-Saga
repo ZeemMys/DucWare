@@ -41,19 +41,28 @@ local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 LobbyTab:CreateButton({
 	Name = "📥 Redeem All Codes",
 	Callback = function()
-		local codes = {"Release", "SorryForDelay", "SorryForShutdown", "50KActive", "1MVisits"}
-		local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local codes = {
+			"Release",
+			"SorryForDelay",
+			"SorryForShutdown",
+			"50KActive",
+			"1MVisits"
+		}
 
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
 		local eventFolder = ReplicatedStorage:FindFirstChild("Event")
+
+		-- Kiểm tra folder Event
 		if not eventFolder then
 			Rayfield:Notify({
 				Title = "❌ Không tìm thấy 'Event'",
-				Content = "ReplicatedStorage không chứa folder 'Event'.",
+				Content = "Thư mục 'Event' không tồn tại trong ReplicatedStorage.",
 				Duration = 4
 			})
 			return
 		end
 
+		-- Kiểm tra RemoteEvent Codes
 		local codeRemote = eventFolder:FindFirstChild("Codes")
 		if not codeRemote or not codeRemote:IsA("RemoteEvent") then
 			Rayfield:Notify({
@@ -64,15 +73,26 @@ LobbyTab:CreateButton({
 			return
 		end
 
+		-- Gửi lần lượt từng code
 		for _, code in ipairs(codes) do
-			codeRemote:FireServer(code)
+			local success, err = pcall(function()
+				codeRemote:FireServer(code)
+			end)
+
+			if success then
+				print("✅ Gửi thành công code:", code)
+			else
+				warn("❌ Gửi code thất bại:", code, err)
+			end
+
 			task.wait(0.3)
 		end
 
+		-- Thông báo khi hoàn tất
 		Rayfield:Notify({
-			Title = "✅ Đã gửi code",
-			Content = "Tất cả code đã được gửi thành công!",
-			Duration = 3
+			Title = "✅ Hoàn tất",
+			Content = "Đã gửi tất cả code về server!",
+			Duration = 4
 		})
 	end
 })
