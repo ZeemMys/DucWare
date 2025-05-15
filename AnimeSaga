@@ -18,89 +18,39 @@ local Window = Rayfield:CreateWindow({
 -- Tạo một Tab trong cửa sổ
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
--- Tạo một Button trong Tab Lobby cho mã code 'Release'
+-- Tạo một Button trong Tab Lobby cho "Redeem All Codes"
 LobbyTab:CreateButton({
-    Name = "Redeem Code 'Release'",  -- Tên nút bấm
+    Name = "Redeem All Codes",  -- Tên nút bấm
     Callback = function()
+        -- Danh sách các mã code
+        local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
+        
         -- Lấy sự kiện ReplicatedStorage để gửi mã code
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+        
+        -- Gửi các mã code đến server
+        for _, code in ipairs(codeList) do
+            local success, err = pcall(function()
+                CodesEvent:FireServer(code)
+            end)
 
-        -- Gửi mã code "Release" tới server
-        local success, err = pcall(function()
-            CodesEvent:FireServer("Release")
-        end)
+            -- Kiểm tra nếu mã code đã được gửi thành công
+            if success then
+                Rayfield:Notify({
+                    Title = "Code Redeemed",
+                    Content = "Mã code '" .. code .. "' đã được nhập thành công.",
+                    Duration = 3
+                })
+            else
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "Lỗi khi gửi mã code: " .. code .. "\n" .. err,
+                    Duration = 3
+                })
+            end
 
-        if success then
-            Rayfield:Notify({
-                Title = "Code Redeemed",
-                Content = "Mã code 'Release' đã được nhập thành công.",
-                Duration = 3
-            })
-        else
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "Lỗi khi gửi mã code: " .. err,
-                Duration = 3
-            })
-        end
-    end
-})
-
--- Tạo thêm một button cho mã code 'SorryForDelay'
-LobbyTab:CreateButton({
-    Name = "Redeem Code 'SorryForDelay'",  -- Tên nút bấm
-    Callback = function()
-        -- Lấy sự kiện ReplicatedStorage để gửi mã code
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-
-        -- Gửi mã code "SorryForDelay" tới server
-        local success, err = pcall(function()
-            CodesEvent:FireServer("SorryForDelay")
-        end)
-
-        if success then
-            Rayfield:Notify({
-                Title = "Code Redeemed",
-                Content = "Mã code 'SorryForDelay' đã được nhập thành công.",
-                Duration = 3
-            })
-        else
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "Lỗi khi gửi mã code: " .. err,
-                Duration = 3
-            })
-        end
-    end
-})
-
--- Tạo thêm một button cho mã code 'SorryForShutdown'
-LobbyTab:CreateButton({
-    Name = "Redeem Code 'SorryForShutdown'",  -- Tên nút bấm
-    Callback = function()
-        -- Lấy sự kiện ReplicatedStorage để gửi mã code
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-
-        -- Gửi mã code "SorryForShutdown" tới server
-        local success, err = pcall(function()
-            CodesEvent:FireServer("SorryForShutdown")
-        end)
-
-        if success then
-            Rayfield:Notify({
-                Title = "Code Redeemed",
-                Content = "Mã code 'SorryForShutdown' đã được nhập thành công.",
-                Duration = 3
-            })
-        else
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "Lỗi khi gửi mã code: " .. err,
-                Duration = 3
-            })
+            wait(1) -- Delay giữa mỗi lần gửi code
         end
     end
 })
