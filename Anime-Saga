@@ -39,7 +39,7 @@ local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
 ---------Lobby----------
 LobbyTab:CreateButton({
-	Name = "✅ Nhập FULL Codes",
+	Name = "✅ Nhập tất cả code qua GUI thật (an toàn)",
 	Callback = function()
 		local success, err = pcall(function()
 			local codes = {
@@ -52,27 +52,40 @@ LobbyTab:CreateButton({
 
 			local player = game:GetService("Players").LocalPlayer
 			local gui = player:WaitForChild("PlayerGui")
-			local window = gui:WaitForChild("Window")
-			local codesGui = window:WaitForChild("Codes")
-			local codeFrame = codesGui:WaitForChild("Frame")
-			local codeInputFrame = codeFrame:WaitForChild("code")
-			local enterBox = codeInputFrame:WaitForChild("entercode")
-			local redeemBtn = codeFrame:WaitForChild("redeem")
+			local window = gui:FindFirstChild("Window")
+			if not window then error("❌ Không tìm thấy 'Window' trong PlayerGui") end
 
-			-- Đảm bảo GUI hiện ra (Frame chứ không phải ScreenGui)
-			codeFrame.Visible = true
+			local codesGui = window:FindFirstChild("Codes")
+			if not codesGui then error("❌ Không tìm thấy 'Codes' trong Window") end
+
+			local codeFrame = codesGui:FindFirstChild("Frame")
+			if not codeFrame then error("❌ Không tìm thấy 'Frame' trong Codes") end
+
+			local codeInputFrame = codeFrame:FindFirstChild("code")
+			if not codeInputFrame then error("❌ Không tìm thấy 'code' trong Frame") end
+
+			local enterBox = codeInputFrame:FindFirstChild("entercode")
+			if not enterBox then error("❌ Không tìm thấy 'entercode' trong code frame") end
+
+			local redeemBtn = codeFrame:FindFirstChild("redeem")
+			if not redeemBtn then error("❌ Không tìm thấy 'redeem' button trong Frame") end
+
+			-- Optional: cố gắng hiện GUI nếu đang ẩn (có thể game tự làm)
+			if codeFrame:IsA("Frame") then
+				codeFrame.Visible = true
+			end
 
 			for _, code in ipairs(codes) do
 				enterBox.Text = code
 				redeemBtn:Activate()
-				print("📨 Đã gửi code:", code)
+				print("📨 Đã nhập code:", code)
 				task.wait(1.2)
 			end
 
 			Rayfield:Notify({
-				Title = "🎉 Xong rồi!",
-				Content = "Đã thử nhập toàn bộ code qua GUI!",
-				Duration = 5
+				Title = "✅ Thành công!",
+				Content = "Tất cả code đã được gửi!",
+				Duration = 4
 			})
 		end)
 
