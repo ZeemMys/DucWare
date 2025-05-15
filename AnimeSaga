@@ -37,13 +37,48 @@ Rayfield:Notify({
 -- Tạo tab Lobby
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
+-- Hàm gửi mã và nhận phản hồi
+local function redeemCode(code)
+    local success, response = pcall(function()
+        game:GetService("ReplicatedStorage").Event.Codes:FireServer(code)
+    end)
+
+    if success then
+        -- Lắng nghe phản hồi từ server
+        game:GetService("ReplicatedStorage").Event.Codes.OnClientEvent:Connect(function(response)
+            if response == "Thành công" then
+                Rayfield:Notify({
+                    Title = "✅ Mã hợp lệ",
+                    Content = "Mã " .. code .. " đã redeem thành công!",
+                    Duration = 3
+                })
+            else
+                Rayfield:Notify({
+                    Title = "❌ Lỗi",
+                    Content = "Có lỗi khi redeem mã " .. code .. ".",
+                    Duration = 3
+                })
+            end
+        end)
+    else
+        Rayfield:Notify({
+            Title = "❌ Lỗi",
+            Content = "Lỗi khi gửi mã " .. code,
+            Duration = 3
+        })
+    end
+end
+
 -- Button để redeem tất cả mã code
 LobbyTab:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
-        game:GetService("ReplicatedStorage").Event.Codes:FireServer("Release")
-        game:GetService("ReplicatedStorage").Event.Codes:FireServer("SorryForDelay")
-        game:GetService("ReplicatedStorage").Event.Codes:FireServer("SorryForShutdown")
+        -- Gửi từng mã và kiểm tra phản hồi
+        redeemCode("Release")
+        wait(2)  -- Đợi 2 giây giữa các lần gửi mã để tránh spam
+        redeemCode("SorryForDelay")
+        wait(2)
+        redeemCode("SorryForShutdown")
 
         Rayfield:Notify({
             Title = "🎉 Hoàn tất",
@@ -52,4 +87,3 @@ LobbyTab:CreateButton({
         })
     end
 })
-
