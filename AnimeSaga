@@ -35,6 +35,7 @@ Rayfield:Notify({
 })
 
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
+local GameTab = Window:CreateTab("Game", 4483362458)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
