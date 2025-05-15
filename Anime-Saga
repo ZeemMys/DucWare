@@ -39,7 +39,7 @@ local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
 ---------Lobby----------
 LobbyTab:CreateButton({
-	Name = "✅ Nhập tất cả code qua GUI thật",
+	Name = "✅ Nhập FULL Codes",
 	Callback = function()
 		local success, err = pcall(function()
 			local codes = {
@@ -53,12 +53,14 @@ LobbyTab:CreateButton({
 			local player = game:GetService("Players").LocalPlayer
 			local gui = player:WaitForChild("PlayerGui")
 			local window = gui:WaitForChild("Window")
-			local codeFrame = window:WaitForChild("Codes"):WaitForChild("Frame")
-			local enterBox = codeFrame:WaitForChild("code"):WaitForChild("entercode")
+			local codesGui = window:WaitForChild("Codes")
+			local codeFrame = codesGui:WaitForChild("Frame")
+			local codeInputFrame = codeFrame:WaitForChild("code")
+			local enterBox = codeInputFrame:WaitForChild("entercode")
 			local redeemBtn = codeFrame:WaitForChild("redeem")
 
-			-- Mở GUI nếu đang ẩn
-			window.Codes.Visible = true
+			-- Đảm bảo GUI hiện ra (Frame chứ không phải ScreenGui)
+			codeFrame.Visible = true
 
 			for _, code in ipairs(codes) do
 				enterBox.Text = code
@@ -68,16 +70,16 @@ LobbyTab:CreateButton({
 			end
 
 			Rayfield:Notify({
-				Title = "🎉 Hoàn tất!",
-				Content = "Tất cả code đã được gửi thành công.",
-				Duration = 4
+				Title = "🎉 Xong rồi!",
+				Content = "Đã thử nhập toàn bộ code qua GUI!",
+				Duration = 5
 			})
 		end)
 
 		if not success then
-			warn("❌ Callback error:", err)
+			warn("❌ Callback Error:", err)
 			Rayfield:Notify({
-				Title = "❌ Lỗi khi nhập code",
+				Title = "❌ Lỗi",
 				Content = tostring(err),
 				Duration = 5
 			})
