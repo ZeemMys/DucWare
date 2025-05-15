@@ -50,49 +50,28 @@ LobbyTab:CreateButton({
 		}
 
 		local ReplicatedStorage = game:GetService("ReplicatedStorage")
-		local eventFolder = ReplicatedStorage:FindFirstChild("Event")
+		local successCount = 0
 
-		-- Kiểm tra folder Event
-		if not eventFolder then
-			Rayfield:Notify({
-				Title = "❌ Không tìm thấy 'Event'",
-				Content = "Thư mục 'Event' không tồn tại trong ReplicatedStorage.",
-				Duration = 4
-			})
-			return
-		end
+		local success, err = pcall(function()
+			local eventFolder = ReplicatedStorage:WaitForChild("Event", 5)
+			local codeRemote = eventFolder:WaitForChild("Codes", 5)
 
-		-- Kiểm tra RemoteEvent Codes
-		local codeRemote = eventFolder:FindFirstChild("Codes")
-		if not codeRemote or not codeRemote:IsA("RemoteEvent") then
-			Rayfield:Notify({
-				Title = "❌ Không tìm thấy 'Codes'",
-				Content = "'Codes' không phải là RemoteEvent hoặc không tồn tại.",
-				Duration = 4
-			})
-			return
-		end
-
-		-- Gửi lần lượt từng code
-		for _, code in ipairs(codes) do
-			local success, err = pcall(function()
-				codeRemote:FireServer(code)
-			end)
-
-			if success then
-				print("✅ Gửi thành công code:", code)
-			else
-				warn("❌ Gửi code thất bại:", code, err)
+			if not codeRemote:IsA("RemoteEvent") then
+				error("❌ Codes không phải là RemoteEvent")
 			end
 
-			task.wait(0.3)
-		end
+			for _, code in ipairs(codes) do
+				codeRemote:FireServer(code)
+				print("✅ Đã gửi code:", code)
+				successCount += 1
+				task.wait(0.5)
+			end
+		end)
 
-		-- Thông báo khi hoàn tất
 		Rayfield:Notify({
-			Title = "✅ Hoàn tất",
-			Content = "Đã gửi tất cả code về server!",
-			Duration = 4
+			Title = success and "✅ Nhập code xong!" or "❌ Lỗi khi gửi code",
+			Content = success and ("Đã gửi %s code thành công.").format(successCount) or tostring(err),
+			Duration = 5
 		})
 	end
 })
