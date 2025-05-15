@@ -38,60 +38,35 @@ Rayfield:Notify({
 
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
--- Danh sách các mã code cần redeem
-local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
-
--- Callback function for sending the code and getting confirmation
-local function sendCode(code)
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-
-    local success, err = pcall(function()
-        -- Gửi mã code đến server
-        CodesEvent:FireServer(code)
-    end)
-
-    if success then
-        -- Wait for a confirmation message from the server
-        CodesEvent.OnClientEvent:Connect(function(response)
-            if response == "success" then
-                -- Notify Rayfield rằng mã code đã được redeem thành công
-                Rayfield:Notify({
-                    Title = "Code Redeemed",
-                    Content = "Mã code " .. code .. " đã được nhập thành công!",
-                    Duration = 3
-                })
-            else
-                -- Notify Rayfield rằng mã code không hợp lệ
-                Rayfield:Notify({
-                    Title = "Lỗi",
-                    Content = "Mã code " .. code .. " không hợp lệ hoặc đã được sử dụng.",
-                    Duration = 3
-                })
-            end
-        end)
-    else
-        warn("[✘] Lỗi khi gửi mã code:", code, err)
-        Rayfield:Notify({
-            Title = "Lỗi",
-            Content = "Không thể gửi mã code: " .. code,
-            Duration = 3
-        })
-    end
-end
-
--- Hàm để redeem tất cả các mã code
-local function redeemAllCodes()
-    for _, code in ipairs(codeList) do
-        sendCode(code)  -- Gửi mã code mỗi lần
-        wait(2)  -- Thêm một chút thời gian giữa mỗi lần gửi
-    end
-end
-
--- Button để redeem tất cả mã code
+-------Lobby-------
 LobbyTab:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
-        redeemAllCodes()
-    end,
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+
+        local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
+        
+        for _, code in ipairs(codeList) do
+            local success, err = pcall(function()
+                CodesEvent:FireServer(code)
+            end)
+
+            if success then
+                Rayfield:Notify({
+                    Title = "Đã gửi mã code",
+                    Content = code,
+                    Duration = 3
+                })
+            else
+                Rayfield:Notify({
+                    Title = "Lỗi khi gửi mã",
+                    Content = code .. " | " .. tostring(err),
+                    Duration = 3
+                })
+            end
+
+            task.wait(2) -- Đợi 2 giây giữa mỗi mã code
+        end
+    end
 })
