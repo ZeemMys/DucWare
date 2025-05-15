@@ -100,9 +100,9 @@ LobbyTab:CreateButton({
                             connection:Disconnect()
                         end
                         Rayfield:Notify({
-                            Title = "⚠️ Không phản hồi",
-                            Content = "Không rõ mã có hợp lệ không: " .. code,
-                            Duration = 3
+                            Title = "⚠️ Không phản hồi từ server",
+                            Content = "Mã \"" .. code .. "\" có thể đã gửi, nhưng server không trả về kết quả.",
+                            Duration = 4
                         })
                         index += 1
                         redeemNext()
