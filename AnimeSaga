@@ -1,50 +1,52 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+
+-- Load Rayfield UI
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- Tạo cửa sổ Rayfield
 local Window = Rayfield:CreateWindow({
     Name = "DucWare — Anime Saga",
-    Icon = 0, -- Icon in Topbar
+    Icon = 0,
     LoadingTitle = "Wait a minute, the script is loading",
     LoadingSubtitle = "by DucWare",
     Theme = "Amethyst",
     ConfigurationSaving = {
-       Enabled = true,
-       FolderName = "DucWare",
-       FileName = "DucWareZ"
+        Enabled = true,
+        FolderName = "DucWare",
+        FileName = "DucWareZ"
     },
- 
     Discord = {
-       Enabled = true,
-       Invite = "PnHj485p",
-       RememberJoins = false
+        Enabled = true,
+        Invite = "PnHj485p",
+        RememberJoins = false
     },
- 
     KeySystem = true,
     KeySettings = {
-       Title = "Get Key",
-       Subtitle = "Key System",
-       Note = "Key: DucWare",
-       FileName = "Key",
-       SaveKey = true,
-       Key = {"DucWare"}
+        Title = "Get Key",
+        Subtitle = "Key System",
+        Note = "Key: DucWare",
+        FileName = "Key",
+        SaveKey = true,
+        Key = {"DucWare"}
     }
- })
-
-Rayfield:Notify({
-   Title = "Enjoy",
-   Content = "Have Fun:)",
-   Duration = 5,
-   Image = "number",
 })
 
+-- Thông báo khởi đầu
+Rayfield:Notify({
+    Title = "Enjoy",
+    Content = "Have Fun :)",
+    Duration = 5,
+    Image = "number"
+})
+
+-- Tạo tab Lobby
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
--------Lobby-------
+-- Button để redeem tất cả mã code
 LobbyTab:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-
         local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
         
         for _, code in ipairs(codeList) do
@@ -54,19 +56,26 @@ LobbyTab:CreateButton({
 
             if success then
                 Rayfield:Notify({
-                    Title = "Đã gửi mã code",
-                    Content = code,
+                    Title = "Thành công",
+                    Content = "Đã gửi mã: " .. code,
                     Duration = 3
                 })
             else
                 Rayfield:Notify({
-                    Title = "Lỗi khi gửi mã",
-                    Content = code .. " | " .. tostring(err),
+                    Title = "Lỗi",
+                    Content = "Mã " .. code .. " thất bại: " .. tostring(err),
                     Duration = 3
                 })
             end
 
-            task.wait(2) -- Đợi 2 giây giữa mỗi mã code
+            task.wait(2) -- Đợi 2 giây để tránh spam server
         end
+
+        -- Thông báo hoàn tất
+        Rayfield:Notify({
+            Title = "Hoàn tất",
+            Content = "Đã thử redeem tất cả mã code!",
+            Duration = 5
+        })
     end
 })
