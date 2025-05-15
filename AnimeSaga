@@ -1,39 +1,37 @@
-if game.GameId == 17850641257 then
-    local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield/library.lua"))()
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield/library.lua"))()
 
-    local Window = Rayfield:CreateWindow({
-        Name = "DucWare",
-        Icon = 0,
-        LoadingTitle = "Wait a minutes to loading the script",
-        LoadingSubtitle = "by DucWare",
-        Theme = "Amethyst",
+local Window = Rayfield:CreateWindow({
+    Name = "DucWare",
+    Icon = 0,
+    LoadingTitle = "Wait a minutes to loading the script",
+    LoadingSubtitle = "by DucWare",
+    Theme = "Amethyst",
 
-        DisableRayfieldPrompts = false,
-        DisableBuildWarnings = false,
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
 
-        ConfigurationSaving = {
-            Enabled = true,
-            FolderName = "DucWare",
-            FileName = "DucWareZ"
-        },
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "DucWare",
+        FileName = "DucWareZ"
+    },
 
-        Discord = {
-            Enabled = false,
-            Invite = "noinvitelink",
-            RememberJoins = true
-        },
+    Discord = {
+        Enabled = false,
+        Invite = "noinvitelink",
+        RememberJoins = true
+    },
 
-        KeySystem = true,
-        KeySettings = {
-            Title = "Get Key",
-            Subtitle = "Key System",
-            Note = "Key: DucWare",
-            FileName = "Key",
-            SaveKey = true,
-            GrabKeyFromSite = false,
-            Key = {"DucWare"}
-        }
-    })
+    KeySystem = true,
+    KeySettings = {
+        Title = "Get Key",
+        Subtitle = "Key System",
+        Note = "Key: DucWare",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = {"DucWare"}
+    }
+})
 
-    local LobbyTab = Window:CreateTab("Lobby", 4483362458)
-end
+local LobbyTab = Window:CreateTab("Lobby", 4483362458)
