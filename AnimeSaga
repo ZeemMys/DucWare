@@ -37,17 +37,24 @@ Rayfield:Notify({
 -- Tạo tab Lobby
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
--- Tạo biến để lắng nghe phản hồi từ server một lần duy nhất
+local CodesEvent = game:GetService("ReplicatedStorage"):WaitForChild("Event"):WaitForChild("Codes")
+
+-- Tạo bảng để theo dõi mã đã redeem
 local redeemed = {}
 
 -- Hàm gửi mã và xử lý phản hồi
 local function redeemCode(code)
+    -- Kiểm tra xem mã đã được redeem chưa
+    if redeemed[code] then
+        return -- Nếu đã redeem rồi thì bỏ qua
+    end
+
     local success, response = pcall(function()
         game:GetService("ReplicatedStorage").Event.Codes:FireServer(code)
     end)
 
     if success then
-        -- Lắng nghe phản hồi từ server một lần duy nhất
+        -- Lắng nghe phản hồi từ server
         game:GetService("ReplicatedStorage").Event.Codes.OnClientEvent:Connect(function(response)
             if redeemed[code] then
                 return -- Đảm bảo không nhận phản hồi nhiều lần cho mã này
@@ -55,14 +62,27 @@ local function redeemCode(code)
 
             redeemed[code] = true
 
+            -- Xử lý phản hồi
             if response == "Thành công" then
-                print("✅ Mã " .. code .. " đã redeem thành công!")
+                Rayfield:Notify({
+                    Title = "✅ Mã " .. code,
+                    Content = "Đã redeem thành công!",
+                    Duration = 5
+                })
             else
-                print("❌ Lỗi khi redeem mã " .. code)
+                Rayfield:Notify({
+                    Title = "❌ Lỗi mã " .. code,
+                    Content = "Không thể redeem mã này.",
+                    Duration = 5
+                })
             end
         end)
     else
-        print("❌ Lỗi khi gửi mã " .. code)
+        Rayfield:Notify({
+            Title = "❌ Lỗi",
+            Content = "Không thể gửi mã " .. code,
+            Duration = 5
+        })
     end
 end
 
