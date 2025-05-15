@@ -1,3 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -34,46 +37,44 @@ Rayfield:Notify({
     Image = "number"
 })
 
--- Tạo tab Lobby
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
-----------Lobby-----------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-
 local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
-
 local redeemedCodes = {}
 
 LobbyTab:CreateButton({
-    Name = "Redeem All Codes",
+    Name = "Redeem All Codes (Safe Mode)",
     Callback = function()
-        for _, code in ipairs(codeList) do
+        for _, rawCode in ipairs(codeList) do
+            -- Xử lý chuẩn hóa mã
+            local code = tostring(rawCode):gsub("^%s*(.-)%s*$", "%1") -- xóa khoảng trắng đầu/cuối
+            print("🔥 Gửi mã:", "[" .. code .. "]")
+
             if not redeemedCodes[code] then
                 local success, err = pcall(function()
                     CodesEvent:FireServer(code)
                 end)
 
                 if success then
-                    redeemedCodes[code] = true -- Ghi nhận là đã gửi thành công
+                    redeemedCodes[code] = true
                     Rayfield:Notify({
-                        Title = "✅ Mã hợp lệ",
+                        Title = "✅ Thành công",
                         Content = "Đã gửi mã: " .. code,
                         Duration = 3
                     })
                 else
                     Rayfield:Notify({
                         Title = "❌ Lỗi",
-                        Content = "Không thể gửi mã: " .. code .. " (" .. tostring(err) .. ")",
+                        Content = "Không gửi được mã: " .. code .. " (" .. tostring(err) .. ")",
                         Duration = 3
                     })
                 end
 
-                task.wait(2)
+                task.wait(1.5)
             else
                 Rayfield:Notify({
                     Title = "⏭️ Bỏ qua",
-                    Content = "Mã " .. code .. " đã gửi trước đó",
+                    Content = "Mã đã redeem trước đó: " .. code,
                     Duration = 2
                 })
             end
@@ -81,7 +82,7 @@ LobbyTab:CreateButton({
 
         Rayfield:Notify({
             Title = "🎉 Hoàn tất",
-            Content = "Đã thử redeem tất cả mã chưa nhập!",
+            Content = "Tất cả mã đã xử lý xong.",
             Duration = 5
         })
     end
