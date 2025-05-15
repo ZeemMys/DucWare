@@ -65,7 +65,7 @@ local function getTargetMobs()
 	return mobs
 end
 
-GameTab:CreateToggle({
+GameTab1:CreateToggle({
 	Name = "🌪Auto Farm",
 	CurrentValue = false,
 	Callback = function(Value)
