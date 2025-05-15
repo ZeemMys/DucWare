@@ -121,7 +121,7 @@ local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-GameTab:CreateButton({
+GameTab:CreateToggle({
     Name = "Bay đánh quái (Auto)",
     Callback = function()
         local mobs = workspace:WaitForChild("Enemy"):GetChildren()
