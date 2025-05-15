@@ -43,26 +43,29 @@ LobbyTab:CreateButton({
 	Callback = function()
 		local codes = {"Release", "SorryForDelay", "SorryForShutdown", "50KActive", "1MVisits"}
 
-		local eventFolder = ReplicatedStorage:WaitForChild("Event", 5)
-		if not eventFolder then
+		-- Bước 1: Lấy folder Event
+		local eventFolder = ReplicatedStorage:FindFirstChild("Event")
+		if not eventFolder or not eventFolder:IsA("Folder") then
 			Rayfield:Notify({
-				Title = "❌ Không tìm thấy 'Event'",
-				Content = "'Event' không tồn tại trong ReplicatedStorage!",
+				Title = "❌ Không tìm thấy Folder 'Event'",
+				Content = "'Event' không phải là Folder hoặc không tồn tại trong ReplicatedStorage.",
 				Duration = 4
 			})
 			return
 		end
 
-		local codeRemote = eventFolder:WaitForChild("Codes", 5)
+		-- Bước 2: Lấy RemoteEvent Codes
+		local codeRemote = eventFolder:FindFirstChild("Codes")
 		if not codeRemote or not codeRemote:IsA("RemoteEvent") then
 			Rayfield:Notify({
-				Title = "❌ Không tìm thấy 'Codes'",
-				Content = "'Codes' không tồn tại hoặc không phải là RemoteEvent.",
+				Title = "❌ Không tìm thấy RemoteEvent 'Codes'",
+				Content = "'Codes' không tồn tại hoặc không phải là RemoteEvent trong folder Event.",
 				Duration = 4
 			})
 			return
 		end
 
+		-- Bước 3: Gửi code
 		for _, code in ipairs(codes) do
 			pcall(function()
 				codeRemote:FireServer(code)
