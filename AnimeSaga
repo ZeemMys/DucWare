@@ -18,7 +18,7 @@ local Window = Rayfield:CreateWindow({
 -- Tạo một Tab trong cửa sổ
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
--- Tạo một Button trong Tab Lobby
+-- Tạo một Button trong Tab Lobby cho mã code 'Release'
 LobbyTab:CreateButton({
     Name = "Redeem Code 'Release'",  -- Tên nút bấm
     Callback = function()
@@ -47,7 +47,7 @@ LobbyTab:CreateButton({
     end
 })
 
--- Tạo thêm một button cho mã code khác
+-- Tạo thêm một button cho mã code 'SorryForDelay'
 LobbyTab:CreateButton({
     Name = "Redeem Code 'SorryForDelay'",  -- Tên nút bấm
     Callback = function()
@@ -64,6 +64,35 @@ LobbyTab:CreateButton({
             Rayfield:Notify({
                 Title = "Code Redeemed",
                 Content = "Mã code 'SorryForDelay' đã được nhập thành công.",
+                Duration = 3
+            })
+        else
+            Rayfield:Notify({
+                Title = "Error",
+                Content = "Lỗi khi gửi mã code: " .. err,
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- Tạo thêm một button cho mã code 'SorryForShutdown'
+LobbyTab:CreateButton({
+    Name = "Redeem Code 'SorryForShutdown'",  -- Tên nút bấm
+    Callback = function()
+        -- Lấy sự kiện ReplicatedStorage để gửi mã code
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
+
+        -- Gửi mã code "SorryForShutdown" tới server
+        local success, err = pcall(function()
+            CodesEvent:FireServer("SorryForShutdown")
+        end)
+
+        if success then
+            Rayfield:Notify({
+                Title = "Code Redeemed",
+                Content = "Mã code 'SorryForShutdown' đã được nhập thành công.",
                 Duration = 3
             })
         else
