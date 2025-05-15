@@ -46,7 +46,7 @@ local function redeemCode(code)
     if success then
         -- Lắng nghe phản hồi từ server
         game:GetService("ReplicatedStorage").Event.Codes.OnClientEvent:Connect(function(response)
-            -- Lắng nghe phản hồi nhưng không thông báo quá nhiều
+            -- Chỉ thông báo nếu mã này đã redeem thành công
             if response == "Thành công" then
                 print("✅ Mã " .. code .. " đã redeem thành công!")
             else
@@ -75,19 +75,11 @@ LobbyTab:CreateButton({
         end
 
         -- Thông báo chỉ một lần khi hoàn tất
-        if redeemSuccess then
-            Rayfield:Notify({
-                Title = "🎉 Hoàn tất",
-                Content = "Đã thử redeem tất cả mã!",
-                Duration = 5
-            })
-        else
-            Rayfield:Notify({
-                Title = "❌ Lỗi",
-                Content = "Đã gặp lỗi khi redeem một số mã.",
-                Duration = 5
-            })
-        end
+        Rayfield:Notify({
+            Title = "🎉 Hoàn tất",
+            Content = "Đã thử redeem tất cả mã!",
+            Duration = 5
+        })
 
         -- Re-enable the button after all codes have been processed
         wait(5) -- Wait before re-enabling the button to avoid spam
