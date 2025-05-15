@@ -136,24 +136,23 @@ GameTab:CreateToggle({
 
             for _, mob in pairs(mobs) do
                 if not autoFarm then break end
+                -- Kiểm tra nếu mob có HumanoidRootPart và Humanoid
                 if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                    -- Xác định hitbox của mob (ở đây là HumanoidRootPart, bạn có thể thay đổi phần này tùy thuộc vào cấu trúc của mob)
                     local mobHitbox = mob:FindFirstChild("HumanoidRootPart")
-
-                    -- Bay đến gần mob và căn chỉnh với hitbox
                     if mobHitbox then
+                        -- Di chuyển đến hitbox của mob
                         HumanoidRootPart.CFrame = mobHitbox.CFrame + Vector3.new(0, 5, 0)
                         task.wait(0.5)
 
-                        -- Giả lập đánh vào hitbox, bạn có thể thay đổi cách tấn công nếu có RemoteEvent hoặc chức năng khác
+                        -- Giả lập đánh (sửa theo cách game yêu cầu)
                         local attackRemote = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Attack")
                         if attackRemote then
-                            attackRemote:FireServer(mob)
+                            attackRemote:FireServer(mob)  -- Gọi RemoteEvent để tấn công
                         else
-                            warn("Không tìm thấy Remote tấn công.")
+                            print("Không tìm thấy RemoteEvent tấn công.")
                         end
 
-                        -- Chờ một chút trước khi đánh quái khác
+                        -- Đợi một chút rồi đánh quái khác
                         task.wait(1)
                     end
                 end
@@ -162,4 +161,4 @@ GameTab:CreateToggle({
             task.wait(1)
         end
     end
-})    
+})
