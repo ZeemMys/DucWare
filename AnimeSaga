@@ -37,7 +37,7 @@ Rayfield:Notify({
 -- Tạo tab Lobby
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
--- Hàm gửi mã và nhận phản hồi
+-- Hàm gửi mã và kiểm tra phản hồi
 local function redeemCode(code)
     local success, response = pcall(function()
         game:GetService("ReplicatedStorage").Event.Codes:FireServer(code)
@@ -46,26 +46,15 @@ local function redeemCode(code)
     if success then
         -- Lắng nghe phản hồi từ server
         game:GetService("ReplicatedStorage").Event.Codes.OnClientEvent:Connect(function(response)
+            -- Lắng nghe phản hồi nhưng không thông báo quá nhiều
             if response == "Thành công" then
-                Rayfield:Notify({
-                    Title = "✅ Mã hợp lệ",
-                    Content = "Mã " .. code .. " đã redeem thành công!",
-                    Duration = 3
-                })
+                print("✅ Mã " .. code .. " đã redeem thành công!")
             else
-                Rayfield:Notify({
-                    Title = "❌ Lỗi",
-                    Content = "Có lỗi khi redeem mã " .. code .. ".",
-                    Duration = 3
-                })
+                print("❌ Lỗi khi redeem mã " .. code)
             end
         end)
     else
-        Rayfield:Notify({
-            Title = "❌ Lỗi",
-            Content = "Lỗi khi gửi mã " .. code,
-            Duration = 3
-        })
+        print("❌ Lỗi khi gửi mã " .. code)
     end
 end
 
@@ -73,17 +62,35 @@ end
 LobbyTab:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
-        -- Gửi từng mã và kiểm tra phản hồi
-        redeemCode("Release")
-        wait(2)  -- Đợi 2 giây giữa các lần gửi mã để tránh spam
-        redeemCode("SorryForDelay")
-        wait(2)
-        redeemCode("SorryForShutdown")
+        -- Disable button to avoid repeated clicks
+        LobbyTab:DisableButton("Redeem All Codes")
 
-        Rayfield:Notify({
-            Title = "🎉 Hoàn tất",
-            Content = "Đã thử redeem tất cả mã!",
-            Duration = 5
-        })
+        -- Gửi từng mã và kiểm tra phản hồi
+        local codesToRedeem = {"Release", "SorryForDelay", "SorryForShutdown"}
+        local redeemSuccess = true
+
+        for _, code in ipairs(codesToRedeem) do
+            redeemCode(code)
+            wait(2) -- Đợi 2 giây giữa các lần gửi mã để tránh spam server
+        end
+
+        -- Thông báo chỉ một lần khi hoàn tất
+        if redeemSuccess then
+            Rayfield:Notify({
+                Title = "🎉 Hoàn tất",
+                Content = "Đã thử redeem tất cả mã!",
+                Duration = 5
+            })
+        else
+            Rayfield:Notify({
+                Title = "❌ Lỗi",
+                Content = "Đã gặp lỗi khi redeem một số mã.",
+                Duration = 5
+            })
+        end
+
+        -- Re-enable the button after all codes have been processed
+        wait(5) -- Wait before re-enabling the button to avoid spam
+        LobbyTab:EnableButton("Redeem All Codes")
     end
 })
