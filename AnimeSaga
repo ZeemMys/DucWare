@@ -32,7 +32,7 @@ local Window = Rayfield:CreateWindow({
     }
 })
 
--- Thông báo khởi đầu
+-- Notify khởi động
 Rayfield:Notify({
     Title = "Enjoy",
     Content = "Have Fun :)",
@@ -40,41 +40,55 @@ Rayfield:Notify({
     Image = "number"
 })
 
--- Tạo tab Lobby
+-- Danh sách mã code
+local allCodes = {"Release", "SorryForDelay", "SorryForShutdown"}
+
+-- Danh sách mã đã dùng (sẽ lưu lại trong session)
+local usedCodes = {}
+
+-- Tab Lobby
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
--- Button để redeem tất cả mã code
+-- Nút redeem code
 LobbyTab:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
-        local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
-        
-        for _, code in ipairs(codeList) do
-            local success, err = pcall(function()
-                CodesEvent:FireServer(code)
-            end)
+        for _, code in ipairs(allCodes) do
+            -- Kiểm tra mã đã dùng chưa
+            if not usedCodes[code] then
+                local success, err = pcall(function()
+                    CodesEvent:FireServer(code)
+                end)
 
-            if success then
-                Rayfield:Notify({
-                    Title = "Thành công",
-                    Content = "Đã gửi mã: " .. code,
-                    Duration = 3
-                })
+                if success then
+                    usedCodes[code] = true -- đánh dấu đã dùng
+
+                    Rayfield:Notify({
+                        Title = "✅ Thành công",
+                        Content = "Đã gửi mã: " .. code,
+                        Duration = 3
+                    })
+                else
+                    Rayfield:Notify({
+                        Title = "❌ Lỗi",
+                        Content = "Mã " .. code .. " thất bại: " .. tostring(err),
+                        Duration = 3
+                    })
+                end
+
+                task.wait(2) -- tránh spam
             else
                 Rayfield:Notify({
-                    Title = "Lỗi",
-                    Content = "Mã " .. code .. " thất bại: " .. tostring(err),
-                    Duration = 3
+                    Title = "⏩ Bỏ qua",
+                    Content = "Mã " .. code .. " đã dùng trước đó",
+                    Duration = 2
                 })
             end
-
-            task.wait(2) -- Đợi 2 giây để tránh spam server
         end
 
-        -- Thông báo hoàn tất
         Rayfield:Notify({
-            Title = "Hoàn tất",
-            Content = "Đã thử redeem tất cả mã code!",
+            Title = "🎉 Hoàn tất",
+            Content = "Đã thử redeem tất cả mã chưa nhập!",
             Duration = 5
         })
     end
