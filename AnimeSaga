@@ -44,61 +44,39 @@ Rayfield:Notify({
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
 ------Lobby-------
-LobbyTab:CreateButton({
+Rayfield:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
-        -- Debug thông báo để kiểm tra xem callback có được gọi hay không
-        print("Button clicked. Starting to redeem codes...")
-
-        -- Kiểm tra module trước khi sử dụng
-        local RemoteModule = require(game:GetService("ReplicatedStorage").Packages.RemoteFunction)
+        local codes = {"Release", "SorryForDelay", "SorryForShutdown"}
         
-        -- Kiểm tra xem module có tồn tại không
-        if not RemoteModule then
-            Rayfield:Notify({
-                Title = "Lỗi",
-                Content = "Không thể require module RemoteFunction.",
-                Duration = 4
-            })
-            return
-        end
-
-        -- Kiểm tra xem hàm redeemCode có tồn tại trong module không
-        if RemoteModule.redeemCode then
-            local codes = {"Release", "SorryForDelay", "SorryForShutdown"}
-
-            -- Lặp qua các code
-            for _, code in ipairs(codes) do
-                local success, err = pcall(function()
-                    -- Gọi hàm redeemCode từ module
-                    RemoteModule.redeemCode(code)
-                end)
-
-                -- Kiểm tra thành công
-                if success then
-                    Rayfield:Notify({
-                        Title = "Code Redeemed",
-                        Content = "Đã gửi code: " .. code,
-                        Duration = 3
-                    })
+        for _, code in ipairs(codes) do
+            local success, err = pcall(function()
+                -- Thử gọi RedeemCode
+                print("Redeeming code: " .. code)  -- Thêm thông báo để kiểm tra
+                -- Kiểm tra xem RemoteFunction có đúng không
+                local remoteFunction = game.ReplicatedStorage:WaitForChild("MyRemoteFunction")
+                if remoteFunction then
+                    remoteFunction:FireServer(code)
                 else
-                    -- Thông báo lỗi nếu không thành công
-                    Rayfield:Notify({
-                        Title = "Lỗi",
-                        Content = "Không gửi được code: " .. code .. "\n" .. err,
-                        Duration = 3
-                    })
+                    error("RemoteFunction not found!")
                 end
+            end)
 
-                wait(1)  -- Đợi giữa các lần gửi code
+            if success then
+                Rayfield:Notify({
+                    Title = "Code Redeemed",
+                    Content = "Đã gửi code: " .. code,
+                    Duration = 3
+                })
+            else
+                Rayfield:Notify({
+                    Title = "Lỗi",
+                    Content = "Không gửi được code: " .. code .. "\n" .. err,
+                    Duration = 3
+                })
             end
-        else
-            -- Thông báo lỗi nếu không tìm thấy hàm redeemCode trong module
-            Rayfield:Notify({
-                Title = "Lỗi",
-                Content = "Hàm redeemCode không tồn tại trong module RemoteFunction.",
-                Duration = 4
-            })
+
+            wait(1)
         end
     end,
 })
