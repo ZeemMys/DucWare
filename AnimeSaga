@@ -45,12 +45,13 @@ local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
 ------ Lobby ------
 LobbyTab:CreateButton({
-    Name = "Redeem All Codes",
+    Name = "Redeem Valid Codes Only",
     Callback = function()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
 
-        local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
+        -- Dùng toàn bộ code viết thường (đề phòng check lowercase)
+        local codeList = {"Release", "sorryfordelay", "sorryforshutdown"}
 
         for _, code in ipairs(codeList) do
             local success, err = pcall(function()
@@ -59,20 +60,19 @@ LobbyTab:CreateButton({
 
             if success then
                 Rayfield:Notify({
-                    Title = "Code Redeemed",
-                    Content = "Đã gửi code: " .. code,
+                    Title = "Code Sent",
+                    Content = "Đã gửi: " .. code,
                     Duration = 3
                 })
             else
                 Rayfield:Notify({
                     Title = "Lỗi",
-                    Content = "Không gửi được code: " .. code .. "\n" .. tostring(err),
-                    Duration = 4
+                    Content = "Không gửi được: " .. code,
+                    Duration = 3
                 })
             end
 
-            wait(1) -- delay mỗi code
+            wait(1)
         end
     end,
 })
-    
