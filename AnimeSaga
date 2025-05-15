@@ -116,39 +116,50 @@ LobbyTab:CreateButton({
     end
 })
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local autoFarm = false
 
 GameTab:CreateToggle({
     Name = "Bay đánh quái (Auto)",
-    Callback = function()
-        local mobs = workspace:WaitForChild("Enemy"):GetChildren()
+    CurrentValue = false,
+    Callback = function(Value)
+        autoFarm = Value
 
-        for _, mob in pairs(mobs) do
-            if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                -- Bay đến gần mob
-                HumanoidRootPart.CFrame = mob.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
-                task.wait(0.5)
-
-                -- Giả lập đánh, nếu game có RemoteEvent để đánh thì thay thế ở đây
-                local attackRemote = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Attack")
-                if attackRemote then
-                    attackRemote:FireServer(mob)
-                else
-                    print("Không tìm thấy Remote để tấn công.")
-                end
-
-                -- Đợi 1 chút rồi chuyển sang quái khác
-                task.wait(1)
-            end
-        end
-
+        -- Thông báo bật/tắt
         Rayfield:Notify({
-            Title = "✔️ Hoàn tất",
-            Content = "Đã tấn công toàn bộ quái khả dụng.",
-            Duration = 4
+            Title = autoFarm and "🌀 Auto Farm Đã Bật" or "⛔ Auto Farm Đã Tắt",
+            Content = autoFarm and "Đang bay đánh quái..." or "Dừng farm.",
+            Duration = 3
         })
+
+        while autoFarm do
+            local mobs = workspace:WaitForChild("Enemy"):GetChildren()
+
+            for _, mob in pairs(mobs) do
+                if not autoFarm then break end
+                if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                    -- Xác định hitbox của mob (ở đây là HumanoidRootPart, bạn có thể thay đổi phần này tùy thuộc vào cấu trúc của mob)
+                    local mobHitbox = mob:FindFirstChild("HumanoidRootPart")
+
+                    -- Bay đến gần mob và căn chỉnh với hitbox
+                    if mobHitbox then
+                        HumanoidRootPart.CFrame = mobHitbox.CFrame + Vector3.new(0, 5, 0)
+                        task.wait(0.5)
+
+                        -- Giả lập đánh vào hitbox, bạn có thể thay đổi cách tấn công nếu có RemoteEvent hoặc chức năng khác
+                        local attackRemote = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Attack")
+                        if attackRemote then
+                            attackRemote:FireServer(mob)
+                        else
+                            warn("Không tìm thấy Remote tấn công.")
+                        end
+
+                        -- Chờ một chút trước khi đánh quái khác
+                        task.wait(1)
+                    end
+                end
+            end
+
+            task.wait(1)
+        end
     end
-})
+})    
