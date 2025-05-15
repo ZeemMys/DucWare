@@ -37,15 +37,13 @@ Rayfield:Notify({
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 local GameTab = Window:CreateTab("Game", 4483362458)
 
--- Đặt biến autoFarm là false mặc định
-local autoFarm = false
-
--- Lấy các dịch vụ cần thiết
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+local autoFarm = false
 
 -- Tạo toggle bật/tắt auto farm
 GameTab:CreateToggle({
@@ -63,18 +61,31 @@ GameTab:CreateToggle({
 
         -- Bắt đầu auto farm khi bật toggle
         while autoFarm do
+            -- Lấy danh sách quái trong môi trường hiện tại
             local mobs = workspace:WaitForChild("Enemy"):GetChildren()
+            local foundMob = false
 
             for _, mob in pairs(mobs) do
-                if not autoFarm then break end  -- Dừng vòng lặp khi tắt autoFarm
-
-                -- Kiểm tra nếu mob có HumanoidRootPart và Humanoid (có thể tấn công)
+                -- Kiểm tra nếu mob có HumanoidRootPart và Humanoid
                 if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                    foundMob = true  -- Có quái vật tồn tại
                     local mobHitbox = mob:FindFirstChild("HumanoidRootPart")
                     if mobHitbox then
                         -- Di chuyển đến hitbox của mob
-                        HumanoidRootPart.CFrame = mobHitbox.CFrame + Vector3.new(0, 5, 0)
-                        task.wait(0.5)
+                        local targetPosition = mobHitbox.Position + Vector3.new(0, 5, 0) -- Tạo vị trí bay lên phía trên quái vật
+                        local distance = (HumanoidRootPart.Position - targetPosition).magnitude
+                        local moveTime = math.max(distance / 100, 1) -- Tính thời gian di chuyển dựa trên khoảng cách
+                        
+                        -- Tạo tween di chuyển nhân vật đến quái vật
+                        local TweenService = game:GetService("TweenService")
+                        local goal = {CFrame = CFrame.new(targetPosition)}
+                        local tweenInfo = TweenInfo.new(moveTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, false)
+                        local tween = TweenService:Create(HumanoidRootPart, tweenInfo, goal)
+
+                        tween:Play()
+
+                        -- Đợi cho đến khi nhân vật đến vị trí quái vật
+                        task.wait(moveTime)
 
                         -- Giả lập đánh (sửa theo cách game yêu cầu)
                         local attackRemote = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Attack")
@@ -90,7 +101,18 @@ GameTab:CreateToggle({
                 end
             end
 
-            task.wait(1)  -- Đợi một chút trước khi kiểm tra lại các quái vật
+            -- Nếu không còn quái, chờ một chút và kiểm tra lại
+            if not foundMob then
+                Rayfield:Notify({
+                    Title = "✅ Tất cả quái vật đã bị đánh bại.",
+                    Content = "Đang tìm quái mới...",
+                    Duration = 3
+                })
+                task.wait(5)  -- Chờ 5 giây trước khi tìm kiếm lại
+            end
+
+            -- Đợi một chút rồi tiếp tục vòng lặp
+            task.wait(1)
         end
     end
 })
