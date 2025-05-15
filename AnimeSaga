@@ -50,38 +50,38 @@ LobbyTab:CreateButton({
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Players = game:GetService("Players")
         local player = Players.LocalPlayer
-
+        
         local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
         local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
 
+        -- Bắt lỗi trước khi gửi mã
         for _, code in ipairs(codeList) do
-            -- 🔓 Mở GUI lại mỗi lần
-            local prompt = workspace:FindFirstChild("ProximityPrompt") and workspace.ProximityPrompt:FindFirstChild("Codes")
-            if prompt then
-                fireproximityprompt(prompt)
-                wait(1)
-            end
-
-            -- 🔁 Gửi code
             local success, err = pcall(function()
+                -- Kiểm tra nếu ProximityPrompt tồn tại
+                local prompt = workspace:FindFirstChild("ProximityPrompt") and workspace.ProximityPrompt:FindFirstChild("Codes")
+                if prompt then
+                    fireproximityprompt(prompt)  -- Mở GUI mỗi lần
+                    wait(1)
+                end
+                -- Gửi code vào RemoteEvent
                 CodesEvent:FireServer(code)
             end)
 
             if success then
                 Rayfield:Notify({
-                    Title = "Đã gửi code",
-                    Content = code,
-                    Duration = 2
+                    Title = "Code Redeemed",
+                    Content = "Đã gửi code: " .. code,
+                    Duration = 3
                 })
             else
                 Rayfield:Notify({
-                    Title = "Lỗi gửi code",
-                    Content = code .. "\n" .. tostring(err),
+                    Title = "Lỗi",
+                    Content = "Không gửi được code: " .. code .. "\n" .. tostring(err),
                     Duration = 3
                 })
             end
 
-            wait(1.2) -- Delay dài hơn chút để tránh lỗi spam
+            wait(1.2)  -- Delay giữa các code để tránh lỗi
         end
     end,
 })
