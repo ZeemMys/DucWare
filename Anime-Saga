@@ -39,7 +39,7 @@ local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
 ---------Lobby----------
 LobbyTab:CreateButton({
-	Name = "📥 Gửi từng code + console",
+	Name = "✅ Redeem All Codes",
 	Callback = function()
 		local codes = {
 			"Release",
@@ -49,19 +49,26 @@ LobbyTab:CreateButton({
 			"1MVisits"
 		}
 
-		local ReplicatedStorage = game:GetService("ReplicatedStorage")
-		local eventFolder = ReplicatedStorage:WaitForChild("Event")
-		local codeRemote = eventFolder:WaitForChild("Codes")
+		local player = game:GetService("Players").LocalPlayer
+		local gui = player:WaitForChild("PlayerGui")
+		local window = gui:WaitForChild("Window")
+		local codeFrame = window:WaitForChild("Codes"):WaitForChild("Frame")
+		local enterBox = codeFrame:WaitForChild("code"):WaitForChild("entercode")
+		local redeemBtn = codeFrame:WaitForChild("redeem")
+
+		-- Mở GUI nếu cần
+		window.Codes.Visible = true
 
 		for _, code in ipairs(codes) do
-			print("🔄 Gửi code:", code)
-			codeRemote:FireServer(code)
-			task.wait(0.5)
+			enterBox.Text = code
+			redeemBtn:Activate()  -- click ảo
+			print("📨 Đã gửi code:", code)
+			task.wait(1.2)
 		end
 
 		Rayfield:Notify({
-			Title = "✅ Đã gửi tất cả code",
-			Content = "Check console để xác nhận.",
+			Title = "🎉 Hoàn tất!",
+			Content = "Tất cả code đã được gửi qua GUI gốc!",
 			Duration = 4
 		})
 	end
