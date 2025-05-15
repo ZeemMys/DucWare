@@ -72,7 +72,7 @@ LobbyTab:CreateButton({
                 })
             end
 
-            wait(1)
+            wait(2)
         end
     end,
 })
