@@ -115,3 +115,40 @@ LobbyTab:CreateButton({
         redeemNext()
     end
 })
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+GameTab:CreateButton({
+    Name = "Bay đánh quái (Auto)",
+    Callback = function()
+        local mobs = workspace:WaitForChild("Enemy"):GetChildren()
+
+        for _, mob in pairs(mobs) do
+            if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                -- Bay đến gần mob
+                HumanoidRootPart.CFrame = mob.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+                task.wait(0.5)
+
+                -- Giả lập đánh, nếu game có RemoteEvent để đánh thì thay thế ở đây
+                local attackRemote = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Attack")
+                if attackRemote then
+                    attackRemote:FireServer(mob)
+                else
+                    print("Không tìm thấy Remote để tấn công.")
+                end
+
+                -- Đợi 1 chút rồi chuyển sang quái khác
+                task.wait(1)
+            end
+        end
+
+        Rayfield:Notify({
+            Title = "✔️ Hoàn tất",
+            Content = "Đã tấn công toàn bộ quái khả dụng.",
+            Duration = 4
+        })
+    end
+})
