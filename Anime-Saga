@@ -42,28 +42,40 @@ LobbyTab:CreateButton({
 	Name = "📥 Redeem Code",
 	Callback = function()
 		local codes = {"Release", "SorryForDelay", "SorryForShutdown", "50KActive", "1MVisits"}
-		local codeRemote = ReplicatedStorage:WaitForChild("Event"):FindFirstChild("Codes")
+		local eventFolder = ReplicatedStorage:FindFirstChild("Event")
 
-		if codeRemote and codeRemote:IsA("RemoteEvent") then
-			for _, code in ipairs(codes) do
-				pcall(function()
-					codeRemote:FireServer(code)
-				end)
-				task.wait(0.3)
-			end
-
+		if not eventFolder then
 			Rayfield:Notify({
-				Title = "✅ Đã gửi code",
-				Content = "Các code đã được redeem thành công!",
-				Duration = 3
+				Title = "❌ Không tìm thấy 'Event'",
+				Content = "Thư mục 'Event' không có trong ReplicatedStorage!",
+				Duration = 4
 			})
-		else
-			Rayfield:Notify({
-				Title = "⚠️ Không tìm thấy RemoteEvent",
-				Content = "Không tìm thấy Event.Codes hoặc không phải RemoteEvent!",
-				Duration = 3
-			})
+			return
 		end
+
+		local codeRemote = eventFolder:FindFirstChild("Codes")
+
+		if not codeRemote or not codeRemote:IsA("RemoteEvent") then
+			Rayfield:Notify({
+				Title = "❌ Không tìm thấy 'Codes'",
+				Content = "'Codes' không phải là RemoteEvent hoặc không tồn tại.",
+				Duration = 4
+			})
+			return
+		end
+
+		for _, code in ipairs(codes) do
+			pcall(function()
+				codeRemote:FireServer(code)
+			end)
+			task.wait(0.3)
+		end
+
+		Rayfield:Notify({
+			Title = "✅ Hoàn tất",
+			Content = "Đã gửi tất cả code!",
+			Duration = 3
+		})
 	end
 })
 
