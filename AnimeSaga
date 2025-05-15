@@ -44,21 +44,21 @@ Rayfield:Notify({
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
 ------Lobby-------
-Rayfield:CreateButton({
+local LobbyTab = Window:CreateTab("Lobby", 4483362458)
+
+LobbyTab:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
+        -- Đây là phần mã đã thực hiện redeem mã.
         local codes = {"Release", "SorryForDelay", "SorryForShutdown"}
-        
+
         for _, code in ipairs(codes) do
             local success, err = pcall(function()
-                -- Thử gọi RedeemCode
-                print("Redeeming code: " .. code)  -- Thêm thông báo để kiểm tra
-                -- Kiểm tra xem RemoteFunction có đúng không
                 local remoteFunction = game.ReplicatedStorage:WaitForChild("MyRemoteFunction")
                 if remoteFunction then
                     remoteFunction:FireServer(code)
                 else
-                    error("RemoteFunction not found!")
+                    error("RemoteFunction không tìm thấy!")
                 end
             end)
 
@@ -71,12 +71,12 @@ Rayfield:CreateButton({
             else
                 Rayfield:Notify({
                     Title = "Lỗi",
-                    Content = "Không gửi được code: " .. code .. "\n" .. err,
+                    Content = "Không thể gửi code: " .. code .. "\n" .. err,
                     Duration = 3
                 })
             end
 
-            wait(1)
+            wait(1)  -- Đợi giữa các lần gửi code
         end
     end,
 })
