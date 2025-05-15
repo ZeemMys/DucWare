@@ -47,7 +47,7 @@ local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 LobbyTab:CreateButton({
     Name = "Redeem All Codes",
     Callback = function()
-        -- Debug thông báo để kiểm tra hàm callback có hoạt động hay không
+        -- Debug thông báo để kiểm tra xem callback có được gọi hay không
         print("Button clicked. Starting to redeem codes...")
 
         -- Kiểm tra module trước khi sử dụng
