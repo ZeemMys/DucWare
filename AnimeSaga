@@ -47,36 +47,40 @@ local function getHRP()
 	return char:FindFirstChild("HumanoidRootPart")
 end
 
-local function getMobs()
+local function getTargetMobs()
 	local enemyFolder = workspace:WaitForChild("Enemy"):WaitForChild("Mob")
 	local mobs = {}
 
 	for _, mob in ipairs(enemyFolder:GetChildren()) do
+		local name = mob.Name
 		local hrp = mob:FindFirstChild("HumanoidRootPart")
 		local hum = mob:FindFirstChild("Humanoid")
 		if hrp and hum and hum.Health > 0 then
-			table.insert(mobs, mob)
+			if name == "Mist Ninja" or name == "Sand Ninja" then
+				table.insert(mobs, mob)
+			end
 		end
 	end
 
 	return mobs
 end
 
-Game1Tab:CreateToggle({
-	Name = "Auto Farm Quái (Bay tới Mist Ninja)",
+GameTab:CreateToggle({
+	Name = "Auto Farm",
 	CurrentValue = false,
 	Callback = function(Value)
 		autoFarm = Value
 
 		Rayfield:Notify({
-			Title = autoFarm and "✅ Auto Farm BẬT" or "⛔ Đã TẮT",
-			Content = autoFarm and "Đang farm quái..." or "Đã dừng auto.",
-			Duration = 4
+			Title = autoFarm and "🟢 Auto Farm BẬT" or "🔴 Auto Farm TẮT",
+			Content = autoFarm and "Đang farm Mist/Sand Ninja..." or "Đã dừng.",
+			Duration = 3
 		})
 
 		task.spawn(function()
 			while autoFarm do
-				local mobs = getMobs()
+				local mobs = getTargetMobs()
+
 				if #mobs == 0 then
 					task.wait(1)
 				else
@@ -84,25 +88,32 @@ Game1Tab:CreateToggle({
 						if not autoFarm then break end
 
 						local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-						if mobHRP then
-							local hrp = getHRP()
-							if hrp then
-								-- Bay lên trên đầu quái
-								hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 5, 0)
+						local hrp = getHRP()
+
+						if mobHRP and hrp then
+							-- Bay đến gần đầu mob, cách 2.5 studs
+							local targetPos = mobHRP.Position + Vector3.new(0, 2.5, 0)
+							hrp.CFrame = CFrame.new(targetPos, mobHRP.Position)
+
+							-- Đợi một tí để hitbox nhân vật chạm
+							task.wait(0.2)
+
+							-- Fire tấn công
+							local atkRemote = ReplicatedStorage:FindFirstChild("Event") and ReplicatedStorage.Event:FindFirstChild("Attack")
+							if atkRemote then
+								atkRemote:FireServer(mob)
+							end
+
+							-- Đợi mob mất máu hoặc die mới tiếp tục
+							local timeout = 0
+							while mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 and timeout < 5 do
 								task.wait(0.3)
-
-								-- Tấn công nếu có Remote
-								local atkRemote = ReplicatedStorage:FindFirstChild("Event")
-								if atkRemote and atkRemote:FindFirstChild("Attack") then
-									atkRemote.Attack:FireServer(mob)
-								end
-
-								-- Đợi tấn công
-								task.wait(1)
+								timeout += 0.3
 							end
 						end
 					end
 				end
+
 				task.wait(0.5)
 			end
 		end)
