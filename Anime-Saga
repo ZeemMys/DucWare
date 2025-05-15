@@ -31,7 +31,7 @@ Rayfield:Notify({
     Title = "Enjoy",
     Content = "Have Fun :)",
     Duration = 5,
-    Image = "number"
+    Image = "0"
 })
 
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
