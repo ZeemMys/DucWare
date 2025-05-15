@@ -71,11 +71,11 @@ GameTab:CreateToggle({
                     foundMob = true  -- Có quái vật tồn tại
                     local mobHitbox = mob:FindFirstChild("HumanoidRootPart")
                     if mobHitbox then
-                        -- Di chuyển đến hitbox của mob
+                        -- Tính khoảng cách giữa nhân vật và quái vật
                         local targetPosition = mobHitbox.Position + Vector3.new(0, 5, 0) -- Tạo vị trí bay lên phía trên quái vật
                         local distance = (HumanoidRootPart.Position - targetPosition).magnitude
                         local moveTime = math.max(distance / 100, 1) -- Tính thời gian di chuyển dựa trên khoảng cách
-                        
+
                         -- Tạo tween di chuyển nhân vật đến quái vật
                         local TweenService = game:GetService("TweenService")
                         local goal = {CFrame = CFrame.new(targetPosition)}
