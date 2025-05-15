@@ -1,94 +1,77 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()  -- Load Rayfield Library
 
 local Window = Rayfield:CreateWindow({
-    Name = "DucWare — Anime Saga",
-    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-    LoadingTitle = "Wait a minute, the script is loading",
+    Name = "DucWare - Anime Saga",
+    Icon = 0, -- Icon in Topbar. Set to 0 for no icon.
+    LoadingTitle = "Loading Script...",
     LoadingSubtitle = "by DucWare",
-    Theme = "Amethyst",
- 
+    Theme = "Amethyst", -- Theme choice for Rayfield
     DisableRayfieldPrompts = false,
     DisableBuildWarnings = false,
- 
     ConfigurationSaving = {
-       Enabled = true,
-       FolderName = "DucWare", -- Create a custom folder for your hub/game
-       FileName = "DucWareZ"
-    },
- 
-    Discord = {
-       Enabled = true, -- Prompt the user to join your Discord server if their executor supports it
-       Invite = "PnHj485p", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
-       RememberJoins = false
-    },
- 
-    KeySystem = true, -- Set this to true to use our key system
-    KeySettings = {
-       Title = "Get Key",
-       Subtitle = "Key System",
-       Note = "Key: DucWare", -- Use this to tell the user how to get a key
-       FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
-       SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-       GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-       Key = {"DucWare"} -- List of keys that will be accepted by the system
+        Enabled = true,
+        FolderName = "DucWare",
+        FileName = "config"
     }
 })
 
-Rayfield:Notify({
-   Title = "Enjoy",
-   Content = "Have Fun :)",
-   Duration = 5,
-   Image = "number",
-})
-
+-- Tạo một Tab trong cửa sổ
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 
------- Lobby ------
+-- Tạo một Button trong Tab Lobby
 LobbyTab:CreateButton({
-    Name = "Redeem All Codes",
+    Name = "Redeem Code 'Release'",  -- Tên nút bấm
     Callback = function()
-        -- Kiểm tra RemoteEvent Codes trong ReplicatedStorage
+        -- Lấy sự kiện ReplicatedStorage để gửi mã code
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
-        
-        -- Đảm bảo CodesEvent đã được xác định
-        if not CodesEvent then
+
+        -- Gửi mã code "Release" tới server
+        local success, err = pcall(function()
+            CodesEvent:FireServer("Release")
+        end)
+
+        if success then
             Rayfield:Notify({
-                Title = "Lỗi",
-                Content = "Không tìm thấy RemoteEvent Codes.",
+                Title = "Code Redeemed",
+                Content = "Mã code 'Release' đã được nhập thành công.",
                 Duration = 3
             })
-            return
+        else
+            Rayfield:Notify({
+                Title = "Error",
+                Content = "Lỗi khi gửi mã code: " .. err,
+                Duration = 3
+            })
         end
-        
-        -- Danh sách các code cần redeem
-        local codeList = {"Release", "SorryForDelay", "SorryForShutdown"}
-        
-        -- Lặp qua từng code
-        for _, code in ipairs(codeList) do
-            local success, err = pcall(function()
-                -- Gửi code vào RemoteEvent
-                CodesEvent:FireServer(code)
-            end)
+    end
+})
 
-            -- Thông báo kết quả
-            if success then
-                Rayfield:Notify({
-                    Title = "Code Redeemed",
-                    Content = "Đã gửi code: " .. code,
-                    Duration = 3
-                })
-            else
-                -- In ra lỗi chi tiết trong console và thông báo cho người dùng
-                warn("[✘] Lỗi khi gửi code:", code, err)
-                Rayfield:Notify({
-                    Title = "Lỗi",
-                    Content = "Không gửi được code: " .. code .. "\n" .. tostring(err),
-                    Duration = 3
-                })
-            end
+-- Tạo thêm một button cho mã code khác
+LobbyTab:CreateButton({
+    Name = "Redeem Code 'SorryForDelay'",  -- Tên nút bấm
+    Callback = function()
+        -- Lấy sự kiện ReplicatedStorage để gửi mã code
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local CodesEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Codes")
 
-            wait(1)  -- Delay giữa các lần gửi code
+        -- Gửi mã code "SorryForDelay" tới server
+        local success, err = pcall(function()
+            CodesEvent:FireServer("SorryForDelay")
+        end)
+
+        if success then
+            Rayfield:Notify({
+                Title = "Code Redeemed",
+                Content = "Mã code 'SorryForDelay' đã được nhập thành công.",
+                Duration = 3
+            })
+        else
+            Rayfield:Notify({
+                Title = "Error",
+                Content = "Lỗi khi gửi mã code: " .. err,
+                Duration = 3
+            })
         end
-    end,
+    end
 })
