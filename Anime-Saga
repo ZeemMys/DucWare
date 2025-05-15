@@ -37,6 +37,43 @@ Rayfield:Notify({
 local LobbyTab = Window:CreateTab("Lobby", 4483362458)
 local Game1Tab = Window:CreateTab("Game-Map1", 4483362458)
 
+---------Lobby----------
+LobbyTab:CreateButton({
+	Name = "📥 Redeem Code",
+	Callback = function()
+		local codes = {"Release", "SorryForDelay", "SorryForShutdown", "50KActive", "1MVisits"}
+		local codeRemote = ReplicatedStorage:WaitForChild("Event"):FindFirstChild("Codes")
+
+		if codeRemote then
+			for _, code in ipairs(codes) do
+				pcall(function()
+					-- Nếu là RemoteFunction
+					if codeRemote:IsA("RemoteFunction") then
+						codeRemote:InvokeServer(code)
+					-- Nếu là RemoteEvent
+					elseif codeRemote:IsA("RemoteEvent") then
+						codeRemote:FireServer(code)
+					end
+				end)
+				task.wait(0.5)
+			end
+
+			Rayfield:Notify({
+				Title = "✅ Đã gửi code",
+				Content = "Các code đã được redeem!",
+				Duration = 3
+			})
+		else
+			Rayfield:Notify({
+				Title = "⚠️ Không tìm thấy Remote",
+				Content = "Không tìm thấy Event.Codes trong ReplicatedStorage!",
+				Duration = 3
+			})
+		end
+	end
+})
+
+-----------Tab farm 1----------------
 local autoFarm = false
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
