@@ -17,45 +17,42 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
-local Options = Fluent.Options
-
-Window:SelectTab(Tabs.Lobby)
-
 ------------- LOBBY TAB -------------
+-- Bắt đầu setup AutoSell trong tab Lobby
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local SellRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Sell")
+local SellEvent = ReplicatedStorage.Event.ItemIven.Sell
 
-local rarities = { "Rare", "Epic", "Legendary", "Mythical" }
-local SelectedRarities = {}
+-- Biến lưu giá trị
+local selectedRarity = nil
+local autoSellToggle = nil
 
-Tabs.Lobby:AddDropdown("RarityDropdown", {
-    Title = "Select Rarities to Auto Sell",
-    Values = rarities,
-    Multi = true,
-    Default = {},
-    Callback = function(selected)
-        SelectedRarities = selected
-        print("Selected rarities:", table.concat(SelectedRarities, ", "))
+-- Dropdown chọn độ hiếm
+Tabs.Lobby:AddDropdown("AutoSellDropdown", {
+    Title = "Chọn độ hiếm để Auto Sell",
+    Values = { "Rare", "Epic", "Legendary", "Mythical" },
+    Multi = false,
+    Default = "Rare",
+    Callback = function(value)
+        selectedRarity = value
+        print("[Dropdown] Đã chọn độ hiếm:", selectedRarity)
     end
 })
 
-Tabs.Lobby:AddToggle("AutoSellToggle", {
-    Title = "Auto Sell",
+-- Toggle bật/tắt auto sell
+autoSellToggle = Tabs.Lobby:AddToggle("AutoSellToggle", {
+    Title = "Bật Auto Sell",
     Default = false,
     Callback = function(isEnabled)
         if isEnabled then
-            if #SelectedRarities == 0 then
-                Fluent:Notify({
-                    Title = "Thông báo",
-                    Content = "Bạn chưa chọn độ hiếm nào để bán!",
-                    Duration = 4
-                })
-                return
+            print("[Toggle] Bật Auto Sell:", selectedRarity)
+            if selectedRarity then
+                SellEvent:FireServer(selectedRarity)
+                print("[FIRE] Đã gửi yêu cầu bán unit có độ hiếm:", selectedRarity)
+            else
+                warn("Bạn chưa chọn độ hiếm để auto sell!")
             end
-            print("Auto Sell Enabled:", table.concat(SelectedRarities, ", "))
-            SellRemote:FireServer(SelectedRarities)
         else
-            print("Auto Sell Disabled")
+            print("[Toggle] Tắt Auto Sell")
         end
     end
 })
