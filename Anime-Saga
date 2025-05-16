@@ -13,6 +13,6 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Lobby = Window:AddTab({ Title = "Lobby", Icon = "lucide-accessibility" }),
+    Lobby = Window:AddTab({ Title = "Lobby", Icon = "box" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
