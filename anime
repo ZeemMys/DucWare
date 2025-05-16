@@ -18,38 +18,48 @@ local Tabs = {
 }
 
 ------------- LOBBY TAB -------------
--- Bắt đầu setup AutoSell trong tab Lobby
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SellEvent = ReplicatedStorage.Event.ItemIven.Sell
 
--- Biến lưu giá trị
-local selectedRarity = nil
+-- Biến lưu lựa chọn
+local selectedRarities = {}  -- bảng chứa độ hiếm được chọn
 local autoSellToggle = nil
 
--- Dropdown chọn độ hiếm
+-- Hàm để kiểm tra có độ hiếm nào được chọn không
+local function hasSelectedRarities()
+    return next(selectedRarities) ~= nil
+end
+
+-- Dropdown chọn độ hiếm (cho phép chọn nhiều)
 Tabs.Lobby:AddDropdown("AutoSellDropdown", {
     Title = "Chọn độ hiếm để Auto Sell",
-    Values = { "Rare", "Epic", "Legendary", "Mythical" },
-    Multi = false,
-    Default = "Rare",
-    Callback = function(value)
-        selectedRarity = value
-        print("[Dropdown] Đã chọn độ hiếm:", selectedRarity)
+    Values = {"Rare", "Epic", "Legendary", "Mythical" },
+    Multi = true, -- Cho phép chọn nhiều
+    Default = {},
+    Callback = function(values)
+        -- Reset lại bảng chọn
+        selectedRarities = {}
+        for _, rarity in pairs(values) do
+            selectedRarities[rarity] = true
+        end
+        print("[Dropdown] Đã chọn các độ hiếm:", table.concat(values, ", "))
     end
 })
 
--- Toggle bật/tắt auto sell
+-- Toggle Auto Sell
 autoSellToggle = Tabs.Lobby:AddToggle("AutoSellToggle", {
-    Title = "Bật Auto Sell",
+    Title = "Auto Sell",
     Default = false,
-    Callback = function(isEnabled)
-        if isEnabled then
-            print("[Toggle] Bật Auto Sell:", selectedRarity)
-            if selectedRarity then
-                SellEvent:FireServer(selectedRarity)
-                print("[FIRE] Đã gửi yêu cầu bán unit có độ hiếm:", selectedRarity)
+    Callback = function(enabled)
+        if enabled then
+            if hasSelectedRarities() then
+                print("[Toggle] Bắt đầu Auto Sell với các độ hiếm:")
+                for rarity in pairs(selectedRarities) do
+                    print("- " .. rarity)
+                    SellEvent:FireServer(rarity)
+                end
             else
-                warn("Bạn chưa chọn độ hiếm để auto sell!")
+                warn("[Toggle] Bạn chưa chọn độ hiếm nào!")
             end
         else
             print("[Toggle] Tắt Auto Sell")
