@@ -74,76 +74,67 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
--- Auto Start
 local autoStart = false
+local autoFarm = false
+
 Tabs.Game:AddToggle("AutoStartToggle", {
     Title = "Auto Start",
     Default = false,
     Callback = function(state)
         autoStart = state
         if state then
-            Fluent:Notify({ Title = "Auto Start", Content = "✅ Bật Auto Start", Duration = 5 })
+            Fluent:Notify({ Title = "Auto Start", Content = "Đã bật!", Duration = 4 })
             task.spawn(function()
                 while autoStart do
                     local gui = PlayerGui:FindFirstChild("RoomUi")
-                    if gui then
-                        local btn = gui:FindFirstChild("Ready")
-                            and gui.Ready:FindFirstChild("Frame")
-                            and gui.Ready.Frame:FindFirstChild("StartButton")
-                        if btn and btn:IsA("ImageButton") and btn.Visible then
-                            pcall(function()
-                                firesignal(btn.MouseButton1Click)
-                            end)
-                        end
+                    local btn = gui and gui:FindFirstChild("Ready")
+                        and gui.Ready:FindFirstChild("Frame")
+                        and gui.Ready.Frame:FindFirstChild("StartButton")
+
+                    if btn and btn:IsA("ImageButton") and btn.Visible and btn.AutoButtonColor then
+                        pcall(function()
+                            firesignal(btn.MouseButton1Click)
+                        end)
                     end
                     task.wait(1.5)
                 end
             end)
         else
-            Fluent:Notify({ Title = "Auto Start", Content = "⛔ Tắt Auto Start", Duration = 5 })
+            Fluent:Notify({ Title = "Auto Start", Content = "Đã tắt!", Duration = 4 })
         end
     end
 })
 
--- Auto Farm (di chuyển sau quái + spam skill thường)
-local autoFarm = false
 Tabs.Game:AddToggle("AutoFarmToggle", {
     Title = "Auto Farm",
     Default = false,
     Callback = function(state)
         autoFarm = state
         if state then
-            Fluent:Notify({ Title = "Auto Farm", Content = "✅ Bật Auto Farm", Duration = 5 })
+            Fluent:Notify({ Title = "Auto Farm", Content = "Đã bật!", Duration = 4 })
             task.spawn(function()
                 while autoFarm do
-                    local mobsFolder = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
+                    local mobsFolder = workspace:FindFirstChild("Enemy")
+                        and workspace.Enemy:FindFirstChild("Mob")
+
                     if mobsFolder then
                         for _, mob in ipairs(mobsFolder:GetChildren()) do
-                            local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-                            local mobHum = mob:FindFirstChild("Humanoid")
-                            local char = LocalPlayer.Character
-                            local myHRP = char and char:FindFirstChild("HumanoidRootPart")
-
-                            if mobHRP and mobHum and mobHum.Health > 0 and myHRP then
-                                local behind = mobHRP.CFrame * CFrame.new(0, 0, -3)
-                                char:PivotTo(behind)
-
-                                -- Spam phím Z, X, C
-                                pcall(function()
-                                    keypress(0x5A) wait(0.05) keyrelease(0x5A) -- Z
-                                    keypress(0x58) wait(0.05) keyrelease(0x58) -- X
-                                    keypress(0x43) wait(0.05) keyrelease(0x43) -- C
-                                end)
-
-                                task.wait(0.25)
+                            if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") then
+                                if mob.Humanoid.Health > 0 then
+                                    local myChar = LocalPlayer.Character
+                                    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                                        myChar:PivotTo(mob.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3))
+                                    end
+                                    break -- tấn công 1 con 1 lần
+                                end
                             end
                         end
                     end
-                    task.wait(0.3)
+                    task.wait(0.4)
                 end
             end)
         else
-            Fluent:Notify({ Title = "Auto Farm", Content = "⛔ Tắt Auto Farm", Duration = 5 })
+            Fluent:Notify({ Title = "Auto Farm", Content = "Đã tắt!", Duration = 4 })
         end
     end
 })
