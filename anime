@@ -12,12 +12,12 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
-local Options = Fluent.Options
-
 local Tabs = {
     Lobby = Window:AddTab({ Title = "Lobby", Icon = "box" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
+
+local Options = Fluent.Options
 
 Window:SelectTab(Tabs.Lobby)
 
