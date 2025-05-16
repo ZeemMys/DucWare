@@ -30,9 +30,16 @@ local SellEvent = ReplicatedStorage:WaitForChild("Event")
     :WaitForChild("ItemIven")
     :WaitForChild("Sell")
 
+-- Đảm bảo đúng loại
+if not SellEvent:IsA("RemoteEvent") then
+    warn("❌ SellEvent không phải RemoteEvent!")
+    return
+end
+
 -- Biến lưu lựa chọn
 local selectedRarities = {}
 local autoSellToggle = nil
+local autoSellRunning = false  -- để kiểm soát vòng lặp nếu cần
 
 -- Hàm kiểm tra đã chọn độ hiếm
 local function hasSelectedRarities()
@@ -59,13 +66,20 @@ autoSellToggle = Tabs.Lobby:AddToggle("AutoSellToggle", {
     Title = "Auto Sell",
     Default = false,
     Callback = function(enabled)
+        autoSellRunning = enabled
         if enabled then
             if hasSelectedRarities() then
                 print("[Toggle] Bắt đầu Auto Sell:")
-                for rarity in pairs(selectedRarities) do
-                    print("- " .. rarity)
-                    SellEvent:FireServer(rarity)
-                end
+                -- Bắt đầu vòng lặp auto sell
+                task.spawn(function()
+                    while autoSellRunning do
+                        for rarity in pairs(selectedRarities) do
+                            print("- Bán:", tostring(rarity))
+                            SellEvent:FireServer(rarity)
+                        end
+                        task.wait(2) -- đợi 2s mỗi lần lặp
+                    end
+                end)
             else
                 warn("[Toggle] Vui lòng chọn độ hiếm!")
             end
