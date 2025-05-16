@@ -25,29 +25,13 @@ Fluent:Notify({
 })
 
 ------------- LOBBY TAB -------------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local SellEvent = ReplicatedStorage:WaitForChild("Event")
-    :WaitForChild("ItemIven")
-    :WaitForChild("Sell")
-
--- Đảm bảo đúng loại
-if not SellEvent:IsA("RemoteEvent") then
-    warn("❌ SellEvent không phải RemoteEvent!")
-    return
-end
-
--- Biến lưu lựa chọn
+-- Biến lưu lựa chọn độ hiếm
 local selectedRarities = {}
 local autoSellToggle = nil
-local autoSellRunning = false  -- để kiểm soát vòng lặp nếu cần
-
--- Hàm kiểm tra đã chọn độ hiếm
-local function hasSelectedRarities()
-    return next(selectedRarities) ~= nil
-end
+local autoSellRunning = false
 
 -- Dropdown chọn độ hiếm
-Tabs.Lobby:AddDropdown("AutoSellDropdown", {
+Tabs.Lobby:AddDropdown("RarityDropdown", {
     Title = "Chọn độ hiếm để Auto Sell",
     Values = {"Rare", "Epic", "Legendary", "Mythical"},
     Multi = true,
@@ -57,34 +41,49 @@ Tabs.Lobby:AddDropdown("AutoSellDropdown", {
         for _, rarity in pairs(values) do
             selectedRarities[rarity] = true
         end
-        print("[Dropdown] Đã chọn độ hiếm:", table.concat(values, ", "))
+        print("[Dropdown] Bạn đã chọn:", table.concat(values, ", "))
     end
 })
 
 -- Toggle Auto Sell
-autoSellToggle = Tabs.Lobby:AddToggle("AutoSellToggle", {
+Tabs.Lobby:AddToggle("AutoSellToggle", {
     Title = "Auto Sell",
     Default = false,
-    Callback = function(enabled)
-        autoSellRunning = enabled
-        if enabled then
-            if hasSelectedRarities() then
-                print("[Toggle] Bắt đầu Auto Sell:")
-                -- Bắt đầu vòng lặp auto sell
-                task.spawn(function()
-                    while autoSellRunning do
-                        for rarity in pairs(selectedRarities) do
-                            print("- Bán:", tostring(rarity))
-                            SellEvent:FireServer(rarity)
-                        end
-                        task.wait(2) -- đợi 2s mỗi lần lặp
-                    end
-                end)
-            else
-                warn("[Toggle] Vui lòng chọn độ hiếm!")
+    Callback = function(state)
+        autoSellRunning = state
+        if state then
+            if next(selectedRarities) == nil then
+                warn("[Auto Sell] ❌ Bạn chưa chọn độ hiếm nào!")
+                Fluent:Notify({
+                    Title = "Auto Sell",
+                    Content = "❌ Vui lòng chọn ít nhất 1 độ hiếm!",
+                    Duration = 5
+                })
+                return
             end
+
+            Fluent:Notify({
+                Title = "Auto Sell",
+                Content = "✅ Đã bật Auto Sell!",
+                Duration = 5
+            })
+
+            -- Bắt đầu vòng lặp Auto Sell
+            task.spawn(function()
+                while autoSellRunning do
+                    for rarity in pairs(selectedRarities) do
+                        print("[AutoSell] Bán:", rarity)
+                        SellEvent:FireServer(rarity)
+                    end
+                    task.wait(2) -- Đợi 2 giây trước khi bán tiếp
+                end
+            end)
         else
-            print("[Toggle] Đã tắt Auto Sell")
+            Fluent:Notify({
+                Title = "Auto Sell",
+                Content = "⛔ Đã tắt Auto Sell!",
+                Duration = 4
+            })
         end
     end
 })
