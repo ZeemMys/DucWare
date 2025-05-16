@@ -97,63 +97,68 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local HitRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("HitScreen")
+local HRP = Character:WaitForChild("HumanoidRootPart")
+local HitRemote = ReplicatedStorage.Event:WaitForChild("HitScreen")
 
 local attacking = false
+local radius = 8
+local height = 7
+local speed = 7
 
-Tabs.Game:AddToggle("AutoAttack", {
-    Title = "Tự Động Đánh Quái",
+Tabs.Game:AddToggle("AutoFarmFixed", {
+    Title = "🔥 Auto Attack",
     Default = false,
     Callback = function(state)
         attacking = state
 
         if attacking then
             Fluent:Notify({
-                Title = "Tấn Công",
-                Content = "🚀 Bắt đầu tấn công quái",
-                Duration = 5
+                Title = "Auto Attack",
+                Content = "🔥 Đã bật AutoFarm FIX",
+                Duration = 4
             })
 
             task.spawn(function()
                 while attacking do
-                    local closestMob = nil
-                    local shortestDistance = math.huge
+                    local mobs = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
+                    if not mobs then task.wait(0.2) continue end
 
-                    for _, mob in pairs(workspace.Enemy.Mob:GetChildren()) do
-                        if mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
-                            local distance = (HumanoidRootPart.Position - mob.HumanoidRootPart.Position).Magnitude
-                            if distance < shortestDistance then
-                                shortestDistance = distance
+                    local closestMob = nil
+                    local shortest = math.huge
+
+                    for _, mob in ipairs(mobs:GetChildren()) do
+                        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                        if mob:IsA("Model") and mobHRP and mob:FindFirstChildOfClass("Humanoid") and mob.Humanoid.Health > 0 then
+                            local dist = (HRP.Position - mobHRP.Position).Magnitude
+                            if dist < shortest then
+                                shortest = dist
                                 closestMob = mob
                             end
                         end
                     end
 
                     if closestMob then
-                        -- Di chuyển quanh mob
-                        local angle = tick() * 3
-                        local offset = Vector3.new(math.cos(angle) * 4, 0, math.sin(angle) * 4)
-                        local targetPos = closestMob.HumanoidRootPart.Position + offset
-                        HumanoidRootPart.CFrame = CFrame.new(targetPos, closestMob.HumanoidRootPart.Position)
+                        local mobHRP = closestMob.HumanoidRootPart
+                        local t = tick() * speed
+                        local offset = Vector3.new(math.cos(t) * radius, height, math.sin(t) * radius)
+                        HRP.CFrame = CFrame.new(mobHRP.Position + offset, mobHRP.Position)
 
-                        -- Gửi remote đánh cực nhanh
+                        -- Đấm cực nhanh
                         pcall(function()
                             HitRemote:FireServer()
                         end)
                     end
 
-                    task.wait(0.1) -- delay rất nhỏ để spam
+                    task.wait(0.05)
                 end
             end)
         else
             Fluent:Notify({
-                Title = "Tấn Công",
-                Content = "⛔ Dừng tấn công",
+                Title = "Auto Attack",
+                Content = "⛔ Đã tắt AutoFarm",
                 Duration = 4
             })
         end
