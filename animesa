@@ -94,9 +94,10 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 -------------Play Tab-------------
+-- GAME TAB: Auto Attack Monsters
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -104,59 +105,58 @@ local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
 local attacking = false
 
-Tabs.Game:AddToggle("AutoFarm", {
-    Title = "Auto Attack (Vòng quanh)",
+Tabs.Game:AddToggle("AutoAttackToggle", {
+    Title = "Auto Attack (Mob)",
     Default = false,
     Callback = function(state)
         attacking = state
 
-        if attacking then
+        if state then
             Fluent:Notify({
                 Title = "Auto Attack",
-                Content = "✅ Đã bật!",
+                Content = "✅ Đã bật Auto Attack!",
                 Duration = 4
             })
 
             task.spawn(function()
-                while attacking and Character and Character:FindFirstChild("HumanoidRootPart") do
+                while attacking do
                     local mobsFolder = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
                     if mobsFolder then
-                        for _, mob in pairs(mobsFolder:GetChildren()) do
-                            if not mob:IsA("Model") or not mob:FindFirstChild("HumanoidRootPart") then continue end
+                        for _, mob in ipairs(mobsFolder:GetChildren()) do
+                            if not attacking then break end
+                            if mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
+                                local mobHRP = mob.HumanoidRootPart
+                                
+                                -- Di chuyển vòng tròn quanh mob
+                                for angle = 0, 360, 45 do
+                                    if not attacking then break end
+                                    local radius = 6
+                                    local radians = math.rad(angle)
+                                    local offset = Vector3.new(math.cos(radians) * radius, 0, math.sin(radians) * radius)
+                                    local targetPos = mobHRP.Position + offset
 
-                            local mobHRP = mob.HumanoidRootPart
+                                    local tween = TweenService:Create(HumanoidRootPart, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
+                                        CFrame = CFrame.new(targetPos, mobHRP.Position)
+                                    })
+                                    tween:Play()
+                                    tween.Completed:Wait()
 
-                            -- Di chuyển xung quanh quái
-                            for angle = 0, 360, 30 do
-                                if not attacking then break end
-                                local radians = math.rad(angle)
-                                local offset = Vector3.new(math.cos(radians), 0, math.sin(radians)) * 5
-                                local targetPos = mobHRP.Position + offset + Vector3.new(0, 1, 0)
-
-                                TweenService:Create(HumanoidRootPart, TweenInfo.new(0.2), {
-                                    CFrame = CFrame.new(targetPos, mobHRP.Position)
-                                }):Play()
-
-                                -- Gửi remote attack nếu có
-                                if ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Attack") then
-                                    pcall(function()
-                                        ReplicatedStorage.Remote.Attack:FireServer(mob)
-                                    end)
+                                    -- Click đánh
+                                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+                                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+                                    task.wait(0.05) -- delay nhẹ để không bị disconnect
                                 end
-
-                                task.wait(0.2)
                             end
                         end
                     end
-
-                    task.wait(0.5)
+                    task.wait(0.1)
                 end
             end)
         else
             Fluent:Notify({
                 Title = "Auto Attack",
-                Content = "⛔ Đã tắt!",
-                Duration = 4
+                Content = "⛔ Đã tắt Auto Attack!",
+                Duration = 3
             })
         end
     end
