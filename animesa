@@ -93,69 +93,86 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
     end
 })
 
--------------Play Tab-------------
--- GAME TAB: Auto Attack Monsters
+-------------GAME TAB-------------
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local HRP = Character:WaitForChild("HumanoidRootPart")
 
 local attacking = false
+local radius = 7
+local speed = 6
 
-Tabs.Game:AddToggle("AutoAttackToggle", {
-    Title = "Auto Attack (Mob)",
+-- Hàm tìm quái gần nhất
+local function getClosestMob()
+    local closest, dist = nil, math.huge
+    for _, mob in pairs(workspace:WaitForChild("Enemy"):WaitForChild("Mob"):GetChildren()) do
+        if mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
+            local d = (mob.HumanoidRootPart.Position - HRP.Position).Magnitude
+            if d < dist then
+                closest = mob
+                dist = d
+            end
+        end
+    end
+    return closest
+end
+
+-- Hàm tấn công cực nhanh (giả lập click)
+local function attack()
+    local tool = Character:FindFirstChildOfClass("Tool")
+    if tool and tool:FindFirstChild("RemoteEvent") then
+        pcall(function()
+            tool.RemoteEvent:FireServer()
+        end)
+    elseif tool and tool:FindFirstChild("Click") then
+        pcall(function()
+            tool.Click:FireServer()
+        end)
+    elseif tool and tool:FindFirstChild("MouseClick") then
+        pcall(function()
+            tool:Activate()
+        end)
+    end
+end
+
+-- Toggle tấn công
+Tabs.Game:AddToggle("AutoFarm", {
+    Title = "Auto Attack (Vòng quanh quái)",
     Default = false,
     Callback = function(state)
         attacking = state
-
-        if state then
+        if attacking then
             Fluent:Notify({
                 Title = "Auto Attack",
-                Content = "✅ Đã bật Auto Attack!",
+                Content = "✅ Đang tấn công quái!",
                 Duration = 4
             })
 
             task.spawn(function()
                 while attacking do
-                    local mobsFolder = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
-                    if mobsFolder then
-                        for _, mob in ipairs(mobsFolder:GetChildren()) do
+                    local mob = getClosestMob()
+                    if mob and mob:FindFirstChild("HumanoidRootPart") then
+                        for theta = 0, 360, 20 do
                             if not attacking then break end
-                            if mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
-                                local mobHRP = mob.HumanoidRootPart
-                                
-                                -- Di chuyển vòng tròn quanh mob
-                                for angle = 0, 360, 45 do
-                                    if not attacking then break end
-                                    local radius = 6
-                                    local radians = math.rad(angle)
-                                    local offset = Vector3.new(math.cos(radians) * radius, 0, math.sin(radians) * radius)
-                                    local targetPos = mobHRP.Position + offset
+                            local angle = math.rad(theta)
+                            local offset = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+                            local targetPos = mob.HumanoidRootPart.Position + offset + Vector3.new(0, 1.5, 0)
+                            HRP.CFrame = CFrame.new(targetPos, mob.HumanoidRootPart.Position)
 
-                                    local tween = TweenService:Create(HumanoidRootPart, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
-                                        CFrame = CFrame.new(targetPos, mobHRP.Position)
-                                    })
-                                    tween:Play()
-                                    tween.Completed:Wait()
-
-                                    -- Click đánh
-                                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-                                    task.wait(0.05) -- delay nhẹ để không bị disconnect
-                                end
-                            end
+                            attack()
+                            task.wait(0.03) -- spam rất nhanh
                         end
+                    else
+                        task.wait(0.5)
                     end
-                    task.wait(0.1)
                 end
             end)
         else
             Fluent:Notify({
                 Title = "Auto Attack",
-                Content = "⛔ Đã tắt Auto Attack!",
+                Content = "⛔ Đã tắt auto!",
                 Duration = 3
             })
         end
