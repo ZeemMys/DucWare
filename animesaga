@@ -1,7 +1,14 @@
+-- ⚠️ Khởi tạo thư viện Fluent GUI
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
+-- ✅ Luôn đợi GUI player có sẵn
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- ✅ Tạo cửa sổ GUI
 local Window = Fluent:CreateWindow({
     Title = "DucWare",
     SubTitle = "by Duck (Thanks To Fluent GUI)",
@@ -14,35 +21,25 @@ local Window = Fluent:CreateWindow({
 
 local Tabs = {
     Lobby = Window:AddTab({ Title = "Lobby", Icon = "box" }),
-    Game = Window:AddTab({ Title = "Game", Icon = "box" }),
+    Game = Window:AddTab({ Title = "Game", Icon = "swords" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
 Fluent:Notify({
     Title = "Chào mừng",
-    Content = "AnimeSaga Script Release",
-    SubContent = "Try It And LOVE It", -- Optional
-    Duration = 7 -- Set to nil to make the notification not disappear
+    Content = "AnimeSaga Script ĐÃ CHẠY",
+    Duration = 6
 })
 
-------------- LOBBY TAB -------------
+------------------ LOBBY --------------------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
--- Kiểm tra RemoteEvent Sell
 local SellEvent = ReplicatedStorage:FindFirstChild("Event")
     and ReplicatedStorage.Event:FindFirstChild("ItemIven")
     and ReplicatedStorage.Event.ItemIven:FindFirstChild("Sell")
 
-if not SellEvent or not SellEvent:IsA("RemoteEvent") then
-    warn("❌ Không tìm thấy hoặc không đúng kiểu RemoteEvent: Sell")
-    return
-end
-
--- Trạng thái lựa chọn và chạy
 local selectedRarities = {}
 local autoSellRunning = false
 
--- Dropdown chọn độ hiếm
 Tabs.Lobby:AddDropdown("RarityDropdown", {
     Title = "Chọn độ hiếm để Auto Sell",
     Values = {"Rare", "Epic", "Legendary", "Mythic"},
@@ -53,75 +50,57 @@ Tabs.Lobby:AddDropdown("RarityDropdown", {
         for _, rarity in ipairs(values) do
             selectedRarities[rarity] = true
         end
-        print("[Dropdown] Đã chọn:", table.concat(values, ", "))
     end
 })
 
--- Toggle Auto Sell
 Tabs.Lobby:AddToggle("AutoSellToggle", {
     Title = "Auto Sell",
     Default = false,
     Callback = function(state)
         autoSellRunning = state
-
         if state then
-            Fluent:Notify({
-                Title = "Auto Sell",
-                Content = "✅ Đã bật Auto Sell!",
-                Duration = 4
-            })
-
-            -- Vòng lặp Auto Sell
             task.spawn(function()
                 while autoSellRunning do
                     for rarity in pairs(selectedRarities) do
-                        print("[AutoSell] Bán:", rarity)
-                        pcall(function()
-                            SellEvent:FireServer(rarity)
-                        end)
+                        if SellEvent then
+                            pcall(function()
+                                SellEvent:FireServer(rarity)
+                            end)
+                        end
                     end
                     task.wait(2)
                 end
             end)
-        else
-            Fluent:Notify({
-                Title = "Auto Sell",
-                Content = "⛔ Đã tắt Auto Sell!",
-                Duration = 4
-            })
         end
     end
 })
 
--------------GAME TAB-------------
+------------------ GAME TAB --------------------
+
+local autoStart = false
+local autoFarm = false
+
 Tabs.Game:AddToggle("AutoStartToggle", {
     Title = "Auto Start",
     Default = false,
     Callback = function(state)
         autoStart = state
-        if autoStart then
-            Fluent:Notify({ Title = "Auto Start", Content = "Đã bật Auto Start!", Duration = 4 })
+        if state then
             task.spawn(function()
-                local player = game:GetService("Players").LocalPlayer
                 while autoStart do
-                    local gui = player:FindFirstChild("PlayerGui")
-                    if gui then
-                        local btn = gui:FindFirstChild("RoomUi")
-                            and gui.RoomUi:FindFirstChild("Ready")
-                            and gui.RoomUi.Ready:FindFirstChild("Frame")
-                            and gui.RoomUi.Ready.Frame:FindFirstChild("StartButton")
+                    local btn = PlayerGui:FindFirstChild("RoomUi")
+                        and PlayerGui.RoomUi:FindFirstChild("Ready")
+                        and PlayerGui.RoomUi.Ready:FindFirstChild("Frame")
+                        and PlayerGui.RoomUi.Ready.Frame:FindFirstChild("StartButton")
 
-                        if btn and btn:IsA("ImageButton") and btn.Visible and btn.AutoButtonColor then
-                            pcall(function()
-                                firesignal(btn.MouseButton1Click)
-                            end)
-                        end
+                    if btn and btn:IsA("ImageButton") and btn.Visible and btn.AutoButtonColor then
+                        pcall(function()
+                            firesignal(btn.MouseButton1Click)
+                        end)
                     end
-                    task.wait(1)
+                    task.wait(2)
                 end
             end)
-        else
-            Fluent:Notify({ Title = "Auto Start", Content = "Đã tắt Auto Start!", Duration = 4 })
         end
     end
 })
@@ -131,30 +110,24 @@ Tabs.Game:AddToggle("AutoFarmToggle", {
     Default = false,
     Callback = function(state)
         autoFarm = state
-        if autoFarm then
-            Fluent:Notify({ Title = "Auto Farm", Content = "Đã bật Auto Farm!", Duration = 4 })
+        if state then
             task.spawn(function()
-                local player = game:GetService("Players").LocalPlayer
                 while autoFarm do
-                    local myChar = player.Character
                     local mobsFolder = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
+                    local myChar = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+                    local myHRP = myChar:WaitForChild("HumanoidRootPart", 5)
 
-                    if myChar and myChar:FindFirstChild("HumanoidRootPart") and mobsFolder then
+                    if mobsFolder and myHRP then
                         for _, mob in ipairs(mobsFolder:GetChildren()) do
-                            if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                                local mobHRP = mob.HumanoidRootPart
-                                local myHRP = myChar.HumanoidRootPart
+                            local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                            local hum = mob:FindFirstChild("Humanoid")
+                            if mobHRP and hum and hum.Health > 0 then
+                                myChar:PivotTo(mobHRP.CFrame * CFrame.new(0, 0, -3))
 
-                                -- Dịch chuyển ra sau quái
-                                local behind = mobHRP.CFrame * CFrame.new(0, 0, -3)
-                                myChar:PivotTo(behind)
-
-                                -- Gửi input phím Z/X/C
-                                task.spawn(function()
-                                    keypress(0x5A) wait(0.05) keyrelease(0x5A) -- Z
-                                    keypress(0x58) wait(0.05) keyrelease(0x58) -- X
-                                    keypress(0x43) wait(0.05) keyrelease(0x43) -- C
-                                end)
+                                -- Skill spam (Z, X, C)
+                                keypress(0x5A) wait(0.05) keyrelease(0x5A)
+                                keypress(0x58) wait(0.05) keyrelease(0x58)
+                                keypress(0x43) wait(0.05) keyrelease(0x43)
 
                                 task.wait(0.3)
                             end
@@ -164,62 +137,29 @@ Tabs.Game:AddToggle("AutoFarmToggle", {
                     task.wait(0.4)
                 end
             end)
-        else
-            Fluent:Notify({ Title = "Auto Farm", Content = "Đã tắt Auto Farm!", Duration = 4 })
         end
     end
 })
 
-------------- SETTINGS TAB -------------
+---------------- SETTINGS -----------------
 
-local Colorpicker = Tabs.Settings:AddColorpicker("Colorpicker", {
-    Title = "Colorpicker",
-    Default = Color3.fromRGB(96, 205, 255)
-})
-Colorpicker:OnChanged(function()
-    print("Colorpicker changed:", Colorpicker.Value)
-end)
-Colorpicker:SetValueRGB(Color3.fromRGB(0, 255, 140))
-
-local TColorpicker = Tabs.Settings:AddColorpicker("TransparencyColorpicker", {
-    Title = "Colorpicker (Transparent)",
-    Description = "Can change transparency.",
-    Transparency = 0,
-    Default = Color3.fromRGB(96, 205, 255)
-})
-TColorpicker:OnChanged(function()
-    print("TColorpicker changed:", TColorpicker.Value, "Transparency:", TColorpicker.Transparency)
-end)
-
--- Hand the library over to our managers
-SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
+SaveManager:SetLibrary(Fluent)
 
--- Ignore keys that are used by ThemeManager.
--- (we dont want configs to save themes, do we?)
 SaveManager:IgnoreThemeSettings()
-
--- You can add indexes of elements the save manager should ignore
 SaveManager:SetIgnoreIndexes({})
-
--- use case for doing it this way:
--- a script hub could have themes in a global folder
--- and game configs in a separate folder per game
 InterfaceManager:SetFolder("FluentScriptHub")
-SaveManager:SetFolder("FluentScriptHub/specific-game")
+SaveManager:SetFolder("FluentScriptHub/AnimeSaga")
 
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
 
-
 Window:SelectTab(1)
 
 Fluent:Notify({
-    Title = "DucWare",
-    Content = "The script has been loaded.",
-    Duration = 8
+    Title = "✅ DucWare đã chạy",
+    Content = "Mọi chức năng đã load xong!",
+    Duration = 6
 })
 
--- You can use the SaveManager:LoadAutoloadConfig() to load a config
--- which has been marked to be one that auto loads!
 SaveManager:LoadAutoloadConfig()
