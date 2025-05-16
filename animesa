@@ -138,75 +138,23 @@ Tabs.Game:AddToggle("AutoStartToggle", {
     end
 })
 
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+-- Tập trung tab Game trong Fluent UI local Players = game:GetService("Players") local ReplicatedStorage = game:GetService("ReplicatedStorage") local TweenService = game:GetService("TweenService") local RunService = game:GetService("RunService")
 
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HRP = Character:WaitForChild("HumanoidRootPart")
-local HitRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("HitScreen")
+local LocalPlayer = Players.LocalPlayer local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait() local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-local attacking = false
+local autoFarm = false local autoStart = false
 
--- Hàm tìm mob gần nhất
-local function getClosestMob()
-    local closest, dist = nil, math.huge
-    for _, mob in pairs(workspace:WaitForChild("Enemy"):WaitForChild("Mob"):GetChildren()) do
-        if mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
-            local d = (mob.HumanoidRootPart.Position - HRP.Position).Magnitude
-            if d < dist then
-                closest = mob
-                dist = d
-            end
-        end
-    end
-    return closest
-end
+-- Thêm Toggle vào tab Game Tabs.Game:AddToggle("AutoFarmToggle", { Title = "✅ Auto Farm", Default = false, Callback = function(state) autoFarm = state if autoFarm then Fluent:Notify({ Title = "Auto Farm", Content = "Đã bật Auto Farm!", Duration = 4 }) task.spawn(function() while autoFarm do local mobs = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob") if mobs then for _, mob in ipairs(mobs:GetChildren()) do if mob:FindFirstChild("HumanoidRootPart") then local mobHRP = mob.HumanoidRootPart
 
-Tabs.Game:AddToggle("AutoAttack", {
-    Title = "Auto Đánh Quái",
-    Default = false,
-    Callback = function(state)
-        attacking = state
+-- Teleport ra sau quái
+                            local behindPosition = mobHRP.Position - (mobHRP.CFrame.LookVector * 3)
+                            HumanoidRootPart.CFrame = CFrame.new(behindPosition, mobHRP.Position)
 
-        if state then
-            Fluent:Notify({
-                Title = "Auto Attack",
-                Content = "✅ Đã bật đánh quái!",
-                Duration = 4
-            })
-
-            task.spawn(function()
-                while attacking do
-                    local mob = getClosestMob()
-                    if mob and mob:FindFirstChild("HumanoidRootPart") then
-                        local mobPos = mob.HumanoidRootPart.Position
-                        local t = tick() * 2 -- tốc độ bay
-                        local radius = 10 -- giữ khoảng cách tránh bị vả
-                        local offset = Vector3.new(math.cos(t), 0, math.sin(t)) * radius
-                        local flyPos = mobPos + offset + Vector3.new(0, 3, 0)
-
-                        HRP.CFrame = CFrame.new(flyPos, mobPos)
-
-                        -- Gửi remote đánh
-                        pcall(function()
-                            HitRemote:FireServer()
-                        end)
-                    end
-                    task.wait(0.05)
-                end
-            end)
-        else
-            Fluent:Notify({
-                Title = "Auto Attack",
-                Content = "⛔ Tắt đánh quái.",
-                Duration = 3
-            })
-        end
-    end
-})
-
+                            -- Gửi remote tấn công (giả lập keypress hoặc tìm Remote nếu có)
+                            -- Giả lập nhấn chuột trái (nếu không có remote rõ ràng)
+                            mouse1press()
+                            wait(0.05)
+                            mouse1release() 
 ------------- SETTINGS TAB -------------
 
 local Colorpicker = Tabs.Settings:AddColorpicker("Colorpicker", {
