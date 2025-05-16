@@ -14,7 +14,7 @@ local Window = Fluent:CreateWindow({
 
 local Tabs = {
     Lobby = Window:AddTab({ Title = "Lobby", Icon = "box" }),
-    Game = Window:AddTab({ Title = "Game", Icon = "settings" }),
+    Game = Window:AddTab({ Title = "Game", Icon = "box" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
@@ -138,20 +138,17 @@ Tabs.Game:AddToggle("AutoStartToggle", {
     end
 })
 
--- Tập trung tab Game trong Fluent UI local Players = game:GetService("Players") local ReplicatedStorage = game:GetService("ReplicatedStorage") local TweenService = game:GetService("TweenService") local RunService = game:GetService("RunService")
+local Players = game:GetService("Players") local ReplicatedStorage = game:GetService("ReplicatedStorage") local TweenService = game:GetService("TweenService") local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait() local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
 local autoFarm = false local autoStart = false
 
--- Thêm Toggle vào tab Game Tabs.Game:AddToggle("AutoFarmToggle", { Title = "✅ Auto Farm", Default = false, Callback = function(state) autoFarm = state if autoFarm then Fluent:Notify({ Title = "Auto Farm", Content = "Đã bật Auto Farm!", Duration = 4 }) task.spawn(function() while autoFarm do local mobs = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob") if mobs then for _, mob in ipairs(mobs:GetChildren()) do if mob:FindFirstChild("HumanoidRootPart") then local mobHRP = mob.HumanoidRootPart
+Tabs.Game:AddToggle("AutoFarmToggle", { Title = "✅ Auto Farm", Default = false, Callback = function(state) autoFarm = state if autoFarm then Fluent:Notify({ Title = "Auto Farm", Content = "Đã bật Auto Farm!", Duration = 4 }) task.spawn(function() while autoFarm do local mobs = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob") if mobs then for _, mob in ipairs(mobs:GetChildren()) do if mob:FindFirstChild("HumanoidRootPart") then local mobHRP = mob.HumanoidRootPart
 
--- Teleport ra sau quái
                             local behindPosition = mobHRP.Position - (mobHRP.CFrame.LookVector * 3)
                             HumanoidRootPart.CFrame = CFrame.new(behindPosition, mobHRP.Position)
 
-                            -- Gửi remote tấn công (giả lập keypress hoặc tìm Remote nếu có)
-                            -- Giả lập nhấn chuột trái (nếu không có remote rõ ràng)
                             mouse1press()
                             wait(0.05)
                             mouse1release() 
