@@ -94,6 +94,77 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 -------------GAME TAB-------------
+-- Sử dụng LocalPlayer.PlayerGui thay vì StarterGui
+Tabs.Game:AddToggle("AutoStartToggle", {
+    Title = "Auto Start",
+    Default = false,
+    Callback = function(state)
+        autoStart = state
+        if autoStart then
+            Fluent:Notify({ Title = "Auto Start", Content = "Đã bật Auto Start!", Duration = 4 })
+            task.spawn(function()
+                while autoStart do
+                    local gui = Players.LocalPlayer:FindFirstChild("PlayerGui")
+                    local btn = gui
+                        and gui:FindFirstChild("RoomUi")
+                        and gui.RoomUi:FindFirstChild("Ready")
+                        and gui.RoomUi.Ready:FindFirstChild("Frame")
+                        and gui.RoomUi.Ready.Frame:FindFirstChild("StartButton")
+
+                    if btn and btn:IsA("ImageButton") and btn.Visible and btn.AutoButtonColor then
+                        pcall(function()
+                            firesignal(btn.MouseButton1Click)
+                        end)
+                    end
+                    wait(2)
+                end
+            end)
+        else
+            Fluent:Notify({ Title = "Auto Start", Content = "Đã tắt Auto Start!", Duration = 4 })
+        end
+    end
+})
+
+-- Tấn công bằng spam phím Z, X, C + di chuyển quanh quái
+Tabs.Game:AddToggle("AutoFarmToggle", {
+    Title = "Auto Farm",
+    Default = false,
+    Callback = function(state)
+        autoFarm = state
+        if autoFarm then
+            Fluent:Notify({ Title = "Auto Farm", Content = "Đã bật Auto Farm!", Duration = 4 })
+            task.spawn(function()
+                while autoFarm do
+                    local mobs = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
+                    if mobs then
+                        for _, mob in ipairs(mobs:GetChildren()) do
+                            if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                local mobHRP = mob.HumanoidRootPart
+                                local myChar = LocalPlayer.Character
+                                if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                                    -- Di chuyển ra sau quái nhanh hơn
+                                    local behind = mobHRP.CFrame * CFrame.new(0, 0,  -3)
+                                    myChar:PivotTo(behind)
+
+                                    -- Gửi input spam skill Z, X, C
+                                    task.spawn(function()
+                                        keypress(0x5A) wait(0.05) keyrelease(0x5A) -- Z
+                                        keypress(0x58) wait(0.05) keyrelease(0x58) -- X
+                                        keypress(0x43) wait(0.05) keyrelease(0x43) -- C
+                                    end)
+                                    task.wait(0.3)
+                                end
+                            end
+                        end
+                    end
+                    task.wait(0.4)
+                end
+            end)
+        else
+            Fluent:Notify({ Title = "Auto Farm", Content = "Đã tắt Auto Farm!", Duration = 4 })
+        end
+    end
+})
 
 ------------- SETTINGS TAB -------------
 
