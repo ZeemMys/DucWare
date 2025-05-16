@@ -17,8 +17,6 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
-Window:SelectTab(Tabs.Lobby)
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SellRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Sell")
 
