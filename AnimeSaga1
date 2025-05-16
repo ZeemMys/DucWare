@@ -33,18 +33,27 @@ end
 -- Dropdown chọn độ hiếm (cho phép chọn nhiều)
 Tabs.Lobby:AddDropdown("AutoSellDropdown", {
     Title = "Chọn độ hiếm để Auto Sell",
-    Values = {"Rare", "Epic", "Legendary", "Mythical"},
+    Values = {"Rare", "Epic", "Legendary", "Mythical" },
     Multi = true, -- Cho phép chọn nhiều
     Default = {},
     Callback = function(values)
         -- Reset lại bảng chọn
         selectedRarities = {}
-        for _, rarity in pairs(values) do
-            selectedRarities[rarity] = true
+        for rarity, isSelected in pairs(values) do
+            if isSelected then
+                selectedRarities[rarity] = true
+            end
         end
-        print("[Dropdown] Đã chọn các độ hiếm:", table.concat(values, ", "))
+
+        -- Hiển thị danh sách đã chọn
+        local selectedList = {}
+        for rarity in pairs(selectedRarities) do
+            table.insert(selectedList, rarity)
+        end
+        print("[Dropdown] Đã chọn các độ hiếm:", table.concat(selectedList, ", "))
     end
 })
+
 
 -- Toggle Auto Sell
 autoSellToggle = Tabs.Lobby:AddToggle("AutoSellToggle", {
