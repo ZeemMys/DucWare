@@ -34,9 +34,9 @@ local SellEvent = ReplicatedStorage:WaitForChild("Event")
 local selectedRarities = {}
 local autoSellToggle = nil
 
--- Hàm kiểm tra đã chọn đủ thông tin chưa
-local function hasSelectedOptions()
-    return next(selectedRarities) ~= nil and next(selectedItemTypes) ~= nil
+-- Hàm kiểm tra đã chọn độ hiếm
+local function hasSelectedRarities()
+    return next(selectedRarities) ~= nil
 end
 
 -- Dropdown chọn độ hiếm
@@ -60,19 +60,14 @@ autoSellToggle = Tabs.Lobby:AddToggle("AutoSellToggle", {
     Default = false,
     Callback = function(enabled)
         if enabled then
-            if hasSelectedOptions() then
+            if hasSelectedRarities() then
                 print("[Toggle] Bắt đầu Auto Sell:")
                 for rarity in pairs(selectedRarities) do
-                    for itemType in pairs(selectedItemTypes) do
-                        print("- " .. rarity .. " " .. itemType)
-                        SellEvent:FireServer({
-                            Rarity = rarity,
-                            Type = itemType
-                        })
-                    end
+                    print("- " .. rarity)
+                    SellEvent:FireServer(rarity)
                 end
             else
-                warn("[Toggle] Vui lòng chọn cả độ hiếm và loại vật phẩm!")
+                warn("[Toggle] Vui lòng chọn độ hiếm!")
             end
         else
             print("[Toggle] Đã tắt Auto Sell")
