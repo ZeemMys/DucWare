@@ -94,6 +94,50 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 -------------GAME TAB-------------
+-- Auto Start Battle
+local autoStart = false
+
+Tabs.Game:AddToggle("AutoStartToggle", {
+    Title = "Auto Start Battle",
+    Default = false,
+    Callback = function(state)
+        autoStart = state
+
+        if state then
+            Fluent:Notify({
+                Title = "Auto Start",
+                Content = "✅ Đã bật tự động bắt đầu trận!",
+                Duration = 4
+            })
+
+            task.spawn(function()
+                while autoStart do
+                    local startButton = game:GetService("Players").LocalPlayer
+                        :WaitForChild("PlayerGui")
+                        :FindFirstChild("RoomUi", true)
+
+                    if startButton then
+                        local button = startButton:FindFirstChild("StartButton", true)
+                        if button and button:IsA("ImageButton") and button.Visible then
+                            pcall(function()
+                                firesignal(button.MouseButton1Click)
+                                print("[AutoStart] Đã nhấn nút Start!")
+                            end)
+                        end
+                    end
+                    task.wait(3)
+                end
+            end)
+        else
+            Fluent:Notify({
+                Title = "Auto Start",
+                Content = "⛔ Đã tắt tự động bắt đầu!",
+                Duration = 4
+            })
+        end
+    end
+})
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
