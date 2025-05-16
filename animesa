@@ -101,65 +101,63 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HRP = Character:WaitForChild("HumanoidRootPart")
-local HitRemote = ReplicatedStorage.Event:WaitForChild("HitScreen")
+local HitRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("HitScreen")
 
 local attacking = false
-local radius = 8
-local height = 7
-local speed = 7
 
-Tabs.Game:AddToggle("AutoFarmFixed", {
-    Title = "🔥 Auto Attack",
+-- Hàm tìm mob gần nhất
+local function getClosestMob()
+    local closest, dist = nil, math.huge
+    for _, mob in pairs(workspace:WaitForChild("Enemy"):WaitForChild("Mob"):GetChildren()) do
+        if mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
+            local d = (mob.HumanoidRootPart.Position - HRP.Position).Magnitude
+            if d < dist then
+                closest = mob
+                dist = d
+            end
+        end
+    end
+    return closest
+end
+
+Tabs.Game:AddToggle("AutoAttack", {
+    Title = "Auto Đánh Quái",
     Default = false,
     Callback = function(state)
         attacking = state
 
-        if attacking then
+        if state then
             Fluent:Notify({
                 Title = "Auto Attack",
-                Content = "🔥 Đã bật AutoFarm FIX",
+                Content = "✅ Đã bật đánh quái!",
                 Duration = 4
             })
 
             task.spawn(function()
                 while attacking do
-                    local mobs = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
-                    if not mobs then task.wait(0.2) continue end
+                    local mob = getClosestMob()
+                    if mob and mob:FindFirstChild("HumanoidRootPart") then
+                        local mobPos = mob.HumanoidRootPart.Position
+                        local t = tick() * 2 -- tốc độ bay
+                        local radius = 10 -- giữ khoảng cách tránh bị vả
+                        local offset = Vector3.new(math.cos(t), 0, math.sin(t)) * radius
+                        local flyPos = mobPos + offset + Vector3.new(0, 3, 0)
 
-                    local closestMob = nil
-                    local shortest = math.huge
+                        HRP.CFrame = CFrame.new(flyPos, mobPos)
 
-                    for _, mob in ipairs(mobs:GetChildren()) do
-                        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-                        if mob:IsA("Model") and mobHRP and mob:FindFirstChildOfClass("Humanoid") and mob.Humanoid.Health > 0 then
-                            local dist = (HRP.Position - mobHRP.Position).Magnitude
-                            if dist < shortest then
-                                shortest = dist
-                                closestMob = mob
-                            end
-                        end
-                    end
-
-                    if closestMob then
-                        local mobHRP = closestMob.HumanoidRootPart
-                        local t = tick() * speed
-                        local offset = Vector3.new(math.cos(t) * radius, height, math.sin(t) * radius)
-                        HRP.CFrame = CFrame.new(mobHRP.Position + offset, mobHRP.Position)
-
-                        -- Đấm cực nhanh
+                        -- Gửi remote đánh
                         pcall(function()
                             HitRemote:FireServer()
                         end)
                     end
-
                     task.wait(0.05)
                 end
             end)
         else
             Fluent:Notify({
                 Title = "Auto Attack",
-                Content = "⛔ Đã tắt AutoFarm",
-                Duration = 4
+                Content = "⛔ Tắt đánh quái.",
+                Duration = 3
             })
         end
     end
