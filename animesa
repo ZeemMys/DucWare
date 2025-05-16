@@ -95,85 +95,66 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 
 -------------GAME TAB-------------
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HRP = Character:WaitForChild("HumanoidRootPart")
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local HitRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("HitScreen")
 
 local attacking = false
-local radius = 7
-local speed = 6
 
--- Hàm tìm quái gần nhất
-local function getClosestMob()
-    local closest, dist = nil, math.huge
-    for _, mob in pairs(workspace:WaitForChild("Enemy"):WaitForChild("Mob"):GetChildren()) do
-        if mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
-            local d = (mob.HumanoidRootPart.Position - HRP.Position).Magnitude
-            if d < dist then
-                closest = mob
-                dist = d
-            end
-        end
-    end
-    return closest
-end
-
--- Hàm tấn công cực nhanh (giả lập click)
-local function attack()
-    local tool = Character:FindFirstChildOfClass("Tool")
-    if tool and tool:FindFirstChild("RemoteEvent") then
-        pcall(function()
-            tool.RemoteEvent:FireServer()
-        end)
-    elseif tool and tool:FindFirstChild("Click") then
-        pcall(function()
-            tool.Click:FireServer()
-        end)
-    elseif tool and tool:FindFirstChild("MouseClick") then
-        pcall(function()
-            tool:Activate()
-        end)
-    end
-end
-
--- Toggle tấn công
-Tabs.Game:AddToggle("AutoFarm", {
-    Title = "Auto Attack (Vòng quanh quái)",
+Tabs.Game:AddToggle("AutoAttack", {
+    Title = "Tự Động Đánh Quái",
     Default = false,
     Callback = function(state)
         attacking = state
+
         if attacking then
             Fluent:Notify({
-                Title = "Auto Attack",
-                Content = "✅ Đang tấn công quái!",
-                Duration = 4
+                Title = "Tấn Công",
+                Content = "🚀 Bắt đầu tấn công quái",
+                Duration = 5
             })
 
             task.spawn(function()
                 while attacking do
-                    local mob = getClosestMob()
-                    if mob and mob:FindFirstChild("HumanoidRootPart") then
-                        for theta = 0, 360, 20 do
-                            if not attacking then break end
-                            local angle = math.rad(theta)
-                            local offset = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
-                            local targetPos = mob.HumanoidRootPart.Position + offset + Vector3.new(0, 1.5, 0)
-                            HRP.CFrame = CFrame.new(targetPos, mob.HumanoidRootPart.Position)
+                    local closestMob = nil
+                    local shortestDistance = math.huge
 
-                            attack()
-                            task.wait(0.03) -- spam rất nhanh
+                    for _, mob in pairs(workspace.Enemy.Mob:GetChildren()) do
+                        if mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
+                            local distance = (HumanoidRootPart.Position - mob.HumanoidRootPart.Position).Magnitude
+                            if distance < shortestDistance then
+                                shortestDistance = distance
+                                closestMob = mob
+                            end
                         end
-                    else
-                        task.wait(0.5)
                     end
+
+                    if closestMob then
+                        -- Di chuyển quanh mob
+                        local angle = tick() * 3
+                        local offset = Vector3.new(math.cos(angle) * 4, 0, math.sin(angle) * 4)
+                        local targetPos = closestMob.HumanoidRootPart.Position + offset
+                        HumanoidRootPart.CFrame = CFrame.new(targetPos, closestMob.HumanoidRootPart.Position)
+
+                        -- Gửi remote đánh cực nhanh
+                        pcall(function()
+                            HitRemote:FireServer()
+                        end)
+                    end
+
+                    task.wait(0.1) -- delay rất nhỏ để spam
                 end
             end)
         else
             Fluent:Notify({
-                Title = "Auto Attack",
-                Content = "⛔ Đã tắt auto!",
-                Duration = 3
+                Title = "Tấn Công",
+                Content = "⛔ Dừng tấn công",
+                Duration = 4
             })
         end
     end
