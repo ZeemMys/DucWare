@@ -3,12 +3,10 @@ local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
--- ✅ Luôn đợi GUI player có sẵn
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- ✅ Tạo cửa sổ GUI
 local Window = Fluent:CreateWindow({
     Title = "DucWare",
     SubTitle = "by Duck (Thanks To Fluent GUI)",
@@ -76,70 +74,6 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
-
-local autoStart = false
-local autoFarm = false
-
-Tabs.Game:AddToggle("AutoStartToggle", {
-    Title = "Auto Start",
-    Default = false,
-    Callback = function(state)
-        autoStart = state
-        if state then
-            task.spawn(function()
-                while autoStart do
-                    local btn = PlayerGui:FindFirstChild("RoomUi")
-                        and PlayerGui.RoomUi:FindFirstChild("Ready")
-                        and PlayerGui.RoomUi.Ready:FindFirstChild("Frame")
-                        and PlayerGui.RoomUi.Ready.Frame:FindFirstChild("StartButton")
-
-                    if btn and btn:IsA("ImageButton") and btn.Visible and btn.AutoButtonColor then
-                        pcall(function()
-                            firesignal(btn.MouseButton1Click)
-                        end)
-                    end
-                    task.wait(2)
-                end
-            end)
-        end
-    end
-})
-
-Tabs.Game:AddToggle("AutoFarmToggle", {
-    Title = "Auto Farm",
-    Default = false,
-    Callback = function(state)
-        autoFarm = state
-        if state then
-            task.spawn(function()
-                while autoFarm do
-                    local mobsFolder = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
-                    local myChar = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-                    local myHRP = myChar:WaitForChild("HumanoidRootPart", 5)
-
-                    if mobsFolder and myHRP then
-                        for _, mob in ipairs(mobsFolder:GetChildren()) do
-                            local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-                            local hum = mob:FindFirstChild("Humanoid")
-                            if mobHRP and hum and hum.Health > 0 then
-                                myChar:PivotTo(mobHRP.CFrame * CFrame.new(0, 0, -3))
-
-                                -- Skill spam (Z, X, C)
-                                keypress(0x5A) wait(0.05) keyrelease(0x5A)
-                                keypress(0x58) wait(0.05) keyrelease(0x58)
-                                keypress(0x43) wait(0.05) keyrelease(0x43)
-
-                                task.wait(0.3)
-                            end
-                        end
-                    end
-
-                    task.wait(0.4)
-                end
-            end)
-        end
-    end
-})
 
 ---------------- SETTINGS -----------------
 
