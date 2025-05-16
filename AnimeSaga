@@ -18,60 +18,31 @@ local Tabs = {
 }
 
 -----------Lobby---------
+-- Setup
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local SellEvent = ReplicatedStorage.Event.ItemIven.Sell
+local SellRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Sell")
 
--- Biến lưu lựa chọn
-local selectedRarities = {}  -- bảng chứa độ hiếm được chọn
-local autoSellToggle = nil
+-- Dropdown và Toggle (ví dụ bạn tạo rồi)
+local SelectedRarities = {}  -- Danh sách độ hiếm được chọn từ dropdown
 
--- Hàm để kiểm tra có độ hiếm nào được chọn không
-local function hasSelectedRarities()
-    return next(selectedRarities) ~= nil
+-- Hàm này được gọi khi dropdown thay đổi
+local function UpdateSelectedRarities(selected)
+	SelectedRarities = selected  -- selected là 1 table {"Common", "Rare"}
 end
 
--- Dropdown chọn độ hiếm (cho phép chọn nhiều)
-Tabs.Lobby:AddDropdown("AutoSellDropdown", {
-    Title = "Chọn độ hiếm để Auto Sell",
-    Values = {"Rare", "Epic", "Legendary", "Mythical" },
-    Multi = true, -- Cho phép chọn nhiều
-    Default = {},
-    Callback = function(values)
-        -- Reset lại bảng chọn
-        selectedRarities = {}
-        for rarity, isSelected in pairs(values) do
-            if isSelected then
-                selectedRarities[rarity] = true
-            end
-        end
+-- Gọi hàm mỗi khi người dùng chọn độ hiếm mới
+-- RarityDropdown.OnChanged(UpdateSelectedRarities) -- Bạn kết nối như vầy nếu có hệ thống Component sẵn
 
-        -- Hiển thị danh sách đã chọn
-        local selectedList = {}
-        for rarity in pairs(selectedRarities) do
-            table.insert(selectedList, rarity)
-        end
-        print("[Dropdown] Đã chọn các độ hiếm:", table.concat(selectedList, ", "))
-    end
-})
-
-
--- Toggle Auto Sell
-autoSellToggle = Tabs.Lobby:AddToggle("AutoSellToggle", {
-    Title = "Auto Sell",
-    Default = false,
-    Callback = function(enabled)
-        if enabled then
-            if hasSelectedRarities() then
-                print("[Toggle] Bắt đầu Auto Sell với các độ hiếm:")
-                for rarity in pairs(selectedRarities) do
-                    print("- " .. rarity)
-                    SellEvent:FireServer(rarity)
-                end
-            else
-                warn("[Toggle] Bạn chưa chọn độ hiếm nào!")
-            end
-        else
-            print("[Toggle] Tắt Auto Sell")
-        end
-    end
+-- Toggle
+local AutoSellToggle = Toggle:New("AutoSell", {
+	Title = "Auto Sell",
+	Default = false,
+	Callback = function(isEnabled)
+		if isEnabled then
+			print("Auto Sell Enabled with rarities:", table.concat(SelectedRarities, ", "))
+			SellRemote:FireServer(SelectedRarities)  -- Gửi table {"Common", "Rare", ...}
+		else
+			print("Auto Sell Disabled")
+		end
+	end,
 })
