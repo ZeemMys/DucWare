@@ -6,7 +6,7 @@ local Window = Fluent:CreateWindow({
     Title = "DucWare",
     SubTitle = "by Duck",
     TabWidth = 160,
-    Size = UDim2.fromOffset(570, 440), --rộng,dài
+    Size = UDim2.fromOffset(570, 440),
     Acrylic = true,
     Theme = "Darker",
     MinimizeKey = Enum.KeyCode.LeftControl
@@ -17,7 +17,9 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
-------------Lobby------------
+-- Mở tab Lobby ngay khi load
+Window:SelectTab(Tabs.Lobby)
+
 -- Reference to RemoteEvent
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SellRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Sell")
@@ -30,7 +32,7 @@ local SelectedRarities = {}
 local Dropdown = Tabs.Lobby:AddDropdown("RarityDropdown", {
     Title = "Select Rarities to Auto-Sell",
     Values = rarities,
-    Multi = true, -- Cho phép chọn nhiều độ hiếm
+    Multi = true,
     Default = {},
     Callback = function(selected)
         SelectedRarities = selected
