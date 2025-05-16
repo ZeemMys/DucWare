@@ -17,8 +17,6 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
-Window:SelectTab(Tabs.Lobby)
-
 -- Tạo biến để lưu độ hiếm được chọn
 local rarities = { "Rare", "Epic", "Legendary", "Mythical" }
 local SelectedRarities = {}
