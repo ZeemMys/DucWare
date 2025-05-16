@@ -6,10 +6,10 @@ local Window = Fluent:CreateWindow({
     Title = "DucWare",
     SubTitle = "by Duck",
     TabWidth = 160,
-    Size = UDim2.fromOffset(570, 440), -- rộng,dài
-    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Size = UDim2.fromOffset(570, 440),
+    Acrylic = true,
     Theme = "Darker",
-    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+    MinimizeKey = Enum.KeyCode.LeftControl
 })
 
 local Tabs = {
@@ -17,32 +17,41 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
------------Lobby---------
--- Setup
+------------Lobby------------
+-- Reference to RemoteEvent
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SellRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Sell")
 
--- Dropdown và Toggle (ví dụ bạn tạo rồi)
-local SelectedRarities = {}  -- Danh sách độ hiếm được chọn từ dropdown
+-- Dropdown list
+local rarities = { "Rare", "Epic", "Legendary", "Mythical" }
+local SelectedRarities = {}
 
--- Hàm này được gọi khi dropdown thay đổi
-local function UpdateSelectedRarities(selected)
-	SelectedRarities = selected  -- selected là 1 table {"Common", "Rare"}
-end
+-- Add Dropdown
+local Dropdown = Tabs.Lobby:AddDropdown("RarityDropdown", {
+    Title = "Select Rarities to Auto-Sell",
+    Values = rarities,
+    Multi = true, -- Cho phép chọn nhiều độ hiếm
+    Default = {},
+    Callback = function(selected)
+        SelectedRarities = selected
+        print("Selected rarities:", table.concat(SelectedRarities, ", "))
+    end
+})
 
--- Gọi hàm mỗi khi người dùng chọn độ hiếm mới
--- RarityDropdown.OnChanged(UpdateSelectedRarities) -- Bạn kết nối như vầy nếu có hệ thống Component sẵn
-
--- Toggle
-local AutoSellToggle = Toggle:New("AutoSell", {
-	Title = "Auto Sell",
-	Default = false,
-	Callback = function(isEnabled)
-		if isEnabled then
-			print("Auto Sell Enabled with rarities:", table.concat(SelectedRarities, ", "))
-			SellRemote:FireServer(SelectedRarities)  -- Gửi table {"Common", "Rare", ...}
-		else
-			print("Auto Sell Disabled")
-		end
-	end,
+-- Add Toggle
+Tabs.Lobby:AddToggle("AutoSellToggle", {
+    Title = "Auto Sell",
+    Default = false,
+    Callback = function(isEnabled)
+        if isEnabled then
+            if #SelectedRarities == 0 then
+                warn("Bạn chưa chọn độ hiếm nào để bán tự động.")
+                return
+            end
+            print("Auto Sell Enabled. Selling rarities:", table.concat(SelectedRarities, ", "))
+            SellRemote:FireServer(SelectedRarities)
+        else
+            print("Auto Sell Disabled")
+        end
+    end
 })
