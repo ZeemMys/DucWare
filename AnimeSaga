@@ -17,18 +17,14 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
--- Mở tab Lobby ngay khi load
 Window:SelectTab(Tabs.Lobby)
 
--- Reference to RemoteEvent
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SellRemote = ReplicatedStorage:WaitForChild("Event"):WaitForChild("Sell")
 
--- Dropdown list
 local rarities = { "Rare", "Epic", "Legendary", "Mythical" }
 local SelectedRarities = {}
 
--- Add Dropdown
 local Dropdown = Tabs.Lobby:AddDropdown("RarityDropdown", {
     Title = "Select Rarities to Auto-Sell",
     Values = rarities,
@@ -40,7 +36,6 @@ local Dropdown = Tabs.Lobby:AddDropdown("RarityDropdown", {
     end
 })
 
--- Add Toggle
 Tabs.Lobby:AddToggle("AutoSellToggle", {
     Title = "Auto Sell",
     Default = false,
