@@ -50,17 +50,25 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
     Title = "Auto Sell",
     Default = false,
     Callback = function(state)
-        autoSellRunning = state
-        if state then
-            if next(selectedRarities) == nil then
-                warn("[Auto Sell] ❌ Bạn chưa chọn độ hiếm nào!")
-                Fluent:Notify({
-                    Title = "Auto Sell",
-                    Content = "❌ Vui lòng chọn ít nhất 1 độ hiếm!",
-                    Duration = 5
-                })
-                return
-            end
+        -- Reference đến các ModuleScript trong SellP
+local sellPFolder = ReplicatedStorage:WaitForChild("Setting"):WaitForChild("SellP")
+
+local function updateSellPModules()
+    for _, rarity in ipairs({"Rare", "Epic", "Legendary", "Mythic"}) do
+        local module = sellPFolder:FindFirstChild(rarity)
+        if module and module:IsA("ModuleScript") then
+            local newState = selectedRarities[rarity] == true
+            local content = "return " .. tostring(newState)
+
+            -- Ghi nội dung mới vào module
+            pcall(function()
+                -- Thay nội dung script nếu có quyền (chỉ khi local test hoặc exploit)
+                module.Source = content
+                print("[SellP] Cập nhật", rarity, "→", newState)
+            end)
+        end
+    end
+end
 
             Fluent:Notify({
                 Title = "Auto Sell",
