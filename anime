@@ -19,7 +19,9 @@ local Tabs = {
 
 ------------- LOBBY TAB -------------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local SellEvent = ReplicatedStorage.Event.ItemIven.Sell
+local SellEvent = ReplicatedStorage:WaitForChild("Event")
+                        :WaitForChild("ItemIven") -- chỉnh nếu cần
+                        :WaitForChild("Sell")
 
 -- Biến lưu lựa chọn
 local selectedRarities = {}  -- bảng chứa độ hiếm được chọn
