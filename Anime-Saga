@@ -16,3 +16,43 @@ local Tabs = {
     Lobby = Window:AddTab({ Title = "Lobby", Icon = "box" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
+
+-----------Lobby---------
+-- Bắt đầu setup AutoSell trong tab Lobby
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SellEvent = ReplicatedStorage.Event.ItemIven.Sell
+
+-- Biến lưu giá trị
+local selectedRarity = nil
+local autoSellToggle = nil
+
+-- Dropdown chọn độ hiếm
+Tabs.Lobby:AddDropdown("AutoSellDropdown", {
+    Title = "Chọn độ hiếm để Auto Sell",
+    Values = { "Rare", "Epic", "Legendary", "Mythical" },
+    Multi = false,
+    Default = "Rare",
+    Callback = function(value)
+        selectedRarity = value
+        print("[Dropdown] Đã chọn độ hiếm:", selectedRarity)
+    end
+})
+
+-- Toggle bật/tắt auto sell
+autoSellToggle = Tabs.Lobby:AddToggle("AutoSellToggle", {
+    Title = "Auto Sell Unit",
+    Default = false,
+    Callback = function(isEnabled)
+        if isEnabled then
+            print("[Toggle] Bật Auto Sell:", selectedRarity)
+            if selectedRarity then
+                SellEvent:FireServer(selectedRarity)
+                print("[FIRE] Đã gửi yêu cầu bán unit có độ hiếm:", selectedRarity)
+            else
+                warn("Bạn chưa chọn độ hiếm để auto sell!")
+            end
+        else
+            print("[Toggle] Tắt Auto Sell")
+        end
+    end
+})
