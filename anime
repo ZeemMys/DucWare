@@ -18,7 +18,7 @@ local Tabs = {
 }
 
 Fluent:Notify({
-    Title = "Notification",
+    Title = "Chào mừng",
     Content = "AnimeSaga Script Release",
     SubContent = "Try It And LOVE It", -- Optional
     Duration = 7 -- Set to nil to make the notification not disappear
@@ -121,7 +121,7 @@ SaveManager:BuildConfigSection(Tabs.Settings)
 Window:SelectTab(1)
 
 Fluent:Notify({
-    Title = "Fluent",
+    Title = "DucWare",
     Content = "The script has been loaded.",
     Duration = 8
 })
