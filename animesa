@@ -27,7 +27,7 @@ Fluent:Notify({
 ------------- LOBBY TAB -------------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Lấy RemoteEvent "Sell"
+-- Kiểm tra RemoteEvent Sell
 local SellEvent = ReplicatedStorage:FindFirstChild("Event")
     and ReplicatedStorage.Event:FindFirstChild("ItemIven")
     and ReplicatedStorage.Event.ItemIven:FindFirstChild("Sell")
@@ -37,14 +37,14 @@ if not SellEvent or not SellEvent:IsA("RemoteEvent") then
     return
 end
 
--- Biến trạng thái
+-- Trạng thái lựa chọn và chạy
 local selectedRarities = {}
 local autoSellRunning = false
 
 -- Dropdown chọn độ hiếm
 Tabs.Lobby:AddDropdown("RarityDropdown", {
     Title = "Chọn độ hiếm để Auto Sell",
-    Values = {"Rare", "Epic", "Legendary", "Mythic"}, -- Mythical -> Myhic?
+    Values = {"Rare", "Epic", "Legendary", "Mythic"},
     Multi = true,
     Default = {},
     Callback = function(values)
@@ -53,22 +53,6 @@ Tabs.Lobby:AddDropdown("RarityDropdown", {
             selectedRarities[rarity] = true
         end
         print("[Dropdown] Đã chọn:", table.concat(values, ", "))
-
-        -- Cập nhật các module SellP tương ứng
-        local sellPFolder = ReplicatedStorage:FindFirstChild("Setting")
-            and ReplicatedStorage.Setting:FindFirstChild("SellP")
-        if sellPFolder then
-            for _, rarity in ipairs({"Rare", "Epic", "Legendary", "Mythic"}) do
-                local module = sellPFolder:FindFirstChild(rarity)
-                if module and module:IsA("ModuleScript") then
-                    local state = selectedRarities[rarity] == true
-                    pcall(function()
-                        module.Source = "return " .. tostring(state)
-                        print("[SellP] Cập nhật", rarity, "→", state)
-                    end)
-                end
-            end
-        end
     end
 })
 
@@ -83,15 +67,17 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
             Fluent:Notify({
                 Title = "Auto Sell",
                 Content = "✅ Đã bật Auto Sell!",
-                Duration = 5
+                Duration = 4
             })
 
-            -- Chạy Auto Sell
+            -- Vòng lặp Auto Sell
             task.spawn(function()
                 while autoSellRunning do
                     for rarity in pairs(selectedRarities) do
                         print("[AutoSell] Bán:", rarity)
-                        SellEvent:FireServer(rarity)
+                        pcall(function()
+                            SellEvent:FireServer(rarity)
+                        end)
                     end
                     task.wait(2)
                 end
