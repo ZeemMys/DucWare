@@ -14,6 +14,7 @@ local Window = Fluent:CreateWindow({
 
 local Tabs = {
     Lobby = Window:AddTab({ Title = "Lobby", Icon = "box" }),
+    Game = Window:AddTab({ Title = "Game", Icon = "settings" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
@@ -86,6 +87,75 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
             Fluent:Notify({
                 Title = "Auto Sell",
                 Content = "⛔ Đã tắt Auto Sell!",
+                Duration = 4
+            })
+        end
+    end
+})
+
+-------------Play Tab-------------
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+local attacking = false
+
+Tabs.Game:AddToggle("AutoFarm", {
+    Title = "Auto Attack (Vòng quanh)",
+    Default = false,
+    Callback = function(state)
+        attacking = state
+
+        if attacking then
+            Fluent:Notify({
+                Title = "Auto Attack",
+                Content = "✅ Đã bật!",
+                Duration = 4
+            })
+
+            task.spawn(function()
+                while attacking and Character and Character:FindFirstChild("HumanoidRootPart") do
+                    local mobsFolder = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
+                    if mobsFolder then
+                        for _, mob in pairs(mobsFolder:GetChildren()) do
+                            if not mob:IsA("Model") or not mob:FindFirstChild("HumanoidRootPart") then continue end
+
+                            local mobHRP = mob.HumanoidRootPart
+
+                            -- Di chuyển xung quanh quái
+                            for angle = 0, 360, 30 do
+                                if not attacking then break end
+                                local radians = math.rad(angle)
+                                local offset = Vector3.new(math.cos(radians), 0, math.sin(radians)) * 5
+                                local targetPos = mobHRP.Position + offset + Vector3.new(0, 1, 0)
+
+                                TweenService:Create(HumanoidRootPart, TweenInfo.new(0.2), {
+                                    CFrame = CFrame.new(targetPos, mobHRP.Position)
+                                }):Play()
+
+                                -- Gửi remote attack nếu có
+                                if ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Attack") then
+                                    pcall(function()
+                                        ReplicatedStorage.Remote.Attack:FireServer(mob)
+                                    end)
+                                end
+
+                                task.wait(0.2)
+                            end
+                        end
+                    end
+
+                    task.wait(0.5)
+                end
+            end)
+        else
+            Fluent:Notify({
+                Title = "Auto Attack",
+                Content = "⛔ Đã tắt!",
                 Duration = 4
             })
         end
