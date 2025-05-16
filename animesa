@@ -27,21 +27,41 @@ Fluent:Notify({
 ------------- LOBBY TAB -------------
 -- Biến lưu lựa chọn độ hiếm
 local selectedRarities = {}
-local autoSellToggle = nil
 local autoSellRunning = false
+
+-- Đường dẫn đến SellP folder và SellEvent
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SellEvent = ReplicatedStorage:WaitForChild("Event"):WaitForChild("ItemIven"):WaitForChild("Sell")
+local SellPFolder = ReplicatedStorage:WaitForChild("Setting"):WaitForChild("SellP")
+
+-- Cập nhật ModuleScript trạng thái AutoSell của từng độ hiếm
+local function updateSellPModules()
+    for _, rarity in ipairs({"Rare", "Epic", "Legendary", "Mythic"}) do
+        local module = SellPFolder:FindFirstChild(rarity)
+        if module and module:IsA("ModuleScript") then
+            local state = selectedRarities[rarity] == true
+            local newContent = "return " .. tostring(state)
+            pcall(function()
+                module.Source = newContent
+                print("[SellP] Đã cập nhật", rarity, "→", state)
+            end)
+        end
+    end
+end
 
 -- Dropdown chọn độ hiếm
 Tabs.Lobby:AddDropdown("RarityDropdown", {
     Title = "Chọn độ hiếm để Auto Sell",
-    Values = {"Rare", "Epic", "Legendary", "Mythical"},
+    Values = {"Rare", "Epic", "Legendary", "Mythic"},
     Multi = true,
     Default = {},
     Callback = function(values)
         selectedRarities = {}
-        for _, rarity in pairs(values) do
+        for _, rarity in ipairs(values) do
             selectedRarities[rarity] = true
         end
-        print("[Dropdown] Bạn đã chọn:", table.concat(values, ", "))
+        print("[Dropdown] Chọn:", table.concat(values, ", "))
+        updateSellPModules() -- Cập nhật trạng thái SellP
     end
 })
 
@@ -50,47 +70,39 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
     Title = "Auto Sell",
     Default = false,
     Callback = function(state)
-        -- Reference đến các ModuleScript trong SellP
-local sellPFolder = ReplicatedStorage:WaitForChild("Setting"):WaitForChild("SellP")
+        autoSellRunning = state
 
-local function updateSellPModules()
-    for _, rarity in ipairs({"Rare", "Epic", "Legendary", "Mythic"}) do
-        local module = sellPFolder:FindFirstChild(rarity)
-        if module and module:IsA("ModuleScript") then
-            local newState = selectedRarities[rarity] == true
-            local content = "return " .. tostring(newState)
-
-            -- Ghi nội dung mới vào module
-            pcall(function()
-                -- Thay nội dung script nếu có quyền (chỉ khi local test hoặc exploit)
-                module.Source = content
-                print("[SellP] Cập nhật", rarity, "→", newState)
-            end)
-        end
-    end
-end
+        if state then
+            if next(selectedRarities) == nil then
+                Fluent:Notify({
+                    Title = "Auto Sell",
+                    Content = "❌ Vui lòng chọn ít nhất một độ hiếm!",
+                    Duration = 4
+                })
+                return
+            end
 
             Fluent:Notify({
                 Title = "Auto Sell",
-                Content = "✅ Đã bật Auto Sell!",
-                Duration = 5
+                Content = "✅ Auto Sell đã bật!",
+                Duration = 4
             })
 
-            -- Bắt đầu vòng lặp Auto Sell
+            -- Khởi động vòng lặp auto-sell
             task.spawn(function()
                 while autoSellRunning do
                     for rarity in pairs(selectedRarities) do
-                        print("[AutoSell] Bán:", rarity)
                         SellEvent:FireServer(rarity)
+                        print("[AutoSell] Gửi yêu cầu bán:", rarity)
                     end
-                    task.wait(2) -- Đợi 2 giây trước khi bán tiếp
+                    task.wait(2)
                 end
             end)
         else
             Fluent:Notify({
                 Title = "Auto Sell",
-                Content = "⛔ Đã tắt Auto Sell!",
-                Duration = 4
+                Content = "⛔ Auto Sell đã tắt.",
+                Duration = 3
             })
         end
     end
