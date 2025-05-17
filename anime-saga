@@ -74,13 +74,6 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
--- Đảm bảo các hàm tồn tại (phòng lỗi nil)
-local function safeFireSignal(button)
-    if typeof(button) == "Instance" and button:IsA("GuiButton") and firesignal then
-        pcall(function() firesignal(button.MouseButton1Click) end)
-    end
-end
-
 local function safeClick()
     if typeof(mouse1press) == "function" and typeof(mouse1release) == "function" then
         mouse1press()
