@@ -32,7 +32,7 @@ Fluent:Notify({
 })
 
 -- 🌾 Game-----------
-Tabs.Game:CreateToggle({
+Tabs.Game:AddToggle({
     Name = "🌾 Auto Harvest",
     CurrentValue = false,
     Callback = function(Value)
@@ -145,7 +145,7 @@ Tabs.Game:CreateToggle({
 })
 
 -- 💰 Auto Sell
-Tabs.Game:CreateToggle({
+Tabs.Game:AddToggle({
     Name = "💰 Auto Sell",
     CurrentValue = false,
     Callback = function(Value)
