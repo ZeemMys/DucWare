@@ -229,59 +229,14 @@ Fluent:Notify({
 
 SaveManager:LoadAutoloadConfig()
 --------------Other-----------
-Tabs.Other:AddButton("fake_kick", {
-    Title = "🚫 Test",
-    Description = "Biết đâu bất ngờ",
+Tabs.Other:AddButton({
+    Title = "🎭 Troll Kick",
+    Description = "Hiện bảng giả kick khỏi game",
     Callback = function()
-        local Players = game:GetService("Players")
-        local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-
-        if PlayerGui:FindFirstChild("FakeKickUI") then
-            PlayerGui:FindFirstChild("FakeKickUI"):Destroy()
-        end
-
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "FakeKickUI"
-        screenGui.ResetOnSpawn = false
-        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        screenGui.Parent = PlayerGui
-
-        local frame = Instance.new("Frame")
-        frame.Size = UDim2.new(0, 400, 0, 180)
-        frame.Position = UDim2.new(0.5, -200, 0.5, -90)
-        frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-        frame.BorderSizePixel = 0
-        frame.AnchorPoint = Vector2.new(0.5, 0.5)
-        frame.Parent = screenGui
-
-        local border = Instance.new("UIStroke")
-        border.Thickness = 2
-        border.Color = Color3.new(1, 1, 1)
-        border.Parent = frame
-
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(1, -40, 0, 100)
-        label.Position = UDim2.new(0, 20, 0, 20)
-        label.BackgroundTransparency = 1
-        label.TextColor3 = Color3.new(1, 1, 1)
-        label.TextWrapped = true
-        label.Font = Enum.Font.SourceSans
-        label.TextSize = 22
-        label.Text = "You have been kicked from this experience:\n\nSuspicious Activity Detected."
-        label.Parent = frame
-
-        local button = Instance.new("TextButton")
-        button.Size = UDim2.new(0, 100, 0, 30)
-        button.Position = UDim2.new(0.5, -50, 1, -50)
-        button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        button.TextColor3 = Color3.new(0, 0, 0)
-        button.Font = Enum.Font.SourceSans
-        button.TextSize = 20
-        button.Text = "OK"
-        button.Parent = frame
-
-        button.MouseButton1Click:Connect(function()
-            screenGui:Destroy()
-        end)
-    end,
+        Fluent:Notify({
+            Title = "⚠️ You have been kicked",
+            Content = "Reason: Exploiting (Code: 267)",
+            Duration = 8
+        })
+    end
 })
