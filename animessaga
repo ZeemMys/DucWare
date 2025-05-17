@@ -74,29 +74,49 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
--- 🧠 Hàm mô phỏng phím (tương thích Solara)
 local VirtualInputManager = game:GetService("VirtualInputManager")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local function pressKey(keyCode)
-    pcall(function()
-        VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+-- 🔘 SAFE MOUSE CLICK (nếu có)
+local function safeClick()
+    if typeof(mouse1press) == "function" and typeof(mouse1release) == "function" then
+        mouse1press()
         task.wait(0.05)
-        VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-    end)
+        mouse1release()
+    else
+        -- Nếu không có mouse1press, dùng VirtualInputManager
+        VirtualInputManager:SendMouseButtonEvent(500, 500, 0, true, game, 0)
+        task.wait(0.05)
+        VirtualInputManager:SendMouseButtonEvent(500, 500, 0, false, game, 0)
+    end
 end
 
--- ⚔️ AutoStart dùng phím Z (giả lập click start nếu phím Z có tác dụng)
+-- ⚔ AUTO START
 local autoStart = false
 Tabs.Game:AddToggle("AutoStart", {
-    Title = "Auto Start",
+    Title = "⚔ Auto Start",
     Default = false,
-    Callback = function(value)
-        autoStart = value
-        if autoStart then
+    Callback = function(state)
+        autoStart = state
+        if state then
             task.spawn(function()
                 while autoStart do
-                    -- Một số game có thể khởi động bằng phím Z
-                    pressKey(Enum.KeyCode.Z)
+                    local gui = PlayerGui:FindFirstChild("RoomUi")
+                    local btn = gui and gui:FindFirstChild("Ready")
+                        and gui.Ready:FindFirstChild("Frame")
+                        and gui.Ready.Frame:FindFirstChild("StartButton")
+                    if btn and btn:IsA("ImageButton") and btn.Visible then
+                        local pos = btn.AbsolutePosition
+                        local size = btn.AbsoluteSize
+                        local centerX, centerY = pos.X + size.X / 2, pos.Y + size.Y / 2
+
+                        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 1)
+                        task.wait(0.05)
+                        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 1)
+                    end
                     task.wait(2)
                 end
             end)
@@ -104,43 +124,61 @@ Tabs.Game:AddToggle("AutoStart", {
     end
 })
 
--- ⚔️ AutoFarm: Teleport sau quái và đánh bằng phím Z
+-- ⚔ AUTO FARM BAY VÒNG + TELE SAU KHI BỊ ĐÁNH
 local autoFarm = false
+local lastHp = nil
 Tabs.Game:AddToggle("AutoFarm", {
-    Title = "⚔️ Auto Farm",
+    Title = "⚔ Auto Farm",
     Default = false,
     Callback = function(value)
         autoFarm = value
         if autoFarm then
             task.spawn(function()
                 while autoFarm do
-                    local mobsFolder = workspace:FindFirstChild("Enemy")
-                        and workspace.Enemy:FindFirstChild("Mob")
+                    local myChar = LocalPlayer.Character
+                    local mobs = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
+                    if myChar and myChar:FindFirstChild("HumanoidRootPart") and mobs then
+                        local hrp = myChar.HumanoidRootPart
+                        local humanoid = myChar:FindFirstChild("Humanoid")
+                        if humanoid then
+                            for _, mob in ipairs(mobs:GetChildren()) do
+                                if not autoFarm then break end
+                                if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                    local mobHRP = mob.HumanoidRootPart
 
-                    if mobsFolder then
-                        for _, mob in ipairs(mobsFolder:GetChildren()) do
-                            if not autoFarm then break end
-                            if mob:FindFirstChild("HumanoidRootPart")
-                                and mob:FindFirstChild("Humanoid")
-                                and mob.Humanoid.Health > 0 then
+                                    -- Bay vòng quanh quái
+                                    local angle = 0
+                                    for _ = 1, 20 do
+                                        if not autoFarm then break end
+                                        local radius = 5
+                                        angle = angle + math.rad(30)
+                                        local offset = CFrame.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+                                        local flyPos = mobHRP.CFrame * offset
+                                        hrp.CFrame = flyPos
 
-                                local myChar = LocalPlayer.Character
-                                if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                                    local behind = mob.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
-                                    myChar:PivotTo(behind)
+                                        -- Tấn công thường
+                                        safeClick()
 
-                                    pressKey(Enum.KeyCode.Z) -- Đòn đánh thường
+                                        -- Nếu bị mất máu → tele ra sau quái
+                                        if lastHp and humanoid.Health < lastHp then
+                                            local behind = mobHRP.CFrame * CFrame.new(0, 0, -3)
+                                            myChar:PivotTo(behind)
+                                        end
+                                        lastHp = humanoid.Health
+
+                                        task.wait(0.1)
+                                    end
                                 end
-                                task.wait(0.3)
                             end
                         end
                     end
-                    task.wait(0.3)
+                    task.wait(0.2)
                 end
             end)
         end
     end
 })
+
 ---------------- SETTINGS -----------------
 
 InterfaceManager:SetLibrary(Fluent)
