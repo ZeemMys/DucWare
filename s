@@ -32,7 +32,7 @@ Fluent:Notify({
 })
 
 -- 🌾 Game-----------
-Tabs.Main:CreateToggle({
+Tabs.Game:CreateToggle({
     Name = "🌾 Auto Harvest",
     CurrentValue = false,
     Callback = function(Value)
