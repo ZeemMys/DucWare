@@ -84,25 +84,19 @@ Tabs.Game:AddToggle("AutoStart", {
                 while autoStart do
                     pcall(function()
                         local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-                        if not playerGui then return end
+                        local roomUi = playerGui and playerGui:FindFirstChild("RoomUi")
+                        local ready = roomUi and roomUi:FindFirstChild("Ready")
+                        local frame = ready and ready:FindFirstChild("Frame")
+                        local startBtn = frame and frame:FindFirstChild("StartButton")
 
-                        local roomUi = playerGui:FindFirstChild("RoomUi")
-                        if not roomUi then return end
+                        if startBtn and startBtn.Visible then
+                            -- Cách 1: Gọi sự kiện mặc định nếu có
+                            startBtn:Activate()
 
-                        local readyFrame = roomUi:FindFirstChild("Ready")
-                            and roomUi.Ready:FindFirstChild("Frame")
-                        if not readyFrame then return end
-
-                        local startBtn = readyFrame:FindFirstChild("StartButton")
-                        if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible then
-                            local pos = startBtn.AbsolutePosition
-                            local size = startBtn.AbsoluteSize
-                            local center = Vector2.new(pos.X + size.X / 2, pos.Y + size.Y / 2)
-
-                            -- Simulate mouse click using VirtualInputManager
-                            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 1)
-                            task.wait(0.05)
-                            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 1)
+                            -- Hoặc nếu không hoạt động thì thử giả lập sự kiện MouseButton1Click
+                            -- for _, conn in ipairs(getconnections(startBtn.MouseButton1Click)) do
+                            --     conn:Fire()
+                            -- end
                         end
                     end)
                     task.wait(2)
