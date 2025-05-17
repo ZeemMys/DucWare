@@ -74,6 +74,7 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
+local autoStart = false
 Tabs.Game:AddToggle("AutoStart", {
     Title = "Auto Start",
     Default = false,
@@ -84,10 +85,11 @@ Tabs.Game:AddToggle("AutoStart", {
                 while autoStart do
                     pcall(function()
                         local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-                        local roomUi = playerGui and playerGui:FindFirstChild("RoomUi")
-                        local ready = roomUi and roomUi:FindFirstChild("Ready")
-                        local frame = ready and ready:FindFirstChild("Frame")
-                        local startBtn = frame and frame:FindFirstChild("StartButton")
+                        local startBtn = playerGui
+                            and playerGui:FindFirstChild("RoomUi")
+                            and playerGui.RoomUi:FindFirstChild("Ready")
+                            and playerGui.RoomUi.Ready:FindFirstChild("Frame")
+                            and playerGui.RoomUi.Ready.Frame:FindFirstChild("StartButton")
 
                         if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible then
                             local pos = startBtn.AbsolutePosition
@@ -96,13 +98,15 @@ Tabs.Game:AddToggle("AutoStart", {
 
                             print("[AutoStart] Clicking StartButton at:", center)
 
-                            -- Ấn chuột trái (giả lập click thật sự)
+                            -- Click the button
                             VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 0)
                             task.wait(0.05)
                             VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 0)
+                        else
+                            print("[AutoStart] StartButton not visible or not found.")
                         end
                     end)
-                    task.wait(2)
+                    task.wait(1)
                 end
             end)
         end
