@@ -74,54 +74,29 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
--- 🛡️ Tấn công thường an toàn (nếu executor hỗ trợ mouse1press/release)
-local function safeClick()
-    local hasClick = pcall(function()
-        return typeof(mouse1press) == "function" and typeof(mouse1release) == "function"
-    end)
+-- 🧠 Hàm mô phỏng phím (tương thích Solara)
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
-    if hasClick then
-        pcall(function()
-            mouse1press()
-            task.wait(0.05)
-            mouse1release()
-        end)
-    end
+local function pressKey(keyCode)
+    pcall(function()
+        VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+        task.wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+    end)
 end
 
--- ⚔️ AUTO START (KHÔNG DÙNG firesignal)
-local VirtualInputManager = nil
-pcall(function()
-    VirtualInputManager = game:GetService("VirtualInputManager")
-end)
-
+-- ⚔️ AutoStart dùng phím Z (giả lập click start nếu phím Z có tác dụng)
 local autoStart = false
 Tabs.Game:AddToggle("AutoStart", {
     Title = "Auto Start",
     Default = false,
     Callback = function(value)
         autoStart = value
-        if autoStart and VirtualInputManager then
+        if autoStart then
             task.spawn(function()
                 while autoStart do
-                    local gui = PlayerGui:FindFirstChild("RoomUi")
-                    local startBtn = gui and gui:FindFirstChild("Ready")
-                        and gui.Ready:FindFirstChild("Frame")
-                        and gui.Ready.Frame:FindFirstChild("StartButton")
-
-                    if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible and startBtn.AutoButtonColor then
-                        local absPos = startBtn.AbsolutePosition
-                        local absSize = startBtn.AbsoluteSize
-                        local centerX = absPos.X + absSize.X / 2
-                        local centerY = absPos.Y + absSize.Y / 2
-
-                        -- Mô phỏng click chuột trái
-                        pcall(function()
-                            VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 1)
-                            task.wait(0.05)
-                            VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 1)
-                        end)
-                    end
+                    -- Một số game có thể khởi động bằng phím Z
+                    pressKey(Enum.KeyCode.Z)
                     task.wait(2)
                 end
             end)
@@ -129,10 +104,10 @@ Tabs.Game:AddToggle("AutoStart", {
     end
 })
 
--- ⚔️ AUTO FARM
+-- ⚔️ AutoFarm: Teleport sau quái và đánh bằng phím Z
 local autoFarm = false
 Tabs.Game:AddToggle("AutoFarm", {
-    Title = "Auto Farm",
+    Title = "⚔️ Auto Farm",
     Default = false,
     Callback = function(value)
         autoFarm = value
@@ -154,7 +129,7 @@ Tabs.Game:AddToggle("AutoFarm", {
                                     local behind = mob.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
                                     myChar:PivotTo(behind)
 
-                                    safeClick()
+                                    pressKey(Enum.KeyCode.Z) -- Đòn đánh thường
                                 end
                                 task.wait(0.3)
                             end
@@ -166,7 +141,6 @@ Tabs.Game:AddToggle("AutoFarm", {
         end
     end
 })
-
 ---------------- SETTINGS -----------------
 
 InterfaceManager:SetLibrary(Fluent)
