@@ -229,70 +229,59 @@ Fluent:Notify({
 
 SaveManager:LoadAutoloadConfig()
 --------------Other-----------
--- Hàm tạo Fake Kick UI
-local function createFakeKick(reason)
-    if LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("FakeKick") then
-        LocalPlayer.PlayerGui:FindFirstChild("FakeKick"):Destroy()
-    end
-
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "FakeKick"
-    screenGui.ResetOnSpawn = false
-    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 500, 0, 200)
-    frame.Position = UDim2.new(0.5, -250, 0.5, -100)
-    frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    frame.BorderSizePixel = 0
-    frame.Parent = screenGui
-
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
-
-    local title = Instance.new("TextLabel")
-    title.Text = "Disconnected"
-    title.Font = Enum.Font.SourceSansBold
-    title.TextSize = 28
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.BackgroundTransparency = 1
-    title.Size = UDim2.new(1, 0, 0, 50)
-    title.Position = UDim2.new(0, 0, 0, 10)
-    title.Parent = frame
-
-    local message = Instance.new("TextLabel")
-    message.Text = "You have been kicked by this experience or its moderators. Moderation message:\n\n" .. reason .. "\n(Error Code: 267)"
-    message.Font = Enum.Font.SourceSans
-    message.TextSize = 20
-    message.TextColor3 = Color3.fromRGB(220, 220, 220)
-    message.TextWrapped = true
-    message.TextYAlignment = Enum.TextYAlignment.Top
-    message.BackgroundTransparency = 1
-    message.Size = UDim2.new(1, -40, 0, 100)
-    message.Position = UDim2.new(0, 20, 0, 60)
-    message.Parent = frame
-
-    local button = Instance.new("TextButton")
-    button.Text = "Leave"
-    button.Font = Enum.Font.SourceSansBold
-    button.TextSize = 22
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    button.Size = UDim2.new(0, 100, 0, 40)
-    button.Position = UDim2.new(0.5, -50, 1, -60)
-    button.Parent = frame
-
-    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-    button.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
-end
-
--- Nút troll vào tab Other
-Tabs.Other:AddButton({
-    Title = "💀 Press To See )",
-    Description = "Cứ thử đi thì mới biết",
+Tabs.Other:AddButton("fake_kick", {
+    Title = "🚫 Test",
+    Description = "Biết đâu bất ngờ",
     Callback = function()
-        createFakeKick("ngu vai lon")
-    end
+        local Players = game:GetService("Players")
+        local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+        if PlayerGui:FindFirstChild("FakeKickUI") then
+            PlayerGui:FindFirstChild("FakeKickUI"):Destroy()
+        end
+
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "FakeKickUI"
+        screenGui.ResetOnSpawn = false
+        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        screenGui.Parent = PlayerGui
+
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(0, 400, 0, 180)
+        frame.Position = UDim2.new(0.5, -200, 0.5, -90)
+        frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        frame.BorderSizePixel = 0
+        frame.AnchorPoint = Vector2.new(0.5, 0.5)
+        frame.Parent = screenGui
+
+        local border = Instance.new("UIStroke")
+        border.Thickness = 2
+        border.Color = Color3.new(1, 1, 1)
+        border.Parent = frame
+
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, -40, 0, 100)
+        label.Position = UDim2.new(0, 20, 0, 20)
+        label.BackgroundTransparency = 1
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.TextWrapped = true
+        label.Font = Enum.Font.SourceSans
+        label.TextSize = 22
+        label.Text = "You have been kicked from this experience:\n\nSuspicious Activity Detected."
+        label.Parent = frame
+
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0, 100, 0, 30)
+        button.Position = UDim2.new(0.5, -50, 1, -50)
+        button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        button.TextColor3 = Color3.new(0, 0, 0)
+        button.Font = Enum.Font.SourceSans
+        button.TextSize = 20
+        button.Text = "OK"
+        button.Parent = frame
+
+        button.MouseButton1Click:Connect(function()
+            screenGui:Destroy()
+        end)
+    end,
 })
