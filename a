@@ -28,6 +28,7 @@ Fluent:Notify({
     Title = "Chào mừng",
     Content = "AnimeSaga Script ĐÃ CHẠY",
     Duration = 6
+})
 ---------------Main--------------
 Tabs.Main:CreateToggle({
     Name = "Auto Harvest",
