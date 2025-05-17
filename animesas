@@ -21,7 +21,7 @@ local Tabs = {
     Game = Window:AddTab({ Title = "Game", Icon = "sword" }),
     Player = Window:AddTab({ Title = "Player", Icon = "box" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings"}),
-    Other = Window:AddTab({ Title = "Other", Icon = "📁"})
+    Other = Window:AddTab({ Title = "Other", Icon = "settings"})
 }
 
 --🔔 Thông báo khởi động
