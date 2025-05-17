@@ -291,7 +291,7 @@ end
 -- Nút troll vào tab Other
 Tabs.Other:AddButton({
     Title = "💀 Press To See )",
-    Description = "ngu=)))",
+    Description = "Cứ thử đi thì mới biết",
     Callback = function()
         createFakeKick("ngu vai lon")
     end
