@@ -31,8 +31,6 @@ Fluent:Notify({
 })
 
 ---------------Main--------------
-local MainSection = Tabs.Main:AddSection("Farm Features")
-
 MainSection:AddToggle({
     Name = "Auto Harvest",
     CurrentValue = false,
@@ -208,79 +206,6 @@ Tabs.Main:CreateToggle({
         else
             print("⛔ Auto Sell đã bị tắt.")
         end
-    end
-})
-
-Tabs.Main:CreateButton({
-    Name = " Mở Seed GUI",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-
-        pcall(function()
-            hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            local tpPoint = workspace:FindFirstChild("Tutorial_Points") and workspace.Tutorial_Points:FindFirstChild("Tutorial_Point_1")
-            local prompt = workspace:FindFirstChild("NPCS")
-                and workspace.NPCS:FindFirstChild("Sam")
-                and workspace.NPCS.Sam:FindFirstChild("HumanoidRootPart")
-                and workspace.NPCS.Sam.HumanoidRootPart:FindFirstChildOfClass("ProximityPrompt")
-
-            if hrp and tpPoint and prompt then
-                -- 📍 Teleport đến NPC
-                hrp.CFrame = tpPoint.CFrame + Vector3.new(0, 3, 0)
-                print("📍 Đã dịch chuyển tới Tutorial_Point_1")
-
-                task.wait(0.5)
-
-                -- ✅ Kích hoạt prompt để mở GUI
-                fireproximityprompt(prompt)
-                print("✅ Đã mở bảng Seed GUI")
-            else
-                warn("⚠️ Không tìm thấy vị trí hoặc prompt.")
-            end
-        end)
-    end
-})
-
-Tabs.Main:CreateButton({
-    Name = "Gear GUI", -- Tên hiển thị
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-
-        -- Bọc bằng pcall để tránh crash nếu có lỗi
-        pcall(function()
-            hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            local tpPoint = workspace:FindFirstChild("Tutorial_Points") and workspace.Tutorial_Points:FindFirstChild("Tutorial_Point_3")
-            local prompt = workspace:FindFirstChild("NPCS")
-                and workspace.NPCS:FindFirstChild("Eloise")
-                and workspace.NPCS.Eloise:FindFirstChild("HumanoidRootPart")
-                and workspace.NPCS.Eloise.HumanoidRootPart:FindFirstChildOfClass("ProximityPrompt")
-
-            local buyGearEvent = game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):FindFirstChild("BuyGearStock")
-
-            if hrp and tpPoint and prompt then
-                -- 📍 Dịch chuyển tới điểm gần NPC
-                hrp.CFrame = tpPoint.CFrame + Vector3.new(0, 3, 0)
-                print("📍 Đã dịch chuyển tới Tutorial_Point_3")
-
-                task.wait(0.5)
-
-                -- ✅ Tương tác mở GUI
-                fireproximityprompt(prompt)
-                print("✅ Đã mở Gear Shop")
-
-                -- 🛒 Gửi sự kiện mua gear
-                if buyGearEvent then
-                    buyGearEvent:FireServer()
-                    print("✅ Đã gọi sự kiện BuyGearStock")
-                else
-                    warn("⚠️ Không tìm thấy sự kiện BuyGearStock.")
-                end
-            else
-                warn("⚠️ Không tìm thấy vị trí hoặc prompt.")
-            end
-        end)
     end
 })
 
