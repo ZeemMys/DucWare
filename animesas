@@ -229,14 +229,51 @@ Fluent:Notify({
 
 SaveManager:LoadAutoloadConfig()
 --------------Other-----------
+-- Nút giả kick trong tab Other
 Tabs.Other:AddButton({
-    Title = "🎭 Troll Kick",
-    Description = "Hiện bảng giả kick khỏi game",
+    Title = "💀 =))",
+    Description = "Test",
     Callback = function()
-        Fluent:Notify({
-            Title = "⚠️ You have been kicked",
-            Content = "Reason: Exploiting (Code: 267)",
-            Duration = 8
-        })
+        local screen = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
+        screen.Name = "FakeKickMessage"
+        screen.ResetOnSpawn = false
+
+        local frame = Instance.new("Frame", screen)
+        frame.Position = UDim2.new(0.5, -200, 0.5, -75)
+        frame.Size = UDim2.new(0, 400, 0, 150)
+        frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        frame.BorderSizePixel = 0
+        frame.AnchorPoint = Vector2.new(0.5, 0.5)
+
+        local title = Instance.new("TextLabel", frame)
+        title.Text = "Disconnected"
+        title.Size = UDim2.new(1, 0, 0.3, 0)
+        title.TextSize = 26
+        title.Font = Enum.Font.SourceSansBold
+        title.TextColor3 = Color3.fromRGB(255, 50, 50)
+        title.BackgroundTransparency = 1
+
+        local content = Instance.new("TextLabel", frame)
+        content.Text = "You have been kicked from this experience.\n(Error Code: 267)"
+        content.Size = UDim2.new(1, -20, 0.5, 0)
+        content.Position = UDim2.new(0, 10, 0.3, 0)
+        content.TextSize = 18
+        content.Font = Enum.Font.SourceSans
+        content.TextColor3 = Color3.fromRGB(255, 255, 255)
+        content.BackgroundTransparency = 1
+        content.TextWrapped = true
+        content.TextYAlignment = Enum.TextYAlignment.Top
+
+        local ok = Instance.new("TextButton", frame)
+        ok.Text = "OK"
+        ok.Size = UDim2.new(0, 100, 0, 30)
+        ok.Position = UDim2.new(0.5, -50, 1, -40)
+        ok.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        ok.TextColor3 = Color3.new(1, 1, 1)
+        ok.Font = Enum.Font.SourceSans
+        ok.TextSize = 18
+        ok.MouseButton1Click:Connect(function()
+            screen:Destroy()
+        end)
     end
 })
