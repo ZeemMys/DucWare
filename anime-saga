@@ -74,6 +74,22 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
+-- Đảm bảo các hàm tồn tại (phòng lỗi nil)
+local function safeFireSignal(button)
+    if typeof(button) == "Instance" and button:IsA("GuiButton") and firesignal then
+        pcall(function() firesignal(button.MouseButton1Click) end)
+    end
+end
+
+local function safeClick()
+    if typeof(mouse1press) == "function" and typeof(mouse1release) == "function" then
+        mouse1press()
+        task.wait(0.05)
+        mouse1release()
+    end
+end
+
+-- ⚔️ AUTO START
 local autoStart = false
 Tabs.Game:AddToggle("AutoStart", {
     Title = "Auto Start",
@@ -84,12 +100,15 @@ Tabs.Game:AddToggle("AutoStart", {
             task.spawn(function()
                 while autoStart do
                     local gui = PlayerGui:FindFirstChild("RoomUi")
-                    if gui and gui:FindFirstChild("Ready") and gui.Ready:FindFirstChild("Frame") then
-                        local startBtn = gui.Ready.Frame:FindFirstChild("StartButton")
-                        if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible and startBtn.AutoButtonColor then
-                            pcall(function() firesignal(startBtn.MouseButton1Click) end)
-                        end
+                    local startBtn = gui and gui:FindFirstChild("Ready")
+                        and gui.Ready:FindFirstChild("Frame")
+                        and gui.Ready.Frame:FindFirstChild("StartButton")
+
+                    if startBtn and startBtn:IsA("ImageButton")
+                        and startBtn.Visible and startBtn.AutoButtonColor then
+                        safeFireSignal(startBtn)
                     end
+
                     task.wait(2)
                 end
             end)
@@ -97,6 +116,7 @@ Tabs.Game:AddToggle("AutoStart", {
     end
 })
 
+-- ⚔️ AUTO FARM
 local autoFarm = false
 Tabs.Game:AddToggle("AutoFarm", {
     Title = "Auto Farm",
@@ -106,20 +126,24 @@ Tabs.Game:AddToggle("AutoFarm", {
         if autoFarm then
             task.spawn(function()
                 while autoFarm do
-                    local mobsFolder = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
+                    local mobsFolder = workspace:FindFirstChild("Enemy")
+                        and workspace.Enemy:FindFirstChild("Mob")
+
                     if mobsFolder then
                         for _, mob in ipairs(mobsFolder:GetChildren()) do
-                            if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                                local mobHRP = mob.HumanoidRootPart
+                            if not autoFarm then break end -- dừng nếu tắt toggle
+                            if mob:FindFirstChild("HumanoidRootPart")
+                                and mob:FindFirstChild("Humanoid")
+                                and mob.Humanoid.Health > 0 then
+
                                 local myChar = LocalPlayer.Character
                                 if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                                    local behind = mobHRP.CFrame * CFrame.new(0, 0, -3)
+                                    -- Teleport ra sau quái
+                                    local behind = mob.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
                                     myChar:PivotTo(behind)
 
-                                    -- Đòn đánh thường: click chuột
-                                    mouse1press()
-                                    task.wait(0.05)
-                                    mouse1release()
+                                    -- Tấn công thường
+                                    safeClick()
                                 end
                                 task.wait(0.3)
                             end
