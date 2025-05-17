@@ -172,6 +172,38 @@ Tabs.Game:AddToggle("auto_sell", {
     end
 })
 
+Tabs.Game:AddToggle("seedgui", {
+    Title = "🌾 Seed GUI",
+    Default = false,
+    Callback = function(Value)
+      local player = game.Players.LocalPlayer
+        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+        -- Chỉ thực hiện hành động một lần khi nút được bấm
+        pcall(function()
+            hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            local tpPoint = workspace:FindFirstChild("Tutorial_Points") and workspace.Tutorial_Points:FindFirstChild("Tutorial_Point_1")
+            local prompt = workspace:FindFirstChild("NPCS")
+                and workspace.NPCS:FindFirstChild("Sam")
+                and workspace.NPCS.Sam:FindFirstChild("HumanoidRootPart")
+                and workspace.NPCS.Sam.HumanoidRootPart:FindFirstChildOfClass("ProximityPrompt")
+
+            if hrp and tpPoint and prompt then
+                -- Teleport tới gần NPC
+                hrp.CFrame = tpPoint.CFrame + Vector3.new(0, 3, 0)
+                print("📍 Đã dịch chuyển tới Tutorial_Point_1")
+
+                task.wait(0.5)
+
+                -- Ấn prompt để mở GUI
+                fireproximityprompt(prompt)
+                print("✅ Đã mở bảng Seed GUI")
+            else
+                warn("⚠️ Không tìm thấy vị trí hoặc prompt.")
+            end
+        end)
+    end
+})
 --------------------------- ⚙️ Settings tab----------------
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:SetLibrary(Fluent)
