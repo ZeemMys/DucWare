@@ -31,7 +31,9 @@ Fluent:Notify({
 })
 
 ---------------Main--------------
-Tabs.Main:CreateToggle({
+local MainSection = Tabs.Main:AddSection("Farm Features")
+
+MainSection:AddToggle({
     Name = "Auto Harvest",
     CurrentValue = false,
     Callback = function(Value)
