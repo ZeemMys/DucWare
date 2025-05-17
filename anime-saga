@@ -75,72 +75,37 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 
 ------------------ GAME TAB --------------------
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
--- 🔘 SAFE MOUSE CLICK (nếu có)
-local function safeClick()
-    if typeof(mouse1press) == "function" and typeof(mouse1release) == "function" then
-        mouse1press()
-        task.wait(0.05)
-        mouse1release()
-    else
-        -- Nếu không có mouse1press, dùng VirtualInputManager
-        VirtualInputManager:SendMouseButtonEvent(500, 500, 0, true, game, 0)
-        task.wait(0.05)
-        VirtualInputManager:SendMouseButtonEvent(500, 500, 0, false, game, 0)
-    end
-end
-
--- ⚔ AUTO START
 local autoStart = false
+
 Tabs.Game:AddToggle("AutoStart", {
-    Title = "⚔ Auto Start",
+    Title = "Auto Start",
     Default = false,
-    Callback = function(state)
-        autoStart = state
-        if state then
+    Callback = function(value)
+        autoStart = value
+        if autoStart then
             task.spawn(function()
                 while autoStart do
-                    local gui = PlayerGui:FindFirstChild("RoomUi")
-                    local btn = gui and gui:FindFirstChild("Ready")
-                        and gui.Ready:FindFirstChild("Frame")
-                        and gui.Ready.Frame:FindFirstChild("StartButton")
-                    if btn and btn:IsA("ImageButton") and btn.Visible then
-                        local pos = btn.AbsolutePosition
-                        local size = btn.AbsoluteSize
-                        local centerX, centerY = pos.X + size.X / 2, pos.Y + size.Y / 2
+                    local playerGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+                    local startBtn = playerGui and playerGui:FindFirstChild("RoomUi")
+                        and playerGui.RoomUi:FindFirstChild("Ready")
+                        and playerGui.RoomUi.Ready:FindFirstChild("Frame")
+                        and playerGui.RoomUi.Ready.Frame:FindFirstChild("StartButton")
 
-                        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 1)
+                    if startBtn and startBtn.Visible and startBtn:IsA("ImageButton") then
+                        local pos = startBtn.AbsolutePosition
+                        local size = startBtn.AbsoluteSize
+                        local center = Vector2.new(pos.X + size.X / 2, pos.Y + size.Y / 2)
+
+                        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 0)
                         task.wait(0.05)
-                        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 1)
+                        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 0)
                     end
-                    task.wait(2)
+
+                    task.wait(1.5)
                 end
             end)
         end
     end
-})
-
--- ⚔ AUTO FARM BAY VÒNG + TELE SAU KHI BỊ ĐÁNH
-local autoFarm = false
-local lastHp = nil
-Tabs.Game:AddToggle("AutoFarm", {
-    Title = "⚔ Auto Farm",
-    Default = false,
-    Callback = function(value)
-        local function safeClick()
-    local camera = workspace.CurrentCamera
-    if camera then
-        local center = camera.ViewportSize / 2
-        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 0)
-        task.wait(0.05)
-        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 0)
-    end
-end
-
 })
 
 ---------------- SETTINGS -----------------
