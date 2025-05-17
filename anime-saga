@@ -74,25 +74,34 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
+-- 🛡️ Tấn công thường an toàn (nếu executor hỗ trợ mouse1press/release)
 local function safeClick()
-    if typeof(mouse1press) == "function" and typeof(mouse1release) == "function" then
-        mouse1press()
-        task.wait(0.05)
-        mouse1release()
+    local hasClick = pcall(function()
+        return typeof(mouse1press) == "function" and typeof(mouse1release) == "function"
+    end)
+
+    if hasClick then
+        pcall(function()
+            mouse1press()
+            task.wait(0.05)
+            mouse1release()
+        end)
     end
 end
 
--- ⚔️ AUTO START
--- AUTO START KHÔNG DÙNG firesignal
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local autoStart = false
+-- ⚔️ AUTO START (KHÔNG DÙNG firesignal)
+local VirtualInputManager = nil
+pcall(function()
+    VirtualInputManager = game:GetService("VirtualInputManager")
+end)
 
+local autoStart = false
 Tabs.Game:AddToggle("AutoStart", {
     Title = "Auto Start",
     Default = false,
     Callback = function(value)
         autoStart = value
-        if autoStart then
+        if autoStart and VirtualInputManager then
             task.spawn(function()
                 while autoStart do
                     local gui = PlayerGui:FindFirstChild("RoomUi")
@@ -107,19 +116,18 @@ Tabs.Game:AddToggle("AutoStart", {
                         local centerY = absPos.Y + absSize.Y / 2
 
                         -- Mô phỏng click chuột trái
-                        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 1)
-                        task.wait(0.05)
-                        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 1)
+                        pcall(function()
+                            VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 1)
+                            task.wait(0.05)
+                            VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 1)
+                        end)
                     end
-
                     task.wait(2)
                 end
             end)
         end
     end
 })
-
-     
 
 -- ⚔️ AUTO FARM
 local autoFarm = false
@@ -136,18 +144,16 @@ Tabs.Game:AddToggle("AutoFarm", {
 
                     if mobsFolder then
                         for _, mob in ipairs(mobsFolder:GetChildren()) do
-                            if not autoFarm then break end -- dừng nếu tắt toggle
+                            if not autoFarm then break end
                             if mob:FindFirstChild("HumanoidRootPart")
                                 and mob:FindFirstChild("Humanoid")
                                 and mob.Humanoid.Health > 0 then
 
                                 local myChar = LocalPlayer.Character
                                 if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                                    -- Teleport ra sau quái
                                     local behind = mob.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
                                     myChar:PivotTo(behind)
 
-                                    -- Tấn công thường
                                     safeClick()
                                 end
                                 task.wait(0.3)
