@@ -18,8 +18,9 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Lobby = Window:AddTab({ Title = "Lobby", Icon = "box" }),
-    Game = Window:AddTab({ Title = "Game", Icon = "swords" }),
+    Main = Window:AddTab({ Title = "Main", Icon = "box" }),
+    Player = Window:AddTab({ Title = "Player", Icon = "swords" }),
+    CodeAndFun = Window:AddTab({ Title = "CodeAndFun", Icon = "box" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
@@ -27,92 +28,9 @@ Fluent:Notify({
     Title = "Chào mừng",
     Content = "AnimeSaga Script ĐÃ CHẠY",
     Duration = 6
-})
-
------------------- LOBBY --------------------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local SellEvent = ReplicatedStorage:FindFirstChild("Event")
-    and ReplicatedStorage.Event:FindFirstChild("ItemIven")
-    and ReplicatedStorage.Event.ItemIven:FindFirstChild("Sell")
-
-local selectedRarities = {}
-local autoSellRunning = false
-
-Tabs.Lobby:AddDropdown("RarityDropdown", {
-    Title = "Chọn độ hiếm để Auto Sell",
-    Values = {"Rare", "Epic", "Legendary", "Mythic"},
-    Multi = true,
-    Default = {},
-    Callback = function(values)
-        selectedRarities = {}
-        for _, rarity in ipairs(values) do
-            selectedRarities[rarity] = true
-        end
-    end
-})
-
-Tabs.Lobby:AddToggle("AutoSellToggle", {
-    Title = "Auto Sell",
-    Default = false,
-    Callback = function(state)
-        autoSellRunning = state
-        if state then
-            task.spawn(function()
-                while autoSellRunning do
-                    for rarity in pairs(selectedRarities) do
-                        if SellEvent then
-                            pcall(function()
-                                SellEvent:FireServer(rarity)
-                            end)
-                        end
-                    end
-                    task.wait(2)
-                end
-            end)
-        end
-    end
-})
-
------------------- GAME TAB --------------------
-local autoStart = false
-Tabs.Game:AddToggle("AutoStart", {
-    Title = "Auto Start",
-    Default = false,
-    Callback = function(value)
-        autoStart = value
-        if autoStart then
-            task.spawn(function()
-                while autoStart do
-                    pcall(function()
-                        local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-                        local startBtn = playerGui
-                            and playerGui:FindFirstChild("RoomUi")
-                            and playerGui.RoomUi:FindFirstChild("Ready")
-                            and playerGui.RoomUi.Ready:FindFirstChild("Frame")
-                            and playerGui.RoomUi.Ready.Frame:FindFirstChild("StartButton")
-
-                        if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible then
-                            local pos = startBtn.AbsolutePosition
-                            local size = startBtn.AbsoluteSize
-                            local center = Vector2.new(pos.X + size.X / 2, pos.Y + size.Y / 2)
-
-                            print("[AutoStart] Clicking StartButton at:", center)
-
-                            -- Click the button
-                            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 0)
-                            task.wait(0.05)
-                            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 0)
-                        else
-                            print("[AutoStart] StartButton not visible or not found.")
-                        end
-                    end)
-                    task.wait(1)
-                end
-            end)
-        end
-    end
-})
-
+---------------Main--------------
+------------------Player------------
+--------------CodeAndFun--------------
 ---------------- SETTINGS -----------------
 
 InterfaceManager:SetLibrary(Fluent)
