@@ -425,7 +425,7 @@ local function stopFlying()
 end
 
 Tabs.Player:AddToggle("fly_toggle", {
-    Title = "🪶 Fly",
+    Title = "🦅 Fly",
     Default = false,
     Callback = function(Value)
         if Value then
