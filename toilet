@@ -390,16 +390,27 @@ Tabs.Player:AddSlider("aimbot_fov", {
 -- Fly
 local UIS = game:GetService("UserInputService")
 local RS = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
 local velocity, flyConnection
 local flying = false
 local flySpeed = 50
 
+local function getHRP()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    return char:FindFirstChild("HumanoidRootPart")
+end
+
 local function startFlying()
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local hrp = getHRP()
     if not hrp then return end
+
     velocity = Instance.new("BodyVelocity")
+    velocity.Name = "FlyVelocity"
     velocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
     velocity.Velocity = Vector3.zero
+    velocity.P = 1e4
     velocity.Parent = hrp
 
     flying = true
@@ -411,21 +422,26 @@ local function startFlying()
         if UIS:IsKeyDown(Enum.KeyCode.S) then moveDir -= cam.CFrame.LookVector end
         if UIS:IsKeyDown(Enum.KeyCode.A) then moveDir -= cam.CFrame.RightVector end
         if UIS:IsKeyDown(Enum.KeyCode.D) then moveDir += cam.CFrame.RightVector end
-        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0,1,0) end
-        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0,1,0) end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0, 1, 0) end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0, 1, 0) end
 
-        velocity.Velocity = moveDir.Magnitude > 0 and moveDir.Unit * flySpeed or Vector3.zero
+        if velocity and velocity.Parent then
+            velocity.Velocity = moveDir.Magnitude > 0 and moveDir.Unit * flySpeed or Vector3.zero
+        end
     end)
 end
 
 local function stopFlying()
     flying = false
-    if flyConnection then flyConnection:Disconnect() end
-    if velocity then velocity:Destroy() end
+    if flyConnection then flyConnection:Disconnect() flyConnection = nil end
+    if velocity then
+        velocity:Destroy()
+        velocity = nil
+    end
 end
 
 Tabs.Player:AddToggle("fly_toggle", {
-    Title = "🦅 Fly",
+    Title = "🦅 Bay",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -437,7 +453,7 @@ Tabs.Player:AddToggle("fly_toggle", {
 })
 
 Tabs.Player:AddSlider("fly_speed", {
-    Title = "Tốc độ bay",
+    Title = "Fly speed",
     Min = 10,
     Max = 300,
     Default = flySpeed,
