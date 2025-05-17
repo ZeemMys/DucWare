@@ -89,14 +89,17 @@ Tabs.Game:AddToggle("AutoStart", {
                         local frame = ready and ready:FindFirstChild("Frame")
                         local startBtn = frame and frame:FindFirstChild("StartButton")
 
-                        if startBtn and startBtn.Visible then
-                            -- Cách 1: Gọi sự kiện mặc định nếu có
-                            startBtn:Activate()
+                        if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible then
+                            local pos = startBtn.AbsolutePosition
+                            local size = startBtn.AbsoluteSize
+                            local center = Vector2.new(pos.X + size.X / 2, pos.Y + size.Y / 2)
 
-                            -- Hoặc nếu không hoạt động thì thử giả lập sự kiện MouseButton1Click
-                            -- for _, conn in ipairs(getconnections(startBtn.MouseButton1Click)) do
-                            --     conn:Fire()
-                            -- end
+                            print("[AutoStart] Clicking StartButton at:", center)
+
+                            -- Ấn chuột trái (giả lập click thật sự)
+                            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 0)
+                            task.wait(0.05)
+                            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 0)
                         end
                     end)
                     task.wait(2)
