@@ -1,0 +1,298 @@
+--⚠️ Load thư viện Fluent UI
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Players = game:GetService("Players")
+
+--⚙️ Tạo cửa sổ chính
+local Window = Fluent:CreateWindow({
+    Title = "DucWare",
+    SubTitle = "by Duck (Thanks To Fluent GUI)",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(570, 440),
+    Acrylic = true,
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+--📁 Tabs
+local Tabs = {
+    Game = Window:AddTab({ Title = "Game", Icon = "sword" }),
+    Player = Window:AddTab({ Title = "Player", Icon = "box" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings",})
+    Other = Window:AddTab({ Title = "Other", Icon = "settings"})
+}
+
+--🔔 Thông báo khởi động
+Fluent:Notify({
+    Title = "Chào mừng",
+    Content = "Grow a Garden Script ĐÃ CHẠY",
+    Duration = 6,
+})
+
+---------------------Player-----------------
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- WalkSpeed
+local WalkEnabled = false
+local DefaultWalkSpeed = 16
+local WalkSpeedValue = DefaultWalkSpeed
+
+Tabs.Player:AddToggle("walkspeed", {
+    Title = "🏃 Chạy Nhanh",
+    Default = false,
+    Callback = function(Value)
+        WalkEnabled = Value
+        local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = Value and WalkSpeedValue or DefaultWalkSpeed
+        end
+    end,
+})
+
+Tabs.Player:AddSlider("walkspeed_slider", {
+    Title = "Tốc độ chạy",
+    Description = "Điều chỉnh tốc độ",
+    Default = DefaultWalkSpeed,
+    Min = 16,
+    Max = 200,
+    Rounding = 0,
+    Callback = function(Value)
+        WalkSpeedValue = Value
+        if WalkEnabled then
+            local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = Value
+            end
+        end
+    end,
+})
+
+-- JumpPower
+local JumpEnabled = false
+local DefaultJumpPower = 50
+local JumpPowerValue = DefaultJumpPower
+
+Tabs.Player:AddToggle("jumppower", {
+    Title = "🦘 Sức Mạnh Nhảy",
+    Default = false,
+    Callback = function(Value)
+        JumpEnabled = Value
+        local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.JumpPower = Value and JumpPowerValue or DefaultJumpPower
+        end
+    end,
+})
+
+Tabs.Player:AddSlider("jumppower_slider", {
+    Title = "Độ cao nhảy",
+    Default = DefaultJumpPower,
+    Min = 50,
+    Max = 500,
+    Rounding = 0,
+    Callback = function(Value)
+        JumpPowerValue = Value
+        if JumpEnabled then
+            local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = Value
+            end
+        end
+    end,
+})
+
+-- Aimbot
+local AimbotEnabled = false
+local AimbotFOV = 100
+local currentTarget = nil
+local marker = nil
+
+local function createMarker(targetPart)
+    if marker then marker:Destroy() end
+    marker = Instance.new("BillboardGui")
+    marker.Name = "AimbotMarker"
+    marker.AlwaysOnTop = true
+    marker.Size = UDim2.new(0, 12, 0, 12)
+    marker.Adornee = targetPart
+    marker.Parent = targetPart
+
+    local dot = Instance.new("Frame")
+    dot.Size = UDim2.new(1, 0, 1, 0)
+    dot.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    dot.BorderSizePixel = 0
+    dot.BackgroundTransparency = 0.1
+    dot.Parent = marker
+end
+
+local function removeMarker()
+    if marker then
+        marker:Destroy()
+        marker = nil
+    end
+end
+
+local function GetNearestTarget()
+    local camera = workspace.CurrentCamera
+    local nearest, shortestDistance = nil, AimbotFOV
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local pos, onScreen = camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            if onScreen then
+                local distance = (Vector2.new(pos.X, pos.Y) - camera.ViewportSize / 2).Magnitude
+                if distance < shortestDistance then
+                    shortestDistance = distance
+                    nearest = player
+                end
+            end
+        end
+    end
+    return nearest
+end
+
+local aimbotConnection
+local function enableAimbot()
+    aimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if not AimbotEnabled then return end
+        local target = GetNearestTarget()
+        local cam = workspace.CurrentCamera
+
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            local targetPos = target.Character.HumanoidRootPart.Position
+            local camPos = cam.CFrame.Position
+            cam.CFrame = CFrame.new(camPos, targetPos)
+
+            if target ~= currentTarget then
+                currentTarget = target
+                createMarker(target.Character.HumanoidRootPart)
+            end
+        else
+            if currentTarget then
+                currentTarget = nil
+                removeMarker()
+            end
+        end
+    end)
+end
+
+local function disableAimbot()
+    if aimbotConnection then aimbotConnection:Disconnect() end
+    currentTarget = nil
+    removeMarker()
+    workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+end
+
+Tabs.Player:AddToggle("aimbot_toggle", {
+    Title = "🎯 Auto Aimbot",
+    Default = false,
+    Callback = function(Value)
+        AimbotEnabled = Value
+        if Value then
+            enableAimbot()
+        else
+            disableAimbot()
+        end
+    end,
+})
+
+Tabs.Player:AddSlider("aimbot_fov", {
+    Title = "Aimbot FOV",
+    Min = 20,
+    Max = 500,
+    Default = AimbotFOV,
+    Rounding = 0,
+    Suffix = "px",
+    Callback = function(Value)
+        AimbotFOV = Value
+    end,
+})
+
+--------------------------- ⚙️ Settings tab----------------
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/GrowAGarden")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "✅ DucWare đã chạy",
+    Content = "Mọi chức năng đã load xong!",
+    Duration = 6
+})
+
+SaveManager:LoadAutoloadConfig()
+--------------Other-----------
+-- Hàm tạo Fake Kick UI
+local function createFakeKick(reason)
+    if LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("FakeKick") then
+        LocalPlayer.PlayerGui:FindFirstChild("FakeKick"):Destroy()
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "FakeKick"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 500, 0, 200)
+    frame.Position = UDim2.new(0.5, -250, 0.5, -100)
+    frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    frame.BorderSizePixel = 0
+    frame.Parent = screenGui
+
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+
+    local title = Instance.new("TextLabel")
+    title.Text = "Disconnected"
+    title.Font = Enum.Font.SourceSansBold
+    title.TextSize = 28
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.BackgroundTransparency = 1
+    title.Size = UDim2.new(1, 0, 0, 50)
+    title.Position = UDim2.new(0, 0, 0, 10)
+    title.Parent = frame
+
+    local message = Instance.new("TextLabel")
+    message.Text = "You have been kicked by this experience or its moderators. Moderation message:\n\n" .. reason .. "\n(Error Code: 267)"
+    message.Font = Enum.Font.SourceSans
+    message.TextSize = 20
+    message.TextColor3 = Color3.fromRGB(220, 220, 220)
+    message.TextWrapped = true
+    message.TextYAlignment = Enum.TextYAlignment.Top
+    message.BackgroundTransparency = 1
+    message.Size = UDim2.new(1, -40, 0, 100)
+    message.Position = UDim2.new(0, 20, 0, 60)
+    message.Parent = frame
+
+    local button = Instance.new("TextButton")
+    button.Text = "Leave"
+    button.Font = Enum.Font.SourceSansBold
+    button.TextSize = 22
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    button.Size = UDim2.new(0, 100, 0, 40)
+    button.Position = UDim2.new(0.5, -50, 1, -60)
+    button.Parent = frame
+
+    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+
+    button.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+end
+
+-- Nút troll vào tab Other
+Tabs.Other:AddButton({
+    Title = "💀 Press To See )",
+    Description = "ngu=)))",
+    Callback = function()
+        createFakeKick("ngu vai lon")
+    end
+})
