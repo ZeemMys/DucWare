@@ -75,18 +75,10 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 
 ------------------ GAME TAB --------------------
 local Players = game:GetService("Players")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
 local LocalPlayer = Players.LocalPlayer
 local autoStart = false
-
--- Kiểm tra firesignal tồn tại không
-local function safeClick(button)
-    if typeof(button) == "Instance" and button:IsA("GuiButton") and getconnections then
-        local connections = getconnections(button.MouseButton1Click)
-        for _, conn in ipairs(connections) do
-            conn:Fire()
-        end
-    end
-end
 
 Tabs.Game:AddToggle("AutoStart", {
     Title = "Auto Start",
@@ -97,16 +89,23 @@ Tabs.Game:AddToggle("AutoStart", {
             task.spawn(function()
                 while autoStart do
                     local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-                    local startBtn = playerGui and playerGui:FindFirstChild("RoomUi")
-                        and playerGui.RoomUi:FindFirstChild("Ready")
-                        and playerGui.RoomUi.Ready:FindFirstChild("Frame")
-                        and playerGui.RoomUi.Ready.Frame:FindFirstChild("StartButton")
+                    if not playerGui then task.wait(1) continue end
 
-                    if startBtn and startBtn.Visible and startBtn:IsA("ImageButton") then
-                        safeClick(startBtn)
+                    local roomUi = playerGui:FindFirstChild("RoomUi")
+                    local readyFrame = roomUi and roomUi:FindFirstChild("Ready") and roomUi.Ready:FindFirstChild("Frame")
+                    local startBtn = readyFrame and readyFrame:FindFirstChild("StartButton")
+
+                    if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible then
+                        local pos = startBtn.AbsolutePosition
+                        local size = startBtn.AbsoluteSize
+                        local center = Vector2.new(pos.X + size.X / 2, pos.Y + size.Y / 2)
+
+                        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 0)
+                        task.wait(0.05)
+                        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 0)
                     end
 
-                    task.wait(1.5)
+                    task.wait(2)
                 end
             end)
         end
