@@ -90,7 +90,10 @@ local function safeClick()
 end
 
 -- ⚔️ AUTO START
+-- AUTO START KHÔNG DÙNG firesignal
+local VirtualInputManager = game:GetService("VirtualInputManager")
 local autoStart = false
+
 Tabs.Game:AddToggle("AutoStart", {
     Title = "Auto Start",
     Default = false,
@@ -104,9 +107,16 @@ Tabs.Game:AddToggle("AutoStart", {
                         and gui.Ready:FindFirstChild("Frame")
                         and gui.Ready.Frame:FindFirstChild("StartButton")
 
-                    if startBtn and startBtn:IsA("ImageButton")
-                        and startBtn.Visible and startBtn.AutoButtonColor then
-                        safeFireSignal(startBtn)
+                    if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible and startBtn.AutoButtonColor then
+                        local absPos = startBtn.AbsolutePosition
+                        local absSize = startBtn.AbsoluteSize
+                        local centerX = absPos.X + absSize.X / 2
+                        local centerY = absPos.Y + absSize.Y / 2
+
+                        -- Mô phỏng click chuột trái
+                        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 1)
+                        task.wait(0.05)
+                        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 1)
                     end
 
                     task.wait(2)
@@ -115,6 +125,8 @@ Tabs.Game:AddToggle("AutoStart", {
         end
     end
 })
+
+     
 
 -- ⚔️ AUTO FARM
 local autoFarm = false
