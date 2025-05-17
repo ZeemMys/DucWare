@@ -3,6 +3,8 @@ local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
+local Players = game:GetService("Players")
+
 --⚙️ Tạo cửa sổ chính
 local Window = Fluent:CreateWindow({
     Title = "DucWare",
@@ -28,10 +30,10 @@ Fluent:Notify({
     Duration = 6,
 })
 
--- 🌾 Game-----------
-Tabs.Game:AddToggle({
-    Name = "🌾 Auto Harvest",
-    CurrentValue = false,
+-- 🌾 Auto Harvest
+Tabs.Game:AddToggle("auto_harvest", {
+    Title = "🌾 Auto Harvest",
+    Default = false,
     Callback = function(Value)
         _G.AutoHarvestUniversal = Value
         if not Value then return end
@@ -142,9 +144,9 @@ Tabs.Game:AddToggle({
 })
 
 -- 💰 Auto Sell
-Tabs.Game:AddToggle({
-    Name = "💰 Auto Sell",
-    CurrentValue = false,
+Tabs.Game:AddToggle("auto_sell", {
+    Title = "💰 Auto Sell",
+    Default = false,
     Callback = function(Value)
         _G.AutoInstantSell = Value
 
