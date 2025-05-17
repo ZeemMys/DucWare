@@ -74,12 +74,6 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
-local Players = game:GetService("Players")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-
-local LocalPlayer = Players.LocalPlayer
-local autoStart = false
-
 Tabs.Game:AddToggle("AutoStart", {
     Title = "Auto Start",
     Default = false,
@@ -88,23 +82,29 @@ Tabs.Game:AddToggle("AutoStart", {
         if autoStart then
             task.spawn(function()
                 while autoStart do
-                    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-                    if not playerGui then task.wait(1) continue end
+                    pcall(function()
+                        local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+                        if not playerGui then return end
 
-                    local roomUi = playerGui:FindFirstChild("RoomUi")
-                    local readyFrame = roomUi and roomUi:FindFirstChild("Ready") and roomUi.Ready:FindFirstChild("Frame")
-                    local startBtn = readyFrame and readyFrame:FindFirstChild("StartButton")
+                        local roomUi = playerGui:FindFirstChild("RoomUi")
+                        if not roomUi then return end
 
-                    if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible then
-                        local pos = startBtn.AbsolutePosition
-                        local size = startBtn.AbsoluteSize
-                        local center = Vector2.new(pos.X + size.X / 2, pos.Y + size.Y / 2)
+                        local readyFrame = roomUi:FindFirstChild("Ready")
+                            and roomUi.Ready:FindFirstChild("Frame")
+                        if not readyFrame then return end
 
-                        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 0)
-                        task.wait(0.05)
-                        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 0)
-                    end
+                        local startBtn = readyFrame:FindFirstChild("StartButton")
+                        if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible then
+                            local pos = startBtn.AbsolutePosition
+                            local size = startBtn.AbsoluteSize
+                            local center = Vector2.new(pos.X + size.X / 2, pos.Y + size.Y / 2)
 
+                            -- Simulate mouse click using VirtualInputManager
+                            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 1)
+                            task.wait(0.05)
+                            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 1)
+                        end
+                    end)
                     task.wait(2)
                 end
             end)
