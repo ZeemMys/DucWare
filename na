@@ -209,6 +209,327 @@ Tabs.Game:AddToggle("seedgui", {
     end
 })
 
+---------------------Player-----------------
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- WalkSpeed
+local WalkEnabled = false
+local DefaultWalkSpeed = 16
+local WalkSpeedValue = DefaultWalkSpeed
+
+Tabs.Player:AddToggle("walkspeed", {
+    Title = "🏃 Chạy Nhanh",
+    Default = false,
+    Callback = function(Value)
+        WalkEnabled = Value
+        local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = Value and WalkSpeedValue or DefaultWalkSpeed
+        end
+    end,
+})
+
+Tabs.Player:AddSlider("walkspeed_slider", {
+    Title = "Tốc độ chạy",
+    Description = "Điều chỉnh tốc độ",
+    Default = DefaultWalkSpeed,
+    Min = 16,
+    Max = 200,
+    Rounding = 0,
+    Callback = function(Value)
+        WalkSpeedValue = Value
+        if WalkEnabled then
+            local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = Value
+            end
+        end
+    end,
+})
+
+-- JumpPower
+local JumpEnabled = false
+local DefaultJumpPower = 50
+local JumpPowerValue = DefaultJumpPower
+
+Tabs.Player:AddToggle("jumppower", {
+    Title = "🦘 Sức Mạnh Nhảy",
+    Default = false,
+    Callback = function(Value)
+        JumpEnabled = Value
+        local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.JumpPower = Value and JumpPowerValue or DefaultJumpPower
+        end
+    end,
+})
+
+Tabs.Player:AddSlider("jumppower_slider", {
+    Title = "Độ cao nhảy",
+    Default = DefaultJumpPower,
+    Min = 50,
+    Max = 500,
+    Rounding = 0,
+    Callback = function(Value)
+        JumpPowerValue = Value
+        if JumpEnabled then
+            local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = Value
+            end
+        end
+    end,
+})
+
+-- Aimbot
+local AimbotEnabled = false
+local AimbotFOV = 100
+local currentTarget = nil
+local marker = nil
+
+local function createMarker(targetPart)
+    if marker then marker:Destroy() end
+    marker = Instance.new("BillboardGui")
+    marker.Name = "AimbotMarker"
+    marker.AlwaysOnTop = true
+    marker.Size = UDim2.new(0, 12, 0, 12)
+    marker.Adornee = targetPart
+    marker.Parent = targetPart
+
+    local dot = Instance.new("Frame")
+    dot.Size = UDim2.new(1, 0, 1, 0)
+    dot.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    dot.BorderSizePixel = 0
+    dot.BackgroundTransparency = 0.1
+    dot.Parent = marker
+end
+
+local function removeMarker()
+    if marker then
+        marker:Destroy()
+        marker = nil
+    end
+end
+
+local function GetNearestTarget()
+    local camera = workspace.CurrentCamera
+    local nearest, shortestDistance = nil, AimbotFOV
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local pos, onScreen = camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            if onScreen then
+                local distance = (Vector2.new(pos.X, pos.Y) - camera.ViewportSize / 2).Magnitude
+                if distance < shortestDistance then
+                    shortestDistance = distance
+                    nearest = player
+                end
+            end
+        end
+    end
+    return nearest
+end
+
+local aimbotConnection
+local function enableAimbot()
+    aimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if not AimbotEnabled then return end
+        local target = GetNearestTarget()
+        local cam = workspace.CurrentCamera
+
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            local targetPos = target.Character.HumanoidRootPart.Position
+            local camPos = cam.CFrame.Position
+            cam.CFrame = CFrame.new(camPos, targetPos)
+
+            if target ~= currentTarget then
+                currentTarget = target
+                createMarker(target.Character.HumanoidRootPart)
+            end
+        else
+            if currentTarget then
+                currentTarget = nil
+                removeMarker()
+            end
+        end
+    end)
+end
+
+local function disableAimbot()
+    if aimbotConnection then aimbotConnection:Disconnect() end
+    currentTarget = nil
+    removeMarker()
+    workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+end
+
+Tabs.Player:AddToggle("aimbot_toggle", {
+    Title = "🎯 Auto Aimbot",
+    Default = false,
+    Callback = function(Value)
+        AimbotEnabled = Value
+        if Value then
+            enableAimbot()
+        else
+            disableAimbot()
+        end
+    end,
+})
+
+Tabs.Player:AddSlider("aimbot_fov", {
+    Title = "Aimbot FOV",
+    Min = 20,
+    Max = 500,
+    Default = AimbotFOV,
+    Rounding = 0,
+    Suffix = "px",
+    Callback = function(Value)
+        AimbotFOV = Value
+    end,
+})
+
+-- Fly
+local UIS = game:GetService("UserInputService")
+local RS = game:GetService("RunService")
+local velocity, flyConnection
+local flying = false
+local flySpeed = 50
+
+local function startFlying()
+    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    velocity = Instance.new("BodyVelocity")
+    velocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    velocity.Velocity = Vector3.zero
+    velocity.Parent = hrp
+
+    flying = true
+    flyConnection = RS.RenderStepped:Connect(function()
+        local moveDir = Vector3.zero
+        local cam = workspace.CurrentCamera
+
+        if UIS:IsKeyDown(Enum.KeyCode.W) then moveDir += cam.CFrame.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then moveDir -= cam.CFrame.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then moveDir -= cam.CFrame.RightVector end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then moveDir += cam.CFrame.RightVector end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0,1,0) end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0,1,0) end
+
+        velocity.Velocity = moveDir.Magnitude > 0 and moveDir.Unit * flySpeed or Vector3.zero
+    end)
+end
+
+local function stopFlying()
+    flying = false
+    if flyConnection then flyConnection:Disconnect() end
+    if velocity then velocity:Destroy() end
+end
+
+Tabs.Player:AddToggle("fly_toggle", {
+    Title = "🪶 Fly",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            startFlying()
+        else
+            stopFlying()
+        end
+    end,
+})
+
+Tabs.Player:AddSlider("fly_speed", {
+    Title = "Tốc độ bay",
+    Min = 10,
+    Max = 300,
+    Default = flySpeed,
+    Increment = 5,
+    Callback = function(Value)
+        flySpeed = Value
+    end,
+})
+
+-- ESP
+local ESPEnabled = false
+local ESPObjects = {}
+
+local function createESP(player)
+    if player == LocalPlayer then return end
+    local char = player.Character
+    if not char then return end
+
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local head = char:FindFirstChild("Head")
+    if not root or not head then return end
+
+    local box = Instance.new("BoxHandleAdornment")
+    box.Size = Vector3.new(2, 5, 1)
+    box.Color3 = Color3.fromRGB(0, 255, 0)
+    box.Transparency = 0.5
+    box.Adornee = root
+    box.AlwaysOnTop = true
+    box.ZIndex = 5
+    box.Parent = root
+
+    local tag = Instance.new("BillboardGui")
+    tag.Size = UDim2.new(0, 100, 0, 40)
+    tag.StudsOffset = Vector3.new(0, 3, 0)
+    tag.Adornee = head
+    tag.AlwaysOnTop = true
+    tag.Parent = head
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = player.Name
+    label.TextColor3 = Color3.new(1,1,1)
+    label.TextScaled = true
+    label.Font = Enum.Font.SourceSansBold
+    label.Parent = tag
+
+    ESPObjects[player] = {box, tag}
+end
+
+local function removeESP(player)
+    if ESPObjects[player] then
+        for _, obj in ipairs(ESPObjects[player]) do
+            if obj then obj:Destroy() end
+        end
+        ESPObjects[player] = nil
+    end
+end
+
+local function updateESP()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if ESPEnabled then
+            if player.Character and not ESPObjects[player] then
+                createESP(player)
+            end
+        else
+            removeESP(player)
+        end
+    end
+end
+
+Tabs.Player:AddToggle("esp_toggle", {
+    Title = "👁️ Bật/Tắt ESP",
+    Default = false,
+    Callback = function(Value)
+        ESPEnabled = Value
+        updateESP()
+    end,
+})
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        task.wait(1)
+        if ESPEnabled then
+            createESP(player)
+        end
+    end)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    removeESP(player)
+end)
 --------------------------- ⚙️ Settings tab----------------
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:SetLibrary(Fluent)
