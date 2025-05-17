@@ -131,52 +131,16 @@ Tabs.Game:AddToggle("AutoFarm", {
     Title = "⚔ Auto Farm",
     Default = false,
     Callback = function(value)
-        autoFarm = value
-        if autoFarm then
-            task.spawn(function()
-                while autoFarm do
-                    local myChar = LocalPlayer.Character
-                    local mobs = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
-                    if myChar and myChar:FindFirstChild("HumanoidRootPart") and mobs then
-                        local hrp = myChar.HumanoidRootPart
-                        local humanoid = myChar:FindFirstChild("Humanoid")
-                        if humanoid then
-                            for _, mob in ipairs(mobs:GetChildren()) do
-                                if not autoFarm then break end
-                                if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                                    local mobHRP = mob.HumanoidRootPart
-
-                                    -- Bay vòng quanh quái
-                                    local angle = 0
-                                    for _ = 1, 20 do
-                                        if not autoFarm then break end
-                                        local radius = 5
-                                        angle = angle + math.rad(30)
-                                        local offset = CFrame.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
-                                        local flyPos = mobHRP.CFrame * offset
-                                        hrp.CFrame = flyPos
-
-                                        -- Tấn công thường
-                                        safeClick()
-
-                                        -- Nếu bị mất máu → tele ra sau quái
-                                        if lastHp and humanoid.Health < lastHp then
-                                            local behind = mobHRP.CFrame * CFrame.new(0, 0, -3)
-                                            myChar:PivotTo(behind)
-                                        end
-                                        lastHp = humanoid.Health
-
-                                        task.wait(0.1)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                    task.wait(0.2)
-                end
-            end)
-        end
+        local function safeClick()
+    local camera = workspace.CurrentCamera
+    if camera then
+        local center = camera.ViewportSize / 2
+        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 0)
+        task.wait(0.05)
+        VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 0)
     end
+end
+
 })
 
 ---------------- SETTINGS -----------------
