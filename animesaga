@@ -74,6 +74,63 @@ Tabs.Lobby:AddToggle("AutoSellToggle", {
 })
 
 ------------------ GAME TAB --------------------
+local autoStart = false
+Tabs.Game:AddToggle("AutoStart", {
+    Title = "Auto Start",
+    Default = false,
+    Callback = function(value)
+        autoStart = value
+        if autoStart then
+            task.spawn(function()
+                while autoStart do
+                    local gui = PlayerGui:FindFirstChild("RoomUi")
+                    if gui and gui:FindFirstChild("Ready") and gui.Ready:FindFirstChild("Frame") then
+                        local startBtn = gui.Ready.Frame:FindFirstChild("StartButton")
+                        if startBtn and startBtn:IsA("ImageButton") and startBtn.Visible and startBtn.AutoButtonColor then
+                            pcall(function() firesignal(startBtn.MouseButton1Click) end)
+                        end
+                    end
+                    task.wait(2)
+                end
+            end)
+        end
+    end
+})
+
+local autoFarm = false
+Tabs.Game:AddToggle("AutoFarm", {
+    Title = "Auto Farm",
+    Default = false,
+    Callback = function(value)
+        autoFarm = value
+        if autoFarm then
+            task.spawn(function()
+                while autoFarm do
+                    local mobsFolder = workspace:FindFirstChild("Enemy") and workspace.Enemy:FindFirstChild("Mob")
+                    if mobsFolder then
+                        for _, mob in ipairs(mobsFolder:GetChildren()) do
+                            if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                local mobHRP = mob.HumanoidRootPart
+                                local myChar = LocalPlayer.Character
+                                if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                                    local behind = mobHRP.CFrame * CFrame.new(0, 0, -3)
+                                    myChar:PivotTo(behind)
+
+                                    -- Đòn đánh thường: click chuột
+                                    mouse1press()
+                                    task.wait(0.05)
+                                    mouse1release()
+                                end
+                                task.wait(0.3)
+                            end
+                        end
+                    end
+                    task.wait(0.3)
+                end
+            end)
+        end
+    end
+})
 
 ---------------- SETTINGS -----------------
 
