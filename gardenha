@@ -22,14 +22,67 @@ local Tabs = {
     Player = Window:AddTab({ Title = "Player", Icon = "box" }),
     EspFruit = Window:AddTab({ Title = "Esp Enchant Fruit", Icon = "box"}),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings"}),
-    Other = Window:AddTab({ Title = "Other", Icon = "settings"})
+    Other = Window:AddTab({ Title = "Other", Icon = "settings"}),
+    local SystemTab = Window:AddTab({ Title = "System", Icon = "terminal" })
 }
+
+local Section = SystemTab:AddSection("Status")
 
 --🔔 Thông báo khởi động
 Fluent:Notify({
     Title = "Chào mừng",
     Content = "Grow a Garden Script ĐÃ CHẠY",
     Duration = 6,
+})
+
+-- Get current time
+local time = "⚠️ " .. os.date("%X") .. " --"
+
+-- Detect executor
+local function getExecutor()
+    local exploit =
+        (identifyexecutor and identifyexecutor()) or
+        (getexecutorname and getexecutorname()) or
+        (syn and "Synapse X") or
+        (KRNL_LOADED and "KRNL") or
+        (is_sirhurt_closure and "SirHurt") or
+        (pebc_execute and "ProtoSmasher") or
+        (secure_load and "Sentinel") or
+        "Unknown"
+    return exploit
+end
+
+local executor = getExecutor()
+
+-- Add log entries
+Section:AddParagraph({
+    Title = time,
+    Content = "============================"
+})
+
+Section:AddParagraph({
+    Title = time,
+    Content = "Welcome to KeyGuardian !"
+})
+
+Section:AddParagraph({
+    Title = time,
+    Content = "Library Version: 2.0.0"
+})
+
+Section:AddParagraph({
+    Title = time,
+    Content = "Executor : " .. executor
+})
+
+Section:AddParagraph({
+    Title = time,
+    Content = "Status : online"
+})
+
+Section:AddParagraph({
+    Title = time,
+    Content = "============================"
 })
 --------------Game---------------
 -- 🌾 Auto Harvest
