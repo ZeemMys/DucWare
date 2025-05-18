@@ -29,7 +29,7 @@ local Tabs = {
 local executor = identifyexecutor and identifyexecutor() or "Không xác định"
 
 -- Thêm nhãn executor vào GUI
-PlayerTab:AddParagraph({
+Tabs.Game:AddParagraph({
     Title = "Executor đang dùng:",
     Content = executor
 })
