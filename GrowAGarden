@@ -1,0 +1,80 @@
+-- ⛔️ Xóa GUI cũ nếu tồn tại
+pcall(function()
+    local old = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("KeyGUI")
+    if old then old:Destroy() end
+end)
+
+-- 👤 Lấy player
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+-- 🧩 Tạo GUI nhập key
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "KeyGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 220, 0, 140)
+Frame.Position = UDim2.new(0.5, -110, 0.5, -70)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(1, -20, 0, 40)
+TextBox.Position = UDim2.new(0, 10, 0, 10)
+TextBox.PlaceholderText = "Enter Key"
+TextBox.Text = ""
+TextBox.TextScaled = true
+TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TextBox.TextColor3 = Color3.new(1, 1, 1)
+TextBox.Parent = Frame
+
+local Submit = Instance.new("TextButton")
+Submit.Size = UDim2.new(1, -20, 0, 40)
+Submit.Position = UDim2.new(0, 10, 0, 60)
+Submit.Text = "Submit"
+Submit.TextScaled = true
+Submit.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+Submit.TextColor3 = Color3.new(1, 1, 1)
+Submit.Parent = Frame
+
+-- 🌐 Nút Get Key
+local GetKey = Instance.new("TextButton")
+GetKey.Size = UDim2.new(1, -20, 0, 30)
+GetKey.Position = UDim2.new(0, 10, 0, 105)
+GetKey.Text = "🔗 Get Key"
+GetKey.TextScaled = true
+GetKey.TextColor3 = Color3.fromRGB(100, 200, 255)
+GetKey.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+GetKey.Parent = Frame
+
+-- 📎 Link Get Key
+local getKeyLink = "https://link-center.net/1351480/get-key-system"
+
+-- 🔐 Key xác thực
+local correctKey = "FreeKeyScrgarden"
+
+-- 🖱️ Nút Get Key
+GetKey.MouseButton1Click:Connect(function()
+    setclipboard(getKeyLink)
+    GetKey.Text = "✅ Copied!"
+    task.wait(1)
+    GetKey.Text = "🔗 Get Key"
+end)
+
+-- 🖱️ Khi ấn nút Submit
+Submit.MouseButton1Click:Connect(function()
+	if TextBox.Text == correctKey then
+		ScreenGui:Destroy()
+
+		-- ✅ Nếu đúng key, load GUI chính
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/toiletz"))()
+	else
+		Submit.Text = "❌ Sai Key"
+		task.wait(1)
+		Submit.Text = "Submit"
+	end
+end)
