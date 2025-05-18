@@ -454,7 +454,7 @@ Tabs.Other:AddButton({
         leave.MouseButton1Click:Connect(function()
             blur:Destroy()
             screen:Destroy()
-            LocalPlayer:Kick("You have left the experience.")
+            LocalPlayer:Kick("ngu vai cac")
         end)
 
         -- Nút Rejoin
