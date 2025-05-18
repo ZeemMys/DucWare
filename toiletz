@@ -1,3 +1,36 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+-- Giao diện nhập key
+local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+ScreenGui.Name = "KeyGUI"
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 220, 0, 110)
+Frame.Position = UDim2.new(0.5, -110, 0.5, -55)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+local TextBox = Instance.new("TextBox", Frame)
+TextBox.Size = UDim2.new(1, -20, 0, 40)
+TextBox.Position = UDim2.new(0, 10, 0, 10)
+TextBox.PlaceholderText = "Enter Key"
+TextBox.Text = ""
+TextBox.TextScaled = true
+
+local Submit = Instance.new("TextButton", Frame)
+Submit.Size = UDim2.new(1, -20, 0, 40)
+Submit.Position = UDim2.new(0, 10, 0, 60)
+Submit.Text = "Submit"
+Submit.TextScaled = true
+
+-- Key chính xác
+local correctKey = "FreeKeyScrgarden"
+
+Submit.MouseButton1Click:Connect(function()
+	if TextBox.Text == correctKey then
+		ScreenGui:Destroy() -- Xoá GUI nhập key
+
 --⚠️ Load thư viện Fluent UI
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
