@@ -678,62 +678,67 @@ Tabs.Other:AddButton({
 })
 
 local Players = game:GetService("Players")
-local InsertService = game:GetService("InsertService")
-
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 
--- Mỗi loại hình dạng sẽ có AssetId của HumanoidDescription mẫu
+local function applyDescription(data)
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        local desc = Instance.new("HumanoidDescription")
+        for prop, val in pairs(data) do
+            if desc[prop] ~= nil then
+                desc[prop] = val
+            end
+        end
+        humanoid:ApplyDescription(desc)
+    end
+end
+
+-- Danh sách mô phỏng hình dạng
 local morphs = {
-    ["🐱 Mèo"] = 7733581962, -- Mèo (Catalog bundle)
-    ["🐶 Chó"] = 1029025, -- Chó (classic doge hat)
-    ["🧍‍♂️ Noob khổng lồ"] = 86487766 -- Noob bundle
+    ["🐱 Mèo"] = {
+        HatAccessory = "1029025", -- Doge hat (làm hình thú)
+        Shirt = 144076759, -- áo màu mèo
+        Pants = 144076760
+    },
+    ["🐶 Chó"] = {
+        HatAccessory = "1029025", -- Doge
+        Shirt = 144076749,
+        Pants = 144076750
+    },
+    ["🧍‍♂️ Noob khổng lồ"] = {
+        Shirt = 144076760, -- áo vàng
+        Pants = 144076761,
+        BodyTypeScale = 1,
+        DepthScale = 2,
+        HeightScale = 2,
+        WidthScale = 2,
+        HeadScale = 2
+    }
 }
 
--- Nút trong tab Other
+-- Giao diện Fluent
 Tabs.Other:AddDropdown("MorphDropdown", {
-    Title = "🧬 Chọn đi:)",
-    Description = "Chọn hình dạng để biến hình",
+    Title = "🧬 Chọn hình dạng",
+    Description = "Biến hình:",
     Values = {"🐱 Mèo", "🐶 Chó", "🧍‍♂️ Noob khổng lồ"},
     Multi = false,
     Default = 1,
     Callback = function(selection)
-        local assetId = morphs[selection]
-        if assetId then
-            -- Tải HumanoidDescription từ asset
-            local success, model = pcall(function()
-                return InsertService:LoadAsset(assetId)
-            end)
-
-            if success and model then
-                local description = nil
-                for _, obj in pairs(model:GetDescendants()) do
-                    if obj:IsA("HumanoidDescription") then
-                        description = obj
-                        break
-                    end
-                end
-
-                if description then
-                    local humanoid = Character:FindFirstChildOfClass("Humanoid")
-                    if humanoid then
-                        humanoid:ApplyDescription(description)
-                        Fluent:Notify({
-                            Title = "🧬 Biến hình thành công!",
-                            Content = "Bạn đã biến thành: " .. selection,
-                            SubContent = "Have fun!",
-                            Duration = 4
-                        })
-                    end
-                end
-                model:Destroy()
-            else
-                Fluent:Notify({
-                    Title = "❌ Lỗi",
-                    Content = "Không thể tải hình dạng: " .. tostring(selection),
-                    Duration = 3
-                })
-            end
+        local data = morphs[selection]
+        if data then
+            applyDescription(data)
+            Fluent:Notify({
+                Title = "✅ Thành công!",
+                Content = "Đã biến thành: " .. selection,
+                Duration = 4
+            })
+        else
+            Fluent:Notify({
+                Title = "❌ Lỗi",
+                Content = "Không tìm thấy dữ liệu hình dạng.",
+                Duration = 3
+            })
         end
     end
 })
