@@ -539,37 +539,58 @@ Tabs.Other:AddButton({
     end
 })
 
-OtherTab:Section("Fake Chat"):Component(function(c)
-    local messages = {}
-    
-    local ChatBox = c:TextBox({
-        text = "",
-        placeholder = "Nhập tin nhắn...",
-        clearOnFocus = false,
-        callback = function(text)
-            -- Tùy bạn muốn xử lý gì ở đây khi nhấn Enter
-        end
-    })
+local CreateSection = require(path.to.SectionModule)
+local OtherTab = SomeTabFrame -- Frame chứa nội dung của tab "Other"
 
-    c:Button({
-        text = "Gửi tin nhắn",
-        callback = function()
-            local message = ChatBox:GetText()
-            if message ~= "" then
-                table.insert(messages, message)
-                if #messages > 10 then -- chỉ hiển thị 10 dòng gần nhất
-                    table.remove(messages, 1)
-                end
-                UpdateChat()
-                ChatBox:SetText("")
-            end
-        end
-    })
+local FakeChatSection = CreateSection("Fake Chat", OtherTab)
 
-    local ChatDisplay = c:Label("")
+-- Tạo bảng lưu tin nhắn
+local messages = {}
 
-    function UpdateChat()
-        local chatText = table.concat(messages, "\n")
-        ChatDisplay:SetText(chatText)
-    end
+-- Tạo TextBox nhập nội dung
+local TextBox = Instance.new("TextBox")
+TextBox.PlaceholderText = "Nhập tin nhắn..."
+TextBox.Size = UDim2.new(1, -10, 0, 30)
+TextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+TextBox.TextColor3 = Color3.new(1, 1, 1)
+TextBox.ClearTextOnFocus = false
+TextBox.Parent = FakeChatSection.Container
+
+-- Tạo nút gửi
+local Button = Instance.new("TextButton")
+Button.Text = "Gửi"
+Button.Size = UDim2.new(1, -10, 0, 30)
+Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+Button.TextColor3 = Color3.new(1, 1, 1)
+Button.Parent = FakeChatSection.Container
+
+-- Label hiển thị tin nhắn
+local ChatLabel = Instance.new("TextLabel")
+ChatLabel.Text = ""
+ChatLabel.TextWrapped = true
+ChatLabel.TextYAlignment = Enum.TextYAlignment.Top
+ChatLabel.Size = UDim2.new(1, -10, 0, 120)
+ChatLabel.BackgroundTransparency = 1
+ChatLabel.TextColor3 = Color3.new(1, 1, 1)
+ChatLabel.TextXAlignment = Enum.TextXAlignment.Left
+ChatLabel.TextSize = 14
+ChatLabel.Parent = FakeChatSection.Container
+
+-- Hàm cập nhật nội dung chat
+local function UpdateChat()
+	local text = table.concat(messages, "\n")
+	ChatLabel.Text = text
+end
+
+-- Khi ấn Gửi
+Button.MouseButton1Click:Connect(function()
+	local msg = TextBox.Text
+	if msg ~= "" then
+		table.insert(messages, msg)
+		if #messages > 10 then
+			table.remove(messages, 1)
+		end
+		UpdateChat()
+		TextBox.Text = ""
+	end
 end)
