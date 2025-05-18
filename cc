@@ -668,29 +668,7 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local PlaceId = game.PlaceId
 
--- NÚT 1: Vào server khác (ngẫu nhiên)
-Tabs.Other:AddButton({
-    Title = "🔁 Server Hop",
-    Description = "Vào server khác trong game này (ngẫu nhiên)",
-    Callback = function()
-        local success, servers = pcall(function()
-            return HttpService:JSONDecode(game:HttpGet(
-                "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Desc&limit=100"))
-        end)
-
-        if success and servers and servers.data then
-            for _, server in pairs(servers.data) do
-                if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                    TeleportService:TeleportToPlaceInstance(PlaceId, server.id, LocalPlayer)
-                    return
-                end
-            end
-        end
-        warn("Không tìm được server khác.")
-    end
-})
-
--- NÚT 2: Join lại chính server hiện tại
+-- NÚT 1: Join lại chính server hiện tại
 Tabs.Other:AddButton({
     Title = "👤 Rejoin Server",
     Description = "Vào lại server hiện tại",
@@ -699,24 +677,13 @@ Tabs.Other:AddButton({
     end
 })
 
--- NÚT 3: Vào server ít người nhất
+-- NÚT 2: Join private server bằng mã link chia sẻ
 Tabs.Other:AddButton({
-    Title = "👥 Server ít người",
-    Description = "Vào server đang hoạt động có ít người nhất",
+    Title = "🔗 Join My Svv",
+    Description = "Join If You Like:)",
     Callback = function()
-        local success, servers = pcall(function()
-            return HttpService:JSONDecode(game:HttpGet(
-                "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
-        end)
-
-        if success and servers and servers.data then
-            for _, server in pairs(servers.data) do
-                if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                    TeleportService:TeleportToPlaceInstance(PlaceId, server.id, LocalPlayer)
-                    return
-                end
-            end
-        end
-        warn("Không tìm được server ít người.")
+        -- Mã từ link: https://www.roblox.com/share?code=a610607117f04f458b94541233c9c94c&type=Server
+        local privateServerCode = "a610607117f04f458b94541233c9c94c"
+        TeleportService:TeleportToPrivateServer(PlaceId, privateServerCode, {LocalPlayer})
     end
 })
