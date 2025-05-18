@@ -436,14 +436,16 @@ Tabs.Player:AddToggle("fly_toggle", {
 })
 
 -- ✅ Slider tốc độ bay
-Tabs.Player:AddSlider("Fly Speed", {
-    min = 10,
-    max = 200,
-    default = 50,
-    rounding = 0,
-}, function(value)
-    flySpeed = value
-end)
+Tabs.Player:AddSlider("fly_speed_slider", {
+    Title = "Tốc độ bay",
+    Min = 10,
+    Max = 200,
+    Default = 50,
+    Rounding = 0,
+    Callback = function(value)
+        flySpeed = value
+    end
+})
 
 local ESPEnabled = false
 local ESPObjects = {}
