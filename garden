@@ -373,8 +373,8 @@ Fluent:Notify({
 SaveManager:LoadAutoloadConfig()
 --------------Other-----------
 Tabs.Other:AddButton({
-    Title = "💀 =))",
-    Description = "Test đi",
+    Title = "💀",
+    Description = "Ấn đi=))",
     Callback = function()
         local Players = game:GetService("Players")
         local TeleportService = game:GetService("TeleportService")
@@ -426,23 +426,6 @@ Tabs.Other:AddButton({
         content.TextWrapped = true
         content.TextYAlignment = Enum.TextYAlignment.Top
         content.TextSize = 16
-
-        -- Nút OK
-        local ok = Instance.new("TextButton", frame)
-        ok.Text = "OK"
-        ok.Size = UDim2.new(0, 100, 0, 32)
-        ok.Position = UDim2.new(0.5, -50, 1, -42)
-        ok.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-        ok.TextColor3 = Color3.new(1, 1, 1)
-        ok.Font = Enum.Font.Gotham
-        ok.TextSize = 18
-
-        local okCorner = Instance.new("UICorner", ok)
-        okCorner.CornerRadius = UDim.new(0, 4)
-
-        ok.MouseButton1Click:Connect(function()
-            screen:Destroy()
-        end)
 
         -- Nút Leave
         local leave = Instance.new("TextButton", frame)
