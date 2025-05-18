@@ -20,6 +20,7 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Game = Window:AddTab({ Title = "Game", Icon = "sword" }),
     Player = Window:AddTab({ Title = "Player", Icon = "box" }),
+    EspFruit = Window:AddTab({ Title = "Esp Enchant Fruit", Icon = "box"}),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings"}),
     Other = Window:AddTab({ Title = "Other", Icon = "settings"})
 }
@@ -208,6 +209,7 @@ Tabs.Player:AddSlider("aimbot_fov", {
         AimbotFOV = Value
     end,
 })
+---------------------EspFruit----------------
 
 --------------------------- ⚙️ Settings tab----------------
 InterfaceManager:SetLibrary(Fluent)
@@ -229,49 +231,80 @@ Fluent:Notify({
 
 SaveManager:LoadAutoloadConfig()
 --------------Other-----------
--- Nút giả kick trong tab Other
 Tabs.Other:AddButton({
-    Title = "💀 =))",
-    Description = "Test",
+    Title = "💀",
+    Description = "Chạm để biết:)",
     Callback = function()
-        local screen = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+
+        -- Tạo GUI
+        local screen = Instance.new("ScreenGui")
         screen.Name = "FakeKickMessage"
         screen.ResetOnSpawn = false
+        screen.IgnoreGuiInset = true
+        screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
+        -- Làm mờ nền
+        local blur = Instance.new("Frame", screen)
+        blur.Size = UDim2.new(1, 0, 1, 0)
+        blur.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        blur.BackgroundTransparency = 0.3
+
+        -- Frame chính
         local frame = Instance.new("Frame", screen)
-        frame.Position = UDim2.new(0.5, -200, 0.5, -75)
-        frame.Size = UDim2.new(0, 400, 0, 150)
-        frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        frame.BorderSizePixel = 0
+        frame.Position = UDim2.new(0.5, 0, 0.5, 0)
         frame.AnchorPoint = Vector2.new(0.5, 0.5)
+        frame.Size = UDim2.new(0, 420, 0, 180)
+        frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 
+        -- Bo tròn
+        local corner = Instance.new("UICorner", frame)
+        corner.CornerRadius = UDim.new(0, 8)
+
+        -- Viền sáng
+        local stroke = Instance.new("UIStroke", frame)
+        stroke.Color = Color3.fromRGB(255, 50, 50)
+        stroke.Thickness = 2
+
+        -- Tiêu đề
         local title = Instance.new("TextLabel", frame)
         title.Text = "Disconnected"
-        title.Size = UDim2.new(1, 0, 0.3, 0)
-        title.TextSize = 26
-        title.Font = Enum.Font.SourceSansBold
-        title.TextColor3 = Color3.fromRGB(255, 50, 50)
+        title.Size = UDim2.new(1, 0, 0.25, 0)
+        title.Position = UDim2.new(0, 0, 0, 10)
         title.BackgroundTransparency = 1
+        title.Font = Enum.Font.GothamBold
+        title.TextColor3 = Color3.fromRGB(255, 70, 70)
+        title.TextScaled = true
 
+        -- Nội dung
         local content = Instance.new("TextLabel", frame)
         content.Text = "You have been kicked from this experience.\n(Error Code: 267)"
-        content.Size = UDim2.new(1, -20, 0.5, 0)
-        content.Position = UDim2.new(0, 10, 0.3, 0)
-        content.TextSize = 18
-        content.Font = Enum.Font.SourceSans
-        content.TextColor3 = Color3.fromRGB(255, 255, 255)
+        content.Size = UDim2.new(1, -40, 0.45, 0)
+        content.Position = UDim2.new(0, 20, 0.3, 0)
         content.BackgroundTransparency = 1
+        content.TextColor3 = Color3.fromRGB(230, 230, 230)
+        content.Font = Enum.Font.Gotham
         content.TextWrapped = true
         content.TextYAlignment = Enum.TextYAlignment.Top
+        content.TextScaled = true
 
+        -- Nút OK
         local ok = Instance.new("TextButton", frame)
         ok.Text = "OK"
-        ok.Size = UDim2.new(0, 100, 0, 30)
-        ok.Position = UDim2.new(0.5, -50, 1, -40)
+        ok.Size = UDim2.new(0, 100, 0, 36)
+        ok.Position = UDim2.new(0.5, -50, 1, -50)
         ok.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         ok.TextColor3 = Color3.new(1, 1, 1)
-        ok.Font = Enum.Font.SourceSans
+        ok.Font = Enum.Font.GothamMedium
         ok.TextSize = 18
+
+        -- Bo tròn nút
+        local okCorner = Instance.new("UICorner", ok)
+        okCorner.CornerRadius = UDim.new(0, 6)
+
+        -- Tác vụ
         ok.MouseButton1Click:Connect(function()
             screen:Destroy()
         end)
