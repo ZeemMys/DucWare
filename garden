@@ -31,7 +31,148 @@ Fluent:Notify({
     Content = "Grow a Garden Script ĐÃ CHẠY",
     Duration = 6,
 })
+--------------Game---------------
+-- 🌾 Auto Harvest
+Tabs.Game:AddToggle("auto_harvest", {
+    Title = "🌾 Auto Harvest",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoHarvestUniversal = Value
+        if not Value then return end
 
+        task.spawn(function()
+            local player = Players.LocalPlayer
+            local hrp = player.Character:WaitForChild("HumanoidRootPart")
+
+            local function teleportTo(part)
+                if part and part:IsA("BasePart") then
+                    hrp.CFrame = CFrame.new(part.Position + Vector3.new(0, 4, 0))
+                    task.wait(0.5)
+                end
+            end
+
+            local function tryHarvestPrompt(prompt, target)
+                teleportTo(target)
+                local start = tick()
+                while tick() - start < 3 do
+                    if not _G.AutoHarvestUniversal then return end
+                    if prompt.Enabled and (target.Position - hrp.Position).Magnitude <= prompt.MaxActivationDistance then
+                        fireproximityprompt(prompt)
+                        task.wait(0.5)
+                        return true
+                    end
+                    task.wait(0.1)
+                end
+                return false
+            end
+
+            local function getMyFarm()
+                local farmFolder = workspace:FindFirstChild("Farm")
+                if not farmFolder then return nil end
+                local myName = player.Name:lower()
+
+                for _, farm in ipairs(farmFolder:GetChildren()) do
+                    local sign = farm:FindFirstChild("Sign")
+                    local core = sign and sign:FindFirstChild("Core_Part")
+                    if core then
+                        for _, obj in ipairs(core:GetDescendants()) do
+                            if obj:IsA("TextLabel") then
+                                local name = obj.Text:match("^(.-)'s Garden") or obj.Text:match("^(.-)’s Garden")
+                                if name and name:lower() == myName then
+                                    return farm
+                                end
+                            end
+                        end
+                    end
+                end
+                return nil
+            end
+
+            local function isPlantMature(plant)
+                local fruits = plant:FindFirstChild("Fruits")
+                local grow = fruits and (fruits:FindFirstChild("Grow") or fruits)
+                if grow then
+                    for _, fruit in ipairs(grow:GetChildren()) do
+                        if fruit:IsA("BasePart") or fruit:IsA("MeshPart") then
+                            return true
+                        end
+                    end
+                end
+                return false
+            end
+
+            while task.wait(1) do
+                if not _G.AutoHarvestUniversal then break end
+
+                pcall(function()
+                    local farm = getMyFarm()
+                    if not farm then return end
+                    local plants = farm:FindFirstChild("Important") and farm.Important:FindFirstChild("Plants_Physical")
+                    if not plants then return end
+
+                    for _, plant in ipairs(plants:GetChildren()) do
+                        if not _G.AutoHarvestUniversal then return end
+
+                        local harvested = false
+                        local fruits = plant:FindFirstChild("Fruits")
+                        if fruits and isPlantMature(plant) then
+                            local grow = fruits:FindFirstChild("Grow") or fruits
+                            for _, fruit in ipairs(grow:GetChildren()) do
+                                if not _G.AutoHarvestUniversal then return end
+                                local prompt = fruit:FindFirstChildWhichIsA("ProximityPrompt")
+                                if prompt then
+                                    tryHarvestPrompt(prompt, fruit)
+                                    harvested = true
+                                end
+                            end
+                        end
+
+                        if not harvested then
+                            for _, part in ipairs(plant:GetDescendants()) do
+                                if not _G.AutoHarvestUniversal then return end
+                                if part:IsA("BasePart") then
+                                    local prompt = part:FindFirstChildWhichIsA("ProximityPrompt")
+                                    if prompt then
+                                        tryHarvestPrompt(prompt, part)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    end
+})
+
+-- 💰 Auto Sell
+Tabs.Game:AddToggle("auto_sell", {
+    Title = "💰 Auto Sell",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoInstantSell = Value
+
+        if Value then
+            task.spawn(function()
+                local player = Players.LocalPlayer
+                local hrp = player.Character:WaitForChild("HumanoidRootPart")
+                local sellRemote = game:GetService("ReplicatedStorage").GameEvents:FindFirstChild("Sell_Inventory")
+                local sellPoint = workspace:WaitForChild("Tutorial_Points"):WaitForChild("Tutorial_Point_2")
+
+                while _G.AutoInstantSell do
+                    pcall(function()
+                        hrp.CFrame = sellPoint.CFrame + Vector3.new(0, 3, 0)
+                        task.wait(0.4)
+                        if sellRemote then
+                            sellRemote:FireServer()
+                        end
+                    end)
+                    task.wait(15)
+                end
+            end)
+        end
+    end
+})
 ---------------------Player-----------------
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
