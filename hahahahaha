@@ -504,7 +504,7 @@ function updateESP()
 end
 
 -- Toggle ESP
-Tabs.PlayerTab:CreateToggle({
+Tabs.PlayerTab:AddToggle({
     Name = "ESP Player",
     CurrentValue = false,
     Callback = function(Value)
