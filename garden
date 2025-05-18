@@ -373,13 +373,15 @@ Fluent:Notify({
 SaveManager:LoadAutoloadConfig()
 --------------Other-----------
 Tabs.Other:AddButton({
-    Title = "💀",
-    Description = "Chạm để biết:)",
+    Title = "💀 =))",
+    Description = "Test đi",
     Callback = function()
         local Players = game:GetService("Players")
+        local TeleportService = game:GetService("TeleportService")
         local LocalPlayer = Players.LocalPlayer
+        local PlaceId = game.PlaceId
 
-        -- Tạo GUI
+        -- GUI
         local screen = Instance.new("ScreenGui")
         screen.Name = "FakeKickMessage"
         screen.ResetOnSpawn = false
@@ -387,67 +389,93 @@ Tabs.Other:AddButton({
         screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-        -- Làm mờ nền
+        -- Nền mờ
         local blur = Instance.new("Frame", screen)
         blur.Size = UDim2.new(1, 0, 1, 0)
         blur.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        blur.BackgroundTransparency = 0.3
+        blur.BackgroundTransparency = 0.4
 
-        -- Frame chính
+        -- Khung chính
         local frame = Instance.new("Frame", screen)
-        frame.Position = UDim2.new(0.5, 0, 0.5, 0)
         frame.AnchorPoint = Vector2.new(0.5, 0.5)
-        frame.Size = UDim2.new(0, 420, 0, 180)
-        frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        frame.Size = UDim2.new(0, 400, 0, 180)
+        frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 
-        -- Bo tròn
         local corner = Instance.new("UICorner", frame)
-        corner.CornerRadius = UDim.new(0, 8)
-
-        -- Viền sáng
-        local stroke = Instance.new("UIStroke", frame)
-        stroke.Color = Color3.fromRGB(255, 50, 50)
-        stroke.Thickness = 2
+        corner.CornerRadius = UDim.new(0, 6)
 
         -- Tiêu đề
         local title = Instance.new("TextLabel", frame)
         title.Text = "Disconnected"
-        title.Size = UDim2.new(1, 0, 0.25, 0)
+        title.Size = UDim2.new(1, 0, 0, 40)
         title.Position = UDim2.new(0, 0, 0, 10)
         title.BackgroundTransparency = 1
-        title.Font = Enum.Font.GothamBold
-        title.TextColor3 = Color3.fromRGB(255, 70, 70)
-        title.TextScaled = true
+        title.Font = Enum.Font.GothamSemibold
+        title.TextColor3 = Color3.fromRGB(255, 255, 255)
+        title.TextSize = 24
 
         -- Nội dung
         local content = Instance.new("TextLabel", frame)
         content.Text = "You have been kicked from this experience.\n(Error Code: 267)"
-        content.Size = UDim2.new(1, -40, 0.45, 0)
-        content.Position = UDim2.new(0, 20, 0.3, 0)
+        content.Size = UDim2.new(1, -40, 0, 60)
+        content.Position = UDim2.new(0, 20, 0, 50)
         content.BackgroundTransparency = 1
-        content.TextColor3 = Color3.fromRGB(230, 230, 230)
+        content.TextColor3 = Color3.fromRGB(220, 220, 220)
         content.Font = Enum.Font.Gotham
         content.TextWrapped = true
         content.TextYAlignment = Enum.TextYAlignment.Top
-        content.TextScaled = true
+        content.TextSize = 16
 
         -- Nút OK
         local ok = Instance.new("TextButton", frame)
         ok.Text = "OK"
-        ok.Size = UDim2.new(0, 100, 0, 36)
-        ok.Position = UDim2.new(0.5, -50, 1, -50)
-        ok.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        ok.Size = UDim2.new(0, 100, 0, 32)
+        ok.Position = UDim2.new(0.5, -50, 1, -42)
+        ok.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         ok.TextColor3 = Color3.new(1, 1, 1)
-        ok.Font = Enum.Font.GothamMedium
+        ok.Font = Enum.Font.Gotham
         ok.TextSize = 18
 
-        -- Bo tròn nút
         local okCorner = Instance.new("UICorner", ok)
-        okCorner.CornerRadius = UDim.new(0, 6)
+        okCorner.CornerRadius = UDim.new(0, 4)
 
-        -- Tác vụ
         ok.MouseButton1Click:Connect(function()
             screen:Destroy()
+        end)
+
+        -- Nút Leave
+        local leave = Instance.new("TextButton", frame)
+        leave.Text = "Leave"
+        leave.Size = UDim2.new(0, 100, 0, 32)
+        leave.Position = UDim2.new(0, 20, 1, -42)
+        leave.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+        leave.TextColor3 = Color3.new(1, 1, 1)
+        leave.Font = Enum.Font.Gotham
+        leave.TextSize = 18
+
+        local leaveCorner = Instance.new("UICorner", leave)
+        leaveCorner.CornerRadius = UDim.new(0, 4)
+
+        leave.MouseButton1Click:Connect(function()
+            LocalPlayer:Kick("You have left the experience.")
+        end)
+
+        -- Nút Rejoin
+        local rejoin = Instance.new("TextButton", frame)
+        rejoin.Text = "Rejoin"
+        rejoin.Size = UDim2.new(0, 100, 0, 32)
+        rejoin.Position = UDim2.new(1, -120, 1, -42)
+        rejoin.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+        rejoin.TextColor3 = Color3.new(1, 1, 1)
+        rejoin.Font = Enum.Font.Gotham
+        rejoin.TextSize = 18
+
+        local rejoinCorner = Instance.new("UICorner", rejoin)
+        rejoinCorner.CornerRadius = UDim.new(0, 4)
+
+        rejoin.MouseButton1Click:Connect(function()
+            TeleportService:Teleport(PlaceId, LocalPlayer)
         end)
     end
 })
