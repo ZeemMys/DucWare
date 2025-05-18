@@ -367,7 +367,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local root = character:WaitForChild("HumanoidRootPart")
 
 local flying = false
-local flySpeed = 50 -- Mặc định
+local flySpeed = 50 -- tốc độ bay mặc định
 local bv, bg
 local flyConnection
 
@@ -403,6 +403,7 @@ local function startFly()
         else
             bv.Velocity = Vector3.zero
         end
+
         bg.CFrame = workspace.CurrentCamera.CFrame
     end)
 end
@@ -417,32 +418,28 @@ local function stopFly()
     if bg then bg:Destroy() bg = nil end
 end
 
--- 📌 Gắn vào PlayerTab:
-PlayerTab:CreateToggle({
-    Name = "Fly",
-    CurrentValue = false,
-    Callback = function(value)
-        flying = value
-        character = player.Character or player.CharacterAdded:Wait()
-        root = character:WaitForChild("HumanoidRootPart")
+-- ✅ Toggle bay
+Tabs.Player:AddToggle("Fly", {default = false}, function(state)
+    flying = state
+    character = player.Character or player.CharacterAdded:Wait()
+    root = character:WaitForChild("HumanoidRootPart")
 
-        if flying then
-            startFly()
-        else
-            stopFly()
-        end
-    end,
-})
+    if flying then
+        startFly()
+    else
+        stopFly()
+    end
+end)
 
-PlayerTab:CreateSlider({
-    Name = "Fly Speed",
-    Range = {10, 200},
-    Increment = 5,
-    CurrentValue = 50,
-    Callback = function(value)
-        flySpeed = value
-    end,
-})
+-- ✅ Slider tốc độ bay
+Tabs.Player:AddSlider("Fly Speed", {
+    min = 10,
+    max = 200,
+    default = 50,
+    rounding = 0,
+}, function(value)
+    flySpeed = value
+end)
 
 local ESPEnabled = false
 local ESPObjects = {}
