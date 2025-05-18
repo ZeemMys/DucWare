@@ -538,3 +538,38 @@ Tabs.Other:AddButton({
         warn("Không tìm được server ít người.")
     end
 })
+
+OtherTab:Section("Fake Chat"):Component(function(c)
+    local messages = {}
+    
+    local ChatBox = c:TextBox({
+        text = "",
+        placeholder = "Nhập tin nhắn...",
+        clearOnFocus = false,
+        callback = function(text)
+            -- Tùy bạn muốn xử lý gì ở đây khi nhấn Enter
+        end
+    })
+
+    c:Button({
+        text = "Gửi tin nhắn",
+        callback = function()
+            local message = ChatBox:GetText()
+            if message ~= "" then
+                table.insert(messages, message)
+                if #messages > 10 then -- chỉ hiển thị 10 dòng gần nhất
+                    table.remove(messages, 1)
+                end
+                UpdateChat()
+                ChatBox:SetText("")
+            end
+        end
+    })
+
+    local ChatDisplay = c:Label("")
+
+    function UpdateChat()
+        local chatText = table.concat(messages, "\n")
+        ChatDisplay:SetText(chatText)
+    end
+end)
