@@ -419,17 +419,21 @@ local function stopFly()
 end
 
 -- ✅ Toggle bay
-Tabs.Player:AddToggle("Fly", {default = false}, function(state)
-    flying = state
-    character = player.Character or player.CharacterAdded:Wait()
-    root = character:WaitForChild("HumanoidRootPart")
+Tabs.Player:AddToggle("fly_toggle", {
+    Title = "🕊️ Bay",
+    Default = false,
+    Callback = function(state)
+        flying = state
+        character = player.Character or player.CharacterAdded:Wait()
+        root = character:WaitForChild("HumanoidRootPart")
 
-    if flying then
-        startFly()
-    else
-        stopFly()
+        if flying then
+            startFly()
+        else
+            stopFly()
+        end
     end
-end)
+})
 
 -- ✅ Slider tốc độ bay
 Tabs.Player:AddSlider("Fly Speed", {
@@ -509,7 +513,7 @@ Tabs.PlayerTab:AddToggle("ESP_toggle", {
     Callback = function(Value)
         ESPEnabled = Value
         updateESP()
-end
+    end
 })
 
 -- Theo dõi người chơi mới
