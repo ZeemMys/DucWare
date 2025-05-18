@@ -539,7 +539,7 @@ Tabs.Other:AddButton({
     end
 })
 
-local CreateSection = require(game:GetService("ReplicatedStorage").UI.Section)
+local CreateSection = require(game:GetService("ReplicatedStorage").Modules.Section)
 local OtherTab = SomeTabFrame -- Frame chứa nội dung của tab "Other"
 
 local FakeChatSection = CreateSection("Fake Chat", OtherTab)
