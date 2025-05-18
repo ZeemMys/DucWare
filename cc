@@ -677,13 +677,63 @@ Tabs.Other:AddButton({
     end
 })
 
--- NÚT 2: Join private server bằng mã link chia sẻ
-Tabs.Other:AddButton({
-    Title = "🔗 Join My Svv",
-    Description = "Join If You Like:)",
-    Callback = function()
-        -- Mã từ link: https://www.roblox.com/share?code=a610607117f04f458b94541233c9c94c&type=Server
-        local privateServerCode = "a610607117f04f458b94541233c9c94c"
-        TeleportService:TeleportToPrivateServer(PlaceId, privateServerCode, {LocalPlayer})
+local Players = game:GetService("Players")
+local InsertService = game:GetService("InsertService")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+-- Mỗi loại hình dạng sẽ có AssetId của HumanoidDescription mẫu
+local morphs = {
+    ["🐱 Mèo"] = 7733581962, -- Mèo (Catalog bundle)
+    ["🐶 Chó"] = 1029025, -- Chó (classic doge hat)
+    ["🧍‍♂️ Noob khổng lồ"] = 86487766 -- Noob bundle
+}
+
+-- Nút trong tab Other
+Tabs.Other:AddDropdown("MorphDropdown", {
+    Title = "🧬 Chọn đi:)",
+    Description = "Chọn hình dạng để biến hình",
+    Values = {"🐱 Mèo", "🐶 Chó", "🧍‍♂️ Noob khổng lồ"},
+    Multi = false,
+    Default = 1,
+    Callback = function(selection)
+        local assetId = morphs[selection]
+        if assetId then
+            -- Tải HumanoidDescription từ asset
+            local success, model = pcall(function()
+                return InsertService:LoadAsset(assetId)
+            end)
+
+            if success and model then
+                local description = nil
+                for _, obj in pairs(model:GetDescendants()) do
+                    if obj:IsA("HumanoidDescription") then
+                        description = obj
+                        break
+                    end
+                end
+
+                if description then
+                    local humanoid = Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid:ApplyDescription(description)
+                        Fluent:Notify({
+                            Title = "🧬 Biến hình thành công!",
+                            Content = "Bạn đã biến thành: " .. selection,
+                            SubContent = "Have fun!",
+                            Duration = 4
+                        })
+                    end
+                end
+                model:Destroy()
+            else
+                Fluent:Notify({
+                    Title = "❌ Lỗi",
+                    Content = "Không thể tải hình dạng: " .. tostring(selection),
+                    Duration = 3
+                })
+            end
+        end
     end
 })
