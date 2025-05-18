@@ -359,6 +359,88 @@ Tabs.Player:AddSlider("aimbot_fov", {
         AimbotFOV = Value
     end,
 })
+
+-- 🕊️ Fly Toggle
+local flyConnection
+local velocity
+local flySpeed = 50
+local flying = false
+
+local function startFlying()
+    local char = Players.LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    velocity = Instance.new("BodyVelocity")
+    velocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    velocity.Velocity = Vector3.zero
+    velocity.Parent = hrp
+
+    flying = true
+
+    flyConnection = RunService.RenderStepped:Connect(function()
+        local cam = workspace.CurrentCamera
+        local moveDirection = Vector3.zero
+
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDirection += cam.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDirection -= cam.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDirection -= cam.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDirection += cam.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            moveDirection += Vector3.new(0, 1, 0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            moveDirection -= Vector3.new(0, 1, 0)
+        end
+
+        if moveDirection.Magnitude > 0 then
+            velocity.Velocity = moveDirection.Unit * flySpeed
+        else
+            velocity.Velocity = Vector3.zero
+        end
+    end)
+end
+
+local function stopFlying()
+    flying = false
+    if flyConnection then flyConnection:Disconnect() end
+    if velocity then velocity:Destroy() end
+end
+
+local FlyEnabled = false
+Tabs.Player:AddToggle("fly_toggle", {
+    Title = "🕊️ Fly",
+    Default = false,
+    Callback = function(Value)
+        FlyEnabled = Value
+        if Value then
+            startFlying()
+        else
+            stopFlying()
+        end
+    end,
+})
+
+Tabs.Player:AddSlider("flyspeed_slider", {
+    Title = "🕊️ Tốc độ bay",
+    Description = "Điều chỉnh tốc độ bay",
+    Default = flySpeed,
+    Min = 10,
+    Max = 300,
+    Rounding = 0,
+    Suffix = "stud/s",
+    Callback = function(Value)
+        flySpeed = Value
+    end,
+})
 ---------------------EspFruit----------------
 
 --------------------------- ⚙️ Settings tab----------------
