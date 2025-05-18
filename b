@@ -26,7 +26,7 @@ local Tabs = {
 }
 
 -- Phát hiện executor
-local executor = identifyexecutor() or "Không xác định"
+local executor = identifyexecutor and identifyexecutor() or "Không xác định"
 
 -- Thêm nhãn executor vào GUI
 Tabs.Game:AddParagraph({
