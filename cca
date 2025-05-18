@@ -678,67 +678,73 @@ Tabs.Other:AddButton({
 })
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+
 local LocalPlayer = Players.LocalPlayer
+local tornadoActive = false
+local tornadoConnection
 
-local function applyDescription(data)
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        local desc = Instance.new("HumanoidDescription")
-        for prop, val in pairs(data) do
-            if desc[prop] ~= nil then
-                desc[prop] = val
-            end
+-- 🌪 Tornado Mode
+Tabs.Other:AddToggle("TornadoToggle", {
+    Title = "🌪 Tornado Mode",
+    Description = "Quay vòng vòng như lốc xoáy!",
+    Default = false,
+    Callback = function(state)
+        tornadoActive = state
+
+        if tornadoConnection then
+            tornadoConnection:Disconnect()
+            tornadoConnection = nil
         end
-        humanoid:ApplyDescription(desc)
+
+        if state then
+            tornadoConnection = RunService.RenderStepped:Connect(function()
+                local char = LocalPlayer.Character
+                if not char then return end
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                -- Xoay nhân vật
+                hrp.CFrame *= CFrame.Angles(0, math.rad(10), 0)
+
+                -- Xoay camera
+                local cam = workspace.CurrentCamera
+                cam.CFrame *= CFrame.Angles(0, 0, math.rad(5))
+            end)
+        end
     end
-end
+})
 
--- Danh sách mô phỏng hình dạng
-local morphs = {
-    ["🐱 Mèo"] = {
-        HatAccessory = "1029025", -- Doge hat (làm hình thú)
-        Shirt = 144076759, -- áo màu mèo
-        Pants = 144076760
-    },
-    ["🐶 Chó"] = {
-        HatAccessory = "1029025", -- Doge
-        Shirt = 144076749,
-        Pants = 144076750
-    },
-    ["🧍‍♂️ Noob khổng lồ"] = {
-        Shirt = 144076760, -- áo vàng
-        Pants = 144076761,
-        BodyTypeScale = 1,
-        DepthScale = 2,
-        HeightScale = 2,
-        WidthScale = 2,
-        HeadScale = 2
-    }
-}
+-- 🧼 Rửa tội (Bay lên trời)
+Tabs.Other:AddButton({
+    Title = "🧼 Rửa Tội",
+    Description = "Thổi bay bạn lên trời kèm rocket âm thanh 🚀",
+    Callback = function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
 
--- Giao diện Fluent
-Tabs.Other:AddDropdown("MorphDropdown", {
-    Title = "🧬 Chọn hình dạng",
-    Description = "Biến hình:",
-    Values = {"🐱 Mèo", "🐶 Chó", "🧍‍♂️ Noob khổng lồ"},
-    Multi = false,
-    Default = 1,
-    Callback = function(selection)
-        local data = morphs[selection]
-        if data then
-            applyDescription(data)
-            Fluent:Notify({
-                Title = "✅ Thành công!",
-                Content = "Đã biến thành: " .. selection,
-                Duration = 4
-            })
-        else
-            Fluent:Notify({
-                Title = "❌ Lỗi",
-                Content = "Không tìm thấy dữ liệu hình dạng.",
-                Duration = 3
-            })
-        end
+        -- Tạo BodyVelocity để bay lên trời
+        local bv = Instance.new("BodyVelocity")
+        bv.Velocity = Vector3.new(0, 250, 0)
+        bv.MaxForce = Vector3.new(0, math.huge, 0)
+        bv.P = 1250
+        bv.Parent = hrp
+
+        -- Tự động xóa sau 2 giây
+        task.delay(2, function()
+            bv:Destroy()
+        end)
+
+        -- Âm thanh bay (Rocket)
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://138186576" -- Rocket launch sound
+        sound.Volume = 2
+        sound.PlayOnRemove = true
+        sound.Parent = hrp
+        sound:Destroy() -- Phát bằng cách xóa
     end
 })
