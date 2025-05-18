@@ -374,12 +374,20 @@ SaveManager:LoadAutoloadConfig()
 --------------Other-----------
 Tabs.Other:AddButton({
     Title = "💀",
-    Description = "Ấn đi=))",
+    Description = "Ấn Để Biết",
     Callback = function()
         local Players = game:GetService("Players")
         local TeleportService = game:GetService("TeleportService")
+        local TweenService = game:GetService("TweenService")
+        local Lighting = game:GetService("Lighting")
         local LocalPlayer = Players.LocalPlayer
         local PlaceId = game.PlaceId
+
+        -- Blur Effect
+        local blur = Instance.new("BlurEffect")
+        blur.Size = 18
+        blur.Name = "FakeKickBlur"
+        blur.Parent = Lighting
 
         -- GUI
         local screen = Instance.new("ScreenGui")
@@ -389,18 +397,20 @@ Tabs.Other:AddButton({
         screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-        -- Nền mờ
-        local blur = Instance.new("Frame", screen)
-        blur.Size = UDim2.new(1, 0, 1, 0)
-        blur.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        blur.BackgroundTransparency = 0.4
+        -- Nền tối
+        local darkBackground = Instance.new("Frame")
+        darkBackground.Size = UDim2.new(1, 0, 1, 0)
+        darkBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        darkBackground.BackgroundTransparency = 0.5
+        darkBackground.Parent = screen
 
         -- Khung chính
-        local frame = Instance.new("Frame", screen)
+        local frame = Instance.new("Frame")
         frame.AnchorPoint = Vector2.new(0.5, 0.5)
         frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-        frame.Size = UDim2.new(0, 400, 0, 180)
+        frame.Size = UDim2.new(0, 500, 0, 220)
         frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        frame.Parent = screen
 
         local corner = Instance.new("UICorner", frame)
         corner.CornerRadius = UDim.new(0, 6)
@@ -413,51 +423,57 @@ Tabs.Other:AddButton({
         title.BackgroundTransparency = 1
         title.Font = Enum.Font.GothamSemibold
         title.TextColor3 = Color3.fromRGB(255, 255, 255)
-        title.TextSize = 24
+        title.TextSize = 26
 
         -- Nội dung
         local content = Instance.new("TextLabel", frame)
         content.Text = "You have been kicked from this experience.\n(Error Code: 267)"
-        content.Size = UDim2.new(1, -40, 0, 60)
+        content.Size = UDim2.new(1, -40, 0, 80)
         content.Position = UDim2.new(0, 20, 0, 50)
         content.BackgroundTransparency = 1
         content.TextColor3 = Color3.fromRGB(220, 220, 220)
         content.Font = Enum.Font.Gotham
         content.TextWrapped = true
         content.TextYAlignment = Enum.TextYAlignment.Top
-        content.TextSize = 16
+        content.TextSize = 18
 
         -- Nút Leave
         local leave = Instance.new("TextButton", frame)
         leave.Text = "Leave"
-        leave.Size = UDim2.new(0, 100, 0, 32)
-        leave.Position = UDim2.new(0, 20, 1, -42)
+        leave.Size = UDim2.new(0, 120, 0, 36)
+        leave.Position = UDim2.new(0.5, -130, 1, -50)
         leave.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
         leave.TextColor3 = Color3.new(1, 1, 1)
         leave.Font = Enum.Font.Gotham
         leave.TextSize = 18
+        leave.Parent = frame
 
         local leaveCorner = Instance.new("UICorner", leave)
         leaveCorner.CornerRadius = UDim.new(0, 4)
 
         leave.MouseButton1Click:Connect(function()
+            blur:Destroy()
+            screen:Destroy()
             LocalPlayer:Kick("You have left the experience.")
         end)
 
         -- Nút Rejoin
         local rejoin = Instance.new("TextButton", frame)
         rejoin.Text = "Rejoin"
-        rejoin.Size = UDim2.new(0, 100, 0, 32)
-        rejoin.Position = UDim2.new(1, -120, 1, -42)
+        rejoin.Size = UDim2.new(0, 120, 0, 36)
+        rejoin.Position = UDim2.new(0.5, 10, 1, -50)
         rejoin.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
         rejoin.TextColor3 = Color3.new(1, 1, 1)
         rejoin.Font = Enum.Font.Gotham
         rejoin.TextSize = 18
+        rejoin.Parent = frame
 
         local rejoinCorner = Instance.new("UICorner", rejoin)
         rejoinCorner.CornerRadius = UDim.new(0, 4)
 
         rejoin.MouseButton1Click:Connect(function()
+            blur:Destroy()
+            screen:Destroy()
             TeleportService:Teleport(PlaceId, LocalPlayer)
         end)
     end
