@@ -509,8 +509,8 @@ function updateESP()
 end
 
 -- Toggle ESP
-Tabs.PlayerTab:AddToggle("ESP_toggle", {
-    Title = "ESP Player",
+Tabs.Player:AddToggle("ESP_toggle", {
+    Title = "🧿 ESP Người chơi",
     Default = false,
     Callback = function(Value)
         ESPEnabled = Value
