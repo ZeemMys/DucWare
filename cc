@@ -679,14 +679,11 @@ Tabs.Other:AddButton({
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
 
 local LocalPlayer = Players.LocalPlayer
 local tornadoActive = false
 local tornadoConnection
 
--- 🌪 Tornado Mode
 Tabs.Other:AddToggle("TornadoToggle", {
     Title = "🌪 Tornado Mode",
     Description = "Quay vòng vòng như lốc xoáy!",
@@ -706,45 +703,9 @@ Tabs.Other:AddToggle("TornadoToggle", {
                 local hrp = char:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
 
-                -- Xoay nhân vật
-                hrp.CFrame *= CFrame.Angles(0, math.rad(10), 0)
-
-                -- Xoay camera
-                local cam = workspace.CurrentCamera
-                cam.CFrame *= CFrame.Angles(0, 0, math.rad(5))
+                -- Xoay nhân vật nhẹ nhàng
+                hrp.CFrame *= CFrame.Angles(0, math.rad(3), 0)
             end)
         end
-    end
-})
-
--- 🧼 Rửa tội (Bay lên trời)
-Tabs.Other:AddButton({
-    Title = "🧼 Rửa Tội",
-    Description = "Thổi bay bạn lên trời kèm rocket âm thanh 🚀",
-    Callback = function()
-        local char = LocalPlayer.Character
-        if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-
-        -- Tạo BodyVelocity để bay lên trời
-        local bv = Instance.new("BodyVelocity")
-        bv.Velocity = Vector3.new(0, 250, 0)
-        bv.MaxForce = Vector3.new(0, math.huge, 0)
-        bv.P = 1250
-        bv.Parent = hrp
-
-        -- Tự động xóa sau 2 giây
-        task.delay(2, function()
-            bv:Destroy()
-        end)
-
-        -- Âm thanh bay (Rocket)
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://138186576" -- Rocket launch sound
-        sound.Volume = 2
-        sound.PlayOnRemove = true
-        sound.Parent = hrp
-        sound:Destroy() -- Phát bằng cách xóa
     end
 })
