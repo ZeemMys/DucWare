@@ -441,6 +441,92 @@ Tabs.Player:AddSlider("flyspeed_slider", {
         flySpeed = Value
     end,
 })
+
+local ESPEnabled = false
+local ESPObjects = {}
+
+function createESP(player)
+    if player == game.Players.LocalPlayer then return end
+    local character = player.Character
+    if not character then return end
+
+    -- Highlight toàn bộ nhân vật
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESPHighlight"
+    highlight.FillColor = Color3.fromRGB(0, 255, 0)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineColor = Color3.new(1, 1, 1)
+    highlight.OutlineTransparency = 0
+    highlight.Adornee = character
+    highlight.Parent = character
+
+    -- Tên người chơi
+    local nameTag = Instance.new("BillboardGui")
+    nameTag.Name = "ESPName"
+    nameTag.Size = UDim2.new(0, 100, 0, 40)
+    nameTag.StudsOffset = Vector3.new(0, 3, 0)
+    nameTag.Adornee = character:FindFirstChild("Head")
+    nameTag.AlwaysOnTop = true
+    nameTag.Parent = character
+
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(1, 0, 1, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = player.Name
+    nameLabel.TextColor3 = Color3.new(1, 1, 1)
+    nameLabel.TextStrokeTransparency = 0
+    nameLabel.TextScaled = true
+    nameLabel.Font = Enum.Font.SourceSansBold
+    nameLabel.Parent = nameTag
+
+    ESPObjects[player] = {highlight, nameTag}
+end
+
+function removeESP(player)
+    if ESPObjects[player] then
+        for _, v in pairs(ESPObjects[player]) do
+            if v then v:Destroy() end
+        end
+        ESPObjects[player] = nil
+    end
+end
+
+function updateESP()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if ESPEnabled then
+            if player.Character and not ESPObjects[player] then
+                createESP(player)
+            end
+        else
+            removeESP(player)
+        end
+    end
+end
+
+-- Toggle ESP
+PlayerTab:CreateToggle({
+    Name = "ESP Player",
+    CurrentValue = false,
+    Callback = function(Value)
+        ESPEnabled = Value
+        updateESP()
+    end,
+})
+
+-- Theo dõi người chơi mới
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        wait(1)
+        if ESPEnabled then
+            createESP(player)
+        end
+    end)
+end)
+
+-- Xoá ESP khi người chơi rời
+game.Players.PlayerRemoving:Connect(function(player)
+    removeESP(player)
+end)
 ---------------------EspFruit----------------
 
 --------------------------- ⚙️ Settings tab----------------
