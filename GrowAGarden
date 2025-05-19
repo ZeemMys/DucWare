@@ -85,7 +85,7 @@ Submit.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
 
         -- ✅ Nếu đúng key, load GUI chính
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/cc"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/cccc"))()
     else
         Submit.Text = "❌ Sai Key"
         task.wait(1)
