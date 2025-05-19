@@ -817,14 +817,14 @@ local function setAntiAFK(state)
         Fluent:Notify({
             Title = "✅ Anti AFK",
             Content = "Đã bật thành công!",
-            SubContent = "Bạn sẽ không bị kick khi AFK.",
+            SubContent = "Bạn sẽ không bị kick khi bật AFK.",
             Duration = 4
         })
     else
         Fluent:Notify({
             Title = "⛔️ Anti AFK",
             Content = "Đã tắt.",
-            SubContent = "Bạn có thể bị kick nếu AFK.",
+            SubContent = "Bạn có thể bị kick nếu tắt AFK.",
             Duration = 4
         })
     end
