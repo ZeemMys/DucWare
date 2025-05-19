@@ -28,9 +28,6 @@ local Tabs = {
 -- Phát hiện executor
 local executor = identifyexecutor and identifyexecutor() or "Không xác định"
 
-local currentFPS = 0
-local fpsLabel
-
 -- Thêm nhãn executor vào GUI
 Tabs.Game:AddParagraph({
     Title = "Executor đang dùng:",
@@ -44,8 +41,14 @@ Fluent:Notify({
     Duration = 6,
 })
 --------------Game---------------
--- Cập nhật FPS mỗi frame
+local RunService = game:GetService("RunService") -- Đảm bảo dòng này tồn tại!
+
 local frameCount, lastTime = 0, tick()
+local currentFPS = 0
+local fpsLabel = nil -- Gán label hiển thị FPS sau này
+
+-- Ví dụ tạo label (nếu bạn dùng Fluent UI thì dùng cách Fluent cung cấp)
+-- fpsLabel = Tabs.Game:AddLabel("FPS: 0")
 
 RunService.RenderStepped:Connect(function()
     frameCount += 1
