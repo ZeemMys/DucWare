@@ -16,8 +16,9 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 420, 0, 180) -- Tăng chiều ngang để chứa avatar
-Frame.Position = UDim2.new(0.5, -210, 0.5, -90)
+Frame.Size = UDim2.new(0, 420, 0, 180)
+Frame.AnchorPoint = Vector2.new(0.5, 0.5) -- 🆕 Căn giữa mobile
+Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
@@ -103,6 +104,11 @@ end)
 -- 🖱️ Khi ấn Submit
 Submit.MouseButton1Click:Connect(function()
     if TextBox.Text == correctKey then
+        Submit.Text = "✅ Key đúng!"
+        task.wait(0.5)
+        Submit.Text = "⏳ Đang tải GUI..."
+        task.wait(0.5)
+
         ScreenGui:Destroy()
         -- ✅ Load GUI chính
         loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/cccc"))()
