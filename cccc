@@ -55,8 +55,8 @@ local function createFPSDisplay()
 
     fpsBillboard = Instance.new("BillboardGui")
     fpsBillboard.Name = "FPSDisplay"
-    fpsBillboard.Size = UDim2.new(0, 100, 0, 40)
-    fpsBillboard.StudsOffset = Vector3.new(0, 3, 0)
+    fpsBillboard.Size = UDim2.new(0, 200, 0, 80) -- 📏 Tăng kích thước
+    fpsBillboard.StudsOffset = Vector3.new(0, 4, 0) -- 📏 Nâng cao lên
     fpsBillboard.AlwaysOnTop = true
 
     fpsLabel = Instance.new("TextLabel")
@@ -66,6 +66,8 @@ local function createFPSDisplay()
     fpsLabel.TextScaled = true
     fpsLabel.Font = Enum.Font.SourceSansBold
     fpsLabel.Text = "FPS: 0"
+    fpsLabel.TextStrokeTransparency = 0.2 -- ✅ Tăng độ nổi bật
+    fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
     fpsLabel.Parent = fpsBillboard
 
     local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -73,7 +75,7 @@ local function createFPSDisplay()
     fpsBillboard.Parent = hrp
 end
 
--- Lấy màu theo FPS
+-- Đổi màu theo FPS
 local function getColorFromFPS(fps)
     if fps <= 15 then
         return Color3.fromRGB(255, 0, 0) -- Đỏ
@@ -107,7 +109,7 @@ end)
 -- Gắn nút trong Fluent UI tab Game
 Tabs.Game:AddButton({
     Title = "🎯 Show FPS",
-    Description = "Display FPS",
+    Description = "Display FPS ",
     Callback = function()
         createFPSDisplay()
     end
