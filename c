@@ -46,11 +46,13 @@ local RunService = game:GetService("RunService")
 local frameCount, lastTime = 0, tick()
 local currentFPS = 0
 
+-- Tạo Paragraph thay vì Label để dễ cập nhật
 local fpsParagraph = Tabs.Game:AddParagraph({
     Title = "FPS Counter",
     Content = "FPS: 0"
 })
 
+-- Cập nhật FPS mỗi giây
 RunService.RenderStepped:Connect(function()
     frameCount += 1
     if tick() - lastTime >= 1 then
@@ -58,7 +60,7 @@ RunService.RenderStepped:Connect(function()
         frameCount = 0
         lastTime = tick()
         if fpsParagraph then
-            fpsParagraph:Set("FPS: " .. currentFPS)
+            fpsParagraph:Update("FPS: " .. currentFPS)
         end
     end
 end)
