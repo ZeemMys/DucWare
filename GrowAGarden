@@ -105,9 +105,9 @@ end)
 Submit.MouseButton1Click:Connect(function()
     if TextBox.Text == correctKey then
         Submit.Text = "✅ Key đúng!"
-        task.wait(0.5)
+        task.wait(1)
         Submit.Text = "⏳ Đang tải GUI..."
-        task.wait(0.5)
+        task.wait(4)
 
         ScreenGui:Destroy()
         -- ✅ Load GUI chính
