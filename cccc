@@ -796,3 +796,46 @@ Tabs.Other:AddToggle("TornadoToggle", {
         end
     end
 })
+
+-- Biến kiểm soát Anti-AFK
+local AntiAFKEnabled = false
+local VirtualUser = game:GetService("VirtualUser")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Hàm bật/tắt Anti-AFK
+local function setAntiAFK(state)
+    AntiAFKEnabled = state
+    if AntiAFKEnabled then
+        LocalPlayer.Idled:Connect(function()
+            if AntiAFKEnabled then
+                VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                task.wait(0.5)
+                VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            end
+        end)
+        Fluent:Notify({
+            Title = "✅ Anti AFK",
+            Content = "Đã bật thành công!",
+            SubContent = "Bạn sẽ không bị kick khi AFK.",
+            Duration = 4
+        })
+    else
+        Fluent:Notify({
+            Title = "⛔️ Anti AFK",
+            Content = "Đã tắt.",
+            SubContent = "Bạn có thể bị kick nếu AFK.",
+            Duration = 4
+        })
+    end
+end
+
+-- Toggle trong tab Other
+Tabs.Other:AddToggle("AntiAFKToggle", {
+    Title = "💤 Anti AFK",
+    Default = false,
+    Description = "Just Sleep",
+    Callback = function(value)
+        setAntiAFK(value)
+    end
+})
