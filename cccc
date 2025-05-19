@@ -48,6 +48,7 @@ local LocalPlayer = Players.LocalPlayer
 local fpsBillboard, fpsLabel
 local currentFPS = 0
 local frameCount, lastTime = 0, tick()
+local fpsVisible = false -- 🔄 Trạng thái bật/tắt FPS
 
 -- Tạo Billboard GUI
 local function createFPSDisplay()
@@ -55,7 +56,7 @@ local function createFPSDisplay()
 
     fpsBillboard = Instance.new("BillboardGui")
     fpsBillboard.Name = "FPSDisplay"
-    fpsBillboard.Size = UDim2.new(0, 130, 0, 45) -- 🔽 Giảm size xuống một chút
+    fpsBillboard.Size = UDim2.new(0, 130, 0, 45)
     fpsBillboard.StudsOffset = Vector3.new(0, 3.5, 0)
     fpsBillboard.AlwaysOnTop = true
 
@@ -92,26 +93,35 @@ local function getColorFromFPS(fps)
     end
 end
 
--- Cập nhật FPS liên tục
+-- Cập nhật FPS
 RunService.RenderStepped:Connect(function()
     frameCount += 1
     if tick() - lastTime >= 1 then
         currentFPS = frameCount
         frameCount = 0
         lastTime = tick()
-        if fpsLabel then
+        if fpsLabel and fpsVisible then
             fpsLabel.Text = "FPS: " .. currentFPS
             fpsLabel.TextColor3 = getColorFromFPS(currentFPS)
         end
     end
 end)
 
--- Gắn nút trong Fluent UI tab Game
+-- Gắn nút Fluent UI để bật/tắt FPS
 Tabs.Game:AddButton({
     Title = "🎯 Show FPS",
-    Description = "Display FPS",
+    Description = "Hiển thị FPS",
     Callback = function()
-        createFPSDisplay()
+        fpsVisible = not fpsVisible
+        if fpsVisible then
+            createFPSDisplay()
+        else
+            if fpsBillboard then
+                fpsBillboard:Destroy()
+                fpsBillboard = nil
+                fpsLabel = nil
+            end
+        end
     end
 })
 
