@@ -28,6 +28,9 @@ local Tabs = {
 -- Phát hiện executor
 local executor = identifyexecutor and identifyexecutor() or "Không xác định"
 
+local currentFPS = 0
+local fpsLabel
+
 -- Thêm nhãn executor vào GUI
 Tabs.Game:AddParagraph({
     Title = "Executor đang dùng:",
@@ -41,6 +44,21 @@ Fluent:Notify({
     Duration = 6,
 })
 --------------Game---------------
+-- Cập nhật FPS mỗi frame
+local frameCount, lastTime = 0, tick()
+
+RunService.RenderStepped:Connect(function()
+    frameCount += 1
+    if tick() - lastTime >= 1 then
+        currentFPS = frameCount
+        frameCount = 0
+        lastTime = tick()
+        if fpsLabel then
+            fpsLabel:Set("FPS: " .. currentFPS)
+        end
+    end
+end)
+
 -- 🌾 Auto Harvest
 Tabs.Game:AddToggle("auto_harvest", {
     Title = "🌾 Auto Harvest",
@@ -684,9 +702,12 @@ local LocalPlayer = Players.LocalPlayer
 local tornadoActive = false
 local tornadoConnection
 
+-- Tốc độ quay: số vòng mỗi giây (20 vòng/s là rất nhanh)
+local rotationSpeed = 30
+
 Tabs.Other:AddToggle("TornadoToggle", {
     Title = "🌪 Tornado Mode",
-    Description = "Quay vòng vòng như lốc xoáy!",
+    Description = "Spin",
     Default = false,
     Callback = function(state)
         tornadoActive = state
@@ -697,14 +718,14 @@ Tabs.Other:AddToggle("TornadoToggle", {
         end
 
         if state then
-            tornadoConnection = RunService.RenderStepped:Connect(function()
+            tornadoConnection = RunService.RenderStepped:Connect(function(dt)
                 local char = LocalPlayer.Character
                 if not char then return end
                 local hrp = char:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
 
-                -- Xoay nhân vật nhẹ nhàng
-                hrp.CFrame *= CFrame.Angles(0, math.rad(3), 0)
+                -- Quay nhanh hơn nhiều so với 3 độ mỗi frame
+                hrp.CFrame *= CFrame.Angles(0, math.rad(rotationSpeed * 360) * dt, 0)
             end)
         end
     end
