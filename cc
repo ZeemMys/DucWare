@@ -41,29 +41,85 @@ Fluent:Notify({
     Duration = 6,
 })
 --------------Game---------------
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
-local frameCount, lastTime = 0, tick()
-local currentFPS = 0
+local fpsGui -- Billboard GUI
+local fpsTextLabel
+local fpsConnection
+local trackingFPS = false
 
--- Tạo Paragraph thay vì Label để dễ cập nhật
-local fpsParagraph = Tabs.Game:AddParagraph({
-    Title = "FPS Counter",
-    Content = "FPS: 0"
-})
+-- Hàm tạo FPS Billboard
+local function createFPSDisplay()
+    if fpsGui then fpsGui:Destroy() end
 
--- Cập nhật FPS mỗi giây
-RunService.RenderStepped:Connect(function()
-    frameCount += 1
-    if tick() - lastTime >= 1 then
-        currentFPS = frameCount
-        frameCount = 0
-        lastTime = tick()
-        if fpsParagraph then
-            fpsParagraph:Update("FPS: " .. currentFPS)
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local head = character:WaitForChild("Head")
+
+    fpsGui = Instance.new("BillboardGui")
+    fpsGui.Name = "FPSDisplay"
+    fpsGui.Adornee = head
+    fpsGui.Size = UDim2.new(0, 100, 0, 40)
+    fpsGui.StudsOffset = Vector3.new(0, 2.5, 0)
+    fpsGui.AlwaysOnTop = true
+    fpsGui.Parent = head
+
+    fpsTextLabel = Instance.new("TextLabel")
+    fpsTextLabel.Size = UDim2.new(1, 0, 1, 0)
+    fpsTextLabel.BackgroundTransparency = 1
+    fpsTextLabel.TextColor3 = Color3.fromRGB(0, 255, 0) -- Màu xanh lá
+    fpsTextLabel.TextStrokeTransparency = 0.5
+    fpsTextLabel.TextScaled = true
+    fpsTextLabel.Font = Enum.Font.GothamBold
+    fpsTextLabel.Text = "FPS: 0"
+    fpsTextLabel.Parent = fpsGui
+end
+
+-- Hàm bắt đầu đếm FPS
+local function startFPSCounter()
+    local frameCount, lastTime = 0, tick()
+
+    fpsConnection = RunService.RenderStepped:Connect(function()
+        frameCount += 1
+        if tick() - lastTime >= 1 then
+            local fps = frameCount
+            frameCount = 0
+            lastTime = tick()
+
+            if fpsTextLabel then
+                fpsTextLabel.Text = "FPS: " .. tostring(fps)
+            end
+        end
+    end)
+end
+
+-- Hàm dừng và xóa GUI
+local function stopFPSCounter()
+    if fpsConnection then
+        fpsConnection:Disconnect()
+        fpsConnection = nil
+    end
+    if fpsGui then
+        fpsGui:Destroy()
+        fpsGui = nil
+    end
+end
+
+-- Nút bật/tắt FPS counter
+Tabs.Game:AddButton({
+    Title = "🎯 Show FPS",
+    Description = "Hiển thị FPS",
+    Callback = function()
+        trackingFPS = not trackingFPS
+        if trackingFPS then
+            createFPSDisplay()
+            startFPSCounter()
+        else
+            stopFPSCounter()
         end
     end
-end)
+})
 
 -- 🌾 Auto Harvest
 Tabs.Game:AddToggle("auto_harvest", {
