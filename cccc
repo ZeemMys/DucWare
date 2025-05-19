@@ -43,81 +43,73 @@ Fluent:Notify({
 --------------Game---------------
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+
 local LocalPlayer = Players.LocalPlayer
+local fpsBillboard, fpsLabel
+local currentFPS = 0
+local frameCount, lastTime = 0, tick()
 
-local fpsGui -- Billboard GUI
-local fpsTextLabel
-local fpsConnection
-local trackingFPS = false
-
--- Hàm tạo FPS Billboard
+-- Tạo Billboard GUI
 local function createFPSDisplay()
-    if fpsGui then fpsGui:Destroy() end
+    if fpsBillboard then fpsBillboard:Destroy() end
 
-    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local head = character:WaitForChild("Head")
+    fpsBillboard = Instance.new("BillboardGui")
+    fpsBillboard.Name = "FPSDisplay"
+    fpsBillboard.Size = UDim2.new(0, 100, 0, 40)
+    fpsBillboard.StudsOffset = Vector3.new(0, 3, 0)
+    fpsBillboard.AlwaysOnTop = true
 
-    fpsGui = Instance.new("BillboardGui")
-    fpsGui.Name = "FPSDisplay"
-    fpsGui.Adornee = head
-    fpsGui.Size = UDim2.new(0, 100, 0, 40)
-    fpsGui.StudsOffset = Vector3.new(0, 2.5, 0)
-    fpsGui.AlwaysOnTop = true
-    fpsGui.Parent = head
+    fpsLabel = Instance.new("TextLabel")
+    fpsLabel.Size = UDim2.new(1, 0, 1, 0)
+    fpsLabel.BackgroundTransparency = 1
+    fpsLabel.TextColor3 = Color3.new(0, 1, 0)
+    fpsLabel.TextScaled = true
+    fpsLabel.Font = Enum.Font.SourceSansBold
+    fpsLabel.Text = "FPS: 0"
+    fpsLabel.Parent = fpsBillboard
 
-    fpsTextLabel = Instance.new("TextLabel")
-    fpsTextLabel.Size = UDim2.new(1, 0, 1, 0)
-    fpsTextLabel.BackgroundTransparency = 1
-    fpsTextLabel.TextColor3 = Color3.fromRGB(0, 255, 0) -- Màu xanh lá
-    fpsTextLabel.TextStrokeTransparency = 0.5
-    fpsTextLabel.TextScaled = true
-    fpsTextLabel.Font = Enum.Font.GothamBold
-    fpsTextLabel.Text = "FPS: 0"
-    fpsTextLabel.Parent = fpsGui
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    fpsBillboard.Parent = hrp
 end
 
--- Hàm bắt đầu đếm FPS
-local function startFPSCounter()
-    local frameCount, lastTime = 0, tick()
+-- Lấy màu theo FPS
+local function getColorFromFPS(fps)
+    if fps <= 15 then
+        return Color3.fromRGB(255, 0, 0) -- Đỏ
+    elseif fps <= 25 then
+        return Color3.fromRGB(255, 85, 0) -- Đỏ cam
+    elseif fps <= 35 then
+        return Color3.fromRGB(255, 170, 0) -- Cam
+    elseif fps <= 45 then
+        return Color3.fromRGB(255, 255, 0) -- Vàng
+    elseif fps <= 59 then
+        return Color3.fromRGB(200, 255, 100) -- Vàng nhạt
+    else
+        return Color3.fromRGB(0, 255, 0) -- Xanh lá
+    end
+end
 
-    fpsConnection = RunService.RenderStepped:Connect(function()
-        frameCount += 1
-        if tick() - lastTime >= 1 then
-            local fps = frameCount
-            frameCount = 0
-            lastTime = tick()
-
-            if fpsTextLabel then
-                fpsTextLabel.Text = "FPS: " .. tostring(fps)
-            end
+-- Cập nhật FPS liên tục
+RunService.RenderStepped:Connect(function()
+    frameCount += 1
+    if tick() - lastTime >= 1 then
+        currentFPS = frameCount
+        frameCount = 0
+        lastTime = tick()
+        if fpsLabel then
+            fpsLabel.Text = "FPS: " .. currentFPS
+            fpsLabel.TextColor3 = getColorFromFPS(currentFPS)
         end
-    end)
-end
-
--- Hàm dừng và xóa GUI
-local function stopFPSCounter()
-    if fpsConnection then
-        fpsConnection:Disconnect()
-        fpsConnection = nil
     end
-    if fpsGui then
-        fpsGui:Destroy()
-        fpsGui = nil
-    end
-end
+end)
 
--- Nút bật/tắt FPS counter
+-- Gắn nút trong Fluent UI tab Game
 Tabs.Game:AddButton({
     Title = "🎯 Show FPS",
-    Description = "Hiển thị FPS",
+    Description = "Display FPS",
     Callback = function()
-        trackingFPS = not trackingFPS
-        if trackingFPS then
-            createFPSDisplay()
-            startFPSCounter()
-        else
-            stopFPSCounter()
-        end
+        createFPSDisplay()
     end
 })
 
