@@ -45,7 +45,7 @@ local RunService = game:GetService("RunService") -- Đảm bảo dòng này tồ
 
 local frameCount, lastTime = 0, tick()
 local currentFPS = 0
-local fpsLabel = nil -- Gán label hiển thị FPS sau này
+local fpsLabel = Tabs.Game:AddLabel("FPS: 0")
 
 -- Ví dụ tạo label (nếu bạn dùng Fluent UI thì dùng cách Fluent cung cấp)
 -- fpsLabel = Tabs.Game:AddLabel("FPS: 0")
@@ -706,7 +706,7 @@ local tornadoActive = false
 local tornadoConnection
 
 -- Tốc độ quay: số vòng mỗi giây (20 vòng/s là rất nhanh)
-local rotationSpeed = 30
+local rotationSpeed = 20
 
 Tabs.Other:AddToggle("TornadoToggle", {
     Title = "🌪 Tornado Mode",
