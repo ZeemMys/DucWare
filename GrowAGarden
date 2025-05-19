@@ -16,8 +16,8 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 320, 0, 180)
-Frame.Position = UDim2.new(0.5, -160, 0.5, -90)
+Frame.Size = UDim2.new(0, 420, 0, 180) -- Tăng chiều ngang để chứa avatar
+Frame.Position = UDim2.new(0.5, -210, 0.5, -90)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
@@ -33,8 +33,28 @@ Title.TextScaled = true
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = Frame
 
+-- 📷 Avatar
+local Avatar = Instance.new("ImageLabel")
+Avatar.Size = UDim2.new(0, 100, 0, 100)
+Avatar.Position = UDim2.new(0, 310, 0, 40)
+Avatar.BackgroundTransparency = 1
+Avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. player.UserId .. "&width=100&height=100&format=png"
+Avatar.Parent = Frame
+
+-- 👤 Tên người chơi
+local PlayerName = Instance.new("TextLabel")
+PlayerName.Size = UDim2.new(0, 100, 0, 20)
+PlayerName.Position = UDim2.new(0, 310, 0, 140)
+PlayerName.BackgroundTransparency = 1
+PlayerName.Text = player.Name
+PlayerName.TextColor3 = Color3.new(1, 1, 1)
+PlayerName.TextScaled = true
+PlayerName.Font = Enum.Font.SourceSansBold
+PlayerName.Parent = Frame
+
+-- 📥 Ô nhập key
 local TextBox = Instance.new("TextBox")
-TextBox.Size = UDim2.new(1, -40, 0, 40)
+TextBox.Size = UDim2.new(0, 260, 0, 40)
 TextBox.Position = UDim2.new(0, 20, 0, 40)
 TextBox.PlaceholderText = "Enter Key"
 TextBox.Text = ""
@@ -44,8 +64,9 @@ TextBox.TextColor3 = Color3.new(1, 1, 1)
 TextBox.Font = Enum.Font.SourceSans
 TextBox.Parent = Frame
 
+-- 🔘 Submit button
 local Submit = Instance.new("TextButton")
-Submit.Size = UDim2.new(1, -40, 0, 40)
+Submit.Size = UDim2.new(0, 260, 0, 40)
 Submit.Position = UDim2.new(0, 20, 0, 90)
 Submit.Text = "Submit"
 Submit.TextScaled = true
@@ -54,9 +75,9 @@ Submit.TextColor3 = Color3.new(1, 1, 1)
 Submit.Font = Enum.Font.SourceSansBold
 Submit.Parent = Frame
 
--- 🌐 Nút Get Key
+-- 🔗 Get Key button
 local GetKey = Instance.new("TextButton")
-GetKey.Size = UDim2.new(1, -40, 0, 30)
+GetKey.Size = UDim2.new(0, 260, 0, 30)
 GetKey.Position = UDim2.new(0, 20, 0, 140)
 GetKey.Text = "🔗 Get Key"
 GetKey.TextScaled = true
@@ -71,7 +92,7 @@ local getKeyLink = "https://link-center.net/1351480/get-key-system"
 -- 🔐 Key xác thực
 local correctKey = "FreeKeyScrgarden"
 
--- 🖱️ Nút Get Key
+-- 🖱️ Khi ấn Get Key
 GetKey.MouseButton1Click:Connect(function()
     setclipboard(getKeyLink)
     GetKey.Text = "✅ Copied!"
@@ -79,12 +100,11 @@ GetKey.MouseButton1Click:Connect(function()
     GetKey.Text = "🔗 Get Key"
 end)
 
--- 🖱️ Khi ấn nút Submit
+-- 🖱️ Khi ấn Submit
 Submit.MouseButton1Click:Connect(function()
     if TextBox.Text == correctKey then
         ScreenGui:Destroy()
-
-        -- ✅ Nếu đúng key, load GUI chính
+        -- ✅ Load GUI chính
         loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/cccc"))()
     else
         Submit.Text = "❌ Sai Key"
