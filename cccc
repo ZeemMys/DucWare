@@ -55,8 +55,8 @@ local function createFPSDisplay()
 
     fpsBillboard = Instance.new("BillboardGui")
     fpsBillboard.Name = "FPSDisplay"
-    fpsBillboard.Size = UDim2.new(0, 200, 0, 80) -- 📏 Tăng kích thước
-    fpsBillboard.StudsOffset = Vector3.new(0, 4, 0) -- 📏 Nâng cao lên
+    fpsBillboard.Size = UDim2.new(0, 130, 0, 45) -- 🔽 Giảm size xuống một chút
+    fpsBillboard.StudsOffset = Vector3.new(0, 3.5, 0)
     fpsBillboard.AlwaysOnTop = true
 
     fpsLabel = Instance.new("TextLabel")
@@ -66,7 +66,7 @@ local function createFPSDisplay()
     fpsLabel.TextScaled = true
     fpsLabel.Font = Enum.Font.SourceSansBold
     fpsLabel.Text = "FPS: 0"
-    fpsLabel.TextStrokeTransparency = 0.2 -- ✅ Tăng độ nổi bật
+    fpsLabel.TextStrokeTransparency = 0.2
     fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
     fpsLabel.Parent = fpsBillboard
 
@@ -78,17 +78,17 @@ end
 -- Đổi màu theo FPS
 local function getColorFromFPS(fps)
     if fps <= 15 then
-        return Color3.fromRGB(255, 0, 0) -- Đỏ
+        return Color3.fromRGB(255, 0, 0)
     elseif fps <= 25 then
-        return Color3.fromRGB(255, 85, 0) -- Đỏ cam
+        return Color3.fromRGB(255, 85, 0)
     elseif fps <= 35 then
-        return Color3.fromRGB(255, 170, 0) -- Cam
+        return Color3.fromRGB(255, 170, 0)
     elseif fps <= 45 then
-        return Color3.fromRGB(255, 255, 0) -- Vàng
+        return Color3.fromRGB(255, 255, 0)
     elseif fps <= 59 then
-        return Color3.fromRGB(200, 255, 100) -- Vàng nhạt
+        return Color3.fromRGB(200, 255, 100)
     else
-        return Color3.fromRGB(0, 255, 0) -- Xanh lá
+        return Color3.fromRGB(0, 255, 0)
     end
 end
 
@@ -109,7 +109,7 @@ end)
 -- Gắn nút trong Fluent UI tab Game
 Tabs.Game:AddButton({
     Title = "🎯 Show FPS",
-    Description = "Display FPS ",
+    Description = "Display FPS",
     Callback = function()
         createFPSDisplay()
     end
