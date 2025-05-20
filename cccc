@@ -62,19 +62,25 @@ local function getDevice()
     end
 end
 
--- Lấy Ping (fix chính xác)
+-- Lấy Ping an toàn
 local function getPing()
-    local network = Stats:FindFirstChild("Network")
-    if network then
-        local pingItem = network:FindFirstChild("ServerStatsItem")
-        if pingItem then
-            local dataPing = pingItem:FindFirstChild("Data Ping")
-            if dataPing and dataPing:GetAttribute("Value") then
-                return math.floor(dataPing:GetAttribute("Value"))
+    local success, result = pcall(function()
+        local network = Stats:FindFirstChild("Network")
+        if network then
+            local serverStats = network:FindFirstChild("ServerStatsItem")
+            if serverStats then
+                local dataPing = serverStats:FindFirstChild("Data Ping")
+                if dataPing then
+                    local pingValue = dataPing:GetAttribute("Value")
+                    if pingValue then
+                        return math.floor(pingValue)
+                    end
+                end
             end
         end
-    end
-    return 0
+        return nil
+    end)
+    return success and result or nil
 end
 
 -- Màu sắc theo FPS
@@ -92,13 +98,6 @@ local function getColorFromFPS(fps)
     else
         return Color3.fromRGB(0, 255, 0)
     end
-end
-
--- Hàm thêm bo góc
-local function addCorner(guiObject)
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = guiObject
 end
 
 -- Tạo GUI hiển thị
@@ -127,7 +126,6 @@ local function createFPSDisplay()
     deviceLabel.TextScaled = true
     deviceLabel.TextStrokeTransparency = 0.2
     deviceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-    addCorner(deviceLabel)
     deviceLabel.Parent = fpsBillboard
 
     -- FPS Label
@@ -142,7 +140,6 @@ local function createFPSDisplay()
     fpsLabel.TextStrokeTransparency = 0.2
     fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
     fpsLabel.Text = "FPS: 0"
-    addCorner(fpsLabel)
     fpsLabel.Parent = fpsBillboard
 
     -- Ping Label
@@ -156,8 +153,7 @@ local function createFPSDisplay()
     pingLabel.TextScaled = true
     pingLabel.TextStrokeTransparency = 0.2
     pingLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-    pingLabel.Text = "Ping: 0"
-    addCorner(pingLabel)
+    pingLabel.Text = "Ping: N/A"
     pingLabel.Parent = fpsBillboard
 end
 
@@ -176,7 +172,7 @@ RunService.RenderStepped:Connect(function()
             fpsLabel.TextColor3 = getColorFromFPS(fps)
 
             local ping = getPing()
-            pingLabel.Text = "Ping: " .. tostring(ping)
+            pingLabel.Text = "Ping: " .. (ping and tostring(ping) or "N/A")
         end
     end
 end)
