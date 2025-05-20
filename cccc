@@ -93,13 +93,14 @@ local function getColorFromFPS(fps)
     end
 end
 
--- Cập nhật FPS
 RunService.RenderStepped:Connect(function()
     frameCount += 1
-    if tick() - lastTime >= 1 then
-        currentFPS = frameCount
+    local now = tick()
+    local elapsed = now - lastTime
+    if elapsed >= 0.5 then -- cập nhật mỗi 0.5 giây
+        currentFPS = math.floor(frameCount / elapsed)
         frameCount = 0
-        lastTime = tick()
+        lastTime = now
         if fpsLabel and fpsVisible then
             fpsLabel.Text = "FPS: " .. currentFPS
             fpsLabel.TextColor3 = getColorFromFPS(currentFPS)
