@@ -51,6 +51,7 @@ local fpsBillboard, fpsLabel, pingLabel, deviceLabel
 local frameCount, lastTime = 0, tick()
 local fpsVisible = false
 
+-- Detect thiết bị
 local function getDevice()
     if UserInputService.TouchEnabled then
         return "Mobile"
@@ -61,19 +62,22 @@ local function getDevice()
     end
 end
 
--- Hiển thị Ping
+-- Lấy Ping (fix chính xác)
 local function getPing()
-    local pingStat = Stats:FindFirstChild("PerformanceStats")
-    if pingStat then
-        local ping = pingStat:FindFirstChild("Ping")
-        if ping then
-            return tonumber(string.match(ping.Text, "[%d%.]+")) or 0
+    local network = Stats:FindFirstChild("Network")
+    if network then
+        local pingItem = network:FindFirstChild("ServerStatsItem")
+        if pingItem then
+            local dataPing = pingItem:FindFirstChild("Data Ping")
+            if dataPing and dataPing:GetAttribute("Value") then
+                return math.floor(dataPing:GetAttribute("Value"))
+            end
         end
     end
     return 0
 end
 
--- Color FPS
+-- Màu sắc theo FPS
 local function getColorFromFPS(fps)
     if fps <= 15 then
         return Color3.fromRGB(255, 0, 0)
@@ -90,7 +94,14 @@ local function getColorFromFPS(fps)
     end
 end
 
--- Tạo Billboard
+-- Hàm thêm bo góc
+local function addCorner(guiObject)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = guiObject
+end
+
+-- Tạo GUI hiển thị
 local function createFPSDisplay()
     if fpsBillboard then fpsBillboard:Destroy() end
 
@@ -104,44 +115,53 @@ local function createFPSDisplay()
     local hrp = char:WaitForChild("HumanoidRootPart")
     fpsBillboard.Parent = hrp
 
+    -- Device Label
     deviceLabel = Instance.new("TextLabel")
     deviceLabel.Size = UDim2.new(1, 0, 0.3, 0)
     deviceLabel.Position = UDim2.new(0, 0, 0, 0)
-    deviceLabel.BackgroundTransparency = 1
+    deviceLabel.BackgroundTransparency = 0.4
+    deviceLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     deviceLabel.Text = getDevice()
     deviceLabel.TextColor3 = Color3.fromRGB(0, 170, 255)
     deviceLabel.Font = Enum.Font.SourceSansBold
     deviceLabel.TextScaled = true
     deviceLabel.TextStrokeTransparency = 0.2
     deviceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+    addCorner(deviceLabel)
     deviceLabel.Parent = fpsBillboard
 
+    -- FPS Label
     fpsLabel = Instance.new("TextLabel")
     fpsLabel.Size = UDim2.new(1, 0, 0.4, 0)
     fpsLabel.Position = UDim2.new(0, 0, 0.3, 0)
-    fpsLabel.BackgroundTransparency = 1
+    fpsLabel.BackgroundTransparency = 0.4
+    fpsLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
     fpsLabel.Font = Enum.Font.SourceSansBold
     fpsLabel.TextScaled = true
     fpsLabel.TextStrokeTransparency = 0.2
     fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
     fpsLabel.Text = "FPS: 0"
+    addCorner(fpsLabel)
     fpsLabel.Parent = fpsBillboard
 
+    -- Ping Label
     pingLabel = Instance.new("TextLabel")
     pingLabel.Size = UDim2.new(1, 0, 0.3, 0)
     pingLabel.Position = UDim2.new(0, 0, 0.7, 0)
-    pingLabel.BackgroundTransparency = 1
+    pingLabel.BackgroundTransparency = 0.4
+    pingLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     pingLabel.TextColor3 = Color3.fromRGB(255, 136, 0)
     pingLabel.Font = Enum.Font.SourceSansBold
     pingLabel.TextScaled = true
     pingLabel.TextStrokeTransparency = 0.2
     pingLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
     pingLabel.Text = "Ping: 0"
+    addCorner(pingLabel)
     pingLabel.Parent = fpsBillboard
 end
 
--- Cập nhật
+-- Cập nhật FPS và Ping
 RunService.RenderStepped:Connect(function()
     frameCount += 1
     local now = tick()
