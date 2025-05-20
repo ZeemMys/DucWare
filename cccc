@@ -44,14 +44,40 @@ Fluent:Notify({
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Stats = game:GetService("Stats")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
 local fpsBillboard, fpsLabel, pingLabel, deviceLabel
 local frameCount, lastTime = 0, tick()
 local fpsVisible = false
 
--- Detect thiết bị
+-- Tạo RemoteFunction nếu chưa có
+local pingRemote = ReplicatedStorage:FindFirstChild("__PingRemote__")
+if not pingRemote then
+    pingRemote = Instance.new("RemoteFunction")
+    pingRemote.Name = "__PingRemote__"
+    pingRemote.Parent = ReplicatedStorage
+end
+
+-- Server-side xử lý phản hồi ping (an toàn khi chạy client)
+pcall(function()
+    pingRemote.OnServerInvoke = function()
+        return true
+    end
+end)
+
+-- Hàm đo Ping thật
+local function getPing()
+    local start = tick()
+    local success, result = pcall(function()
+        return pingRemote:InvokeServer()
+    end)
+    if success and result then
+        return math.floor((tick() - start) * 1000)
+    end
+    return nil
+end
+
 local function getDevice()
     if UserInputService.TouchEnabled then
         return "Mobile"
@@ -62,28 +88,6 @@ local function getDevice()
     end
 end
 
--- Lấy Ping an toàn
-local function getPing()
-    local success, result = pcall(function()
-        local network = Stats:FindFirstChild("Network")
-        if network then
-            local serverStats = network:FindFirstChild("ServerStatsItem")
-            if serverStats then
-                local dataPing = serverStats:FindFirstChild("Data Ping")
-                if dataPing then
-                    local pingValue = dataPing:GetAttribute("Value")
-                    if pingValue then
-                        return math.floor(pingValue)
-                    end
-                end
-            end
-        end
-        return nil
-    end)
-    return success and result or nil
-end
-
--- Màu sắc theo FPS
 local function getColorFromFPS(fps)
     if fps <= 15 then
         return Color3.fromRGB(255, 0, 0)
@@ -100,7 +104,6 @@ local function getColorFromFPS(fps)
     end
 end
 
--- Tạo GUI hiển thị
 local function createFPSDisplay()
     if fpsBillboard then fpsBillboard:Destroy() end
 
@@ -114,12 +117,10 @@ local function createFPSDisplay()
     local hrp = char:WaitForChild("HumanoidRootPart")
     fpsBillboard.Parent = hrp
 
-    -- Device Label
     deviceLabel = Instance.new("TextLabel")
     deviceLabel.Size = UDim2.new(1, 0, 0.3, 0)
     deviceLabel.Position = UDim2.new(0, 0, 0, 0)
-    deviceLabel.BackgroundTransparency = 0.4
-    deviceLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    deviceLabel.BackgroundTransparency = 1
     deviceLabel.Text = getDevice()
     deviceLabel.TextColor3 = Color3.fromRGB(0, 170, 255)
     deviceLabel.Font = Enum.Font.SourceSansBold
@@ -128,12 +129,10 @@ local function createFPSDisplay()
     deviceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
     deviceLabel.Parent = fpsBillboard
 
-    -- FPS Label
     fpsLabel = Instance.new("TextLabel")
     fpsLabel.Size = UDim2.new(1, 0, 0.4, 0)
     fpsLabel.Position = UDim2.new(0, 0, 0.3, 0)
-    fpsLabel.BackgroundTransparency = 0.4
-    fpsLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    fpsLabel.BackgroundTransparency = 1
     fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
     fpsLabel.Font = Enum.Font.SourceSansBold
     fpsLabel.TextScaled = true
@@ -142,22 +141,19 @@ local function createFPSDisplay()
     fpsLabel.Text = "FPS: 0"
     fpsLabel.Parent = fpsBillboard
 
-    -- Ping Label
     pingLabel = Instance.new("TextLabel")
     pingLabel.Size = UDim2.new(1, 0, 0.3, 0)
     pingLabel.Position = UDim2.new(0, 0, 0.7, 0)
-    pingLabel.BackgroundTransparency = 0.4
-    pingLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    pingLabel.BackgroundTransparency = 1
     pingLabel.TextColor3 = Color3.fromRGB(255, 136, 0)
     pingLabel.Font = Enum.Font.SourceSansBold
     pingLabel.TextScaled = true
     pingLabel.TextStrokeTransparency = 0.2
     pingLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-    pingLabel.Text = "Ping: N/A"
+    pingLabel.Text = "Ping: ..."
     pingLabel.Parent = fpsBillboard
 end
 
--- Cập nhật FPS và Ping
 RunService.RenderStepped:Connect(function()
     frameCount += 1
     local now = tick()
@@ -172,12 +168,12 @@ RunService.RenderStepped:Connect(function()
             fpsLabel.TextColor3 = getColorFromFPS(fps)
 
             local ping = getPing()
-            pingLabel.Text = "Ping: " .. (ping and tostring(ping) or "N/A")
+            pingLabel.Text = ping and ("Ping: " .. tostring(ping)) or "Ping: N/A"
         end
     end
 end)
 
--- Nút bật/tắt
+-- Nút bật/tắt trong Fluent UI
 Tabs.Game:AddButton({
     Title = "📊 Show FPS & Ping, Advice",
     Description = "Hiển thị FPS, Ping và Thiết bị",
