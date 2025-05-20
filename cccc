@@ -43,6 +43,7 @@ Fluent:Notify({
 --------------Game---------------
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local Stats = game:GetService("Stats")
 
 local LocalPlayer = Players.LocalPlayer
@@ -50,12 +51,11 @@ local fpsBillboard, fpsLabel, pingLabel, deviceLabel
 local frameCount, lastTime = 0, tick()
 local fpsVisible = false
 
--- Phát hiện thiết bị
 local function getDevice()
-    if UserInputService:IsKeyDown(Enum.KeyCode.ButtonA) then
-        return "Console"
-    elseif UserInputService.TouchEnabled then
+    if UserInputService.TouchEnabled then
         return "Mobile"
+    elseif UserInputService.GamepadEnabled then
+        return "Console"
     else
         return "Windows"
     end
