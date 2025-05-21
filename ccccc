@@ -87,14 +87,12 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- Trạng thái hiện tại của Fluent GUI
 local isVisible = true
-Window.Enabled = isVisible
+Window.Window.Visible = isVisible
 
--- Toggle bật/tắt Fluent GUI khi click
 button.MouseButton1Click:Connect(function()
-	isVisible = not isVisible
-	Window.Enabled = isVisible
+    isVisible = not isVisible
+    Window.Window.Visible = isVisible
 end)
 
 --📁 Tabs
