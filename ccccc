@@ -113,7 +113,7 @@ Tabs.Game:AddParagraph({
 
 -- Gán Fluent cho InterfaceManager và build UI
 InterfaceManager.Library = Fluent
-InterfaceManager:BuildInterfaceSection(Window)
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 
 -- Ẩn Fluent GUI khi khởi động
 Window:SetMinimized(true)
