@@ -87,16 +87,13 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
-local isVisible = true
-Window.Visible = isVisible
+-- Ẩn hiện GUI bằng nút launcher
+local minimized = true
+Window.Minimized = minimized
 
 button.MouseButton1Click:Connect(function()
-    isVisible = not isVisible
-    if isVisible then
-        Window:Show()
-    else
-        Window:Hide()
-    end
+    minimized = not minimized
+    Window.Minimized = minimized
 end)
 
 --📁 Tabs
@@ -118,9 +115,6 @@ Tabs.Game:AddParagraph({
 -- Gán Fluent cho InterfaceManager và build UI
 InterfaceManager.Library = Fluent
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-
--- Ẩn Fluent GUI khi khởi động
-Window:Minimize()
 
 --🔔 Thông báo khởi động
 Fluent:Notify({
