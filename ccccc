@@ -88,11 +88,11 @@ UIS.InputChanged:Connect(function(input)
 end)
 
 local isVisible = true
-Window.Window.Visible = isVisible
+Window.Instance.Visible = isVisible
 
 button.MouseButton1Click:Connect(function()
     isVisible = not isVisible
-    Window.Window.Visible = isVisible
+    Window.Instance.Visible = isVisible
 end)
 
 --📁 Tabs
