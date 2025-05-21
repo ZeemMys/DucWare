@@ -111,7 +111,7 @@ Submit.MouseButton1Click:Connect(function()
 
         ScreenGui:Destroy()
         -- ✅ Load GUI chính
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/cccc"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/skibidi"))()
     else
         Submit.Text = "❌ Sai Key"
         task.wait(1)
