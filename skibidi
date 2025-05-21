@@ -33,6 +33,6 @@ logoButton.MouseButton1Click:Connect(function()
 			end
 		end)()
 	else
-		warn("Script đã chạy rồi!")
+		warn("Loaded!")
 	end
 end)
