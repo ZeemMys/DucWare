@@ -92,7 +92,11 @@ Window.Visible = isVisible
 
 button.MouseButton1Click:Connect(function()
     isVisible = not isVisible
-    Window.Visible = isVisible
+    if isVisible then
+        Window:Show()
+    else
+        Window:Hide()
+    end
 end)
 
 --📁 Tabs
@@ -116,7 +120,7 @@ InterfaceManager.Library = Fluent
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 
 -- Ẩn Fluent GUI khi khởi động
-Window:SetMinimized(true)
+Window:Minimize()
 
 --🔔 Thông báo khởi động
 Fluent:Notify({
