@@ -45,21 +45,22 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local LocalPlayer = Players.LocalPlayer
-local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+local localPlayer = Players.LocalPlayer
+local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+local head = character:WaitForChild("Head")
 
--- Lấy loại thiết bị và icon tương ứng
+-- Thiết bị và icon
 local function getDeviceInfo()
 	if UserInputService.TouchEnabled then
-		return "Mobile", "rbxassetid://7733964645"
+		return "Mobile", "rbxassetid://7733964645", Color3.fromRGB(0, 255, 0)
 	elseif UserInputService.GamepadEnabled then
-		return "Console", "rbxassetid://7733772935"
+		return "Console", "rbxassetid://7733772935", Color3.fromRGB(170, 0, 255)
 	else
-		return "Windows", "rbxassetid://7733911823"
+		return "Windows", "rbxassetid://7733911823", Color3.fromRGB(0, 170, 255)
 	end
 end
 
--- Màu FPS
+-- Màu chữ FPS động
 local function getColorFromFPS(fps)
 	if fps <= 15 then
 		return Color3.fromRGB(255, 0, 0)
@@ -76,51 +77,66 @@ local function getColorFromFPS(fps)
 	end
 end
 
--- Tạo UI banner
-local function createBanner()
-	if playerGui:FindFirstChild("DeviceFPSBanner") then
-		playerGui.DeviceFPSBanner:Destroy()
+-- Tạo GUI trên đầu
+local function createTag()
+	if head:FindFirstChild("FPSDeviceTag") then
+		head.FPSDeviceTag:Destroy()
 	end
 
-	local screenGui = Instance.new("ScreenGui", playerGui)
-	screenGui.Name = "DeviceFPSBanner"
-	screenGui.ResetOnSpawn = false
+	local billboardGui = Instance.new("BillboardGui")
+	billboardGui.Name = "FPSDeviceTag"
+	billboardGui.Adornee = head
+	billboardGui.Size = UDim2.new(0, 200, 0, 50)
+	billboardGui.StudsOffset = Vector3.new(0, 2.5, 0)
+	billboardGui.AlwaysOnTop = true
+	billboardGui.Parent = head
 
-	local banner = Instance.new("Frame")
-	banner.Size = UDim2.new(0, 280, 0, 40)
-	banner.Position = UDim2.new(0.5, -140, 0, 20)
-	banner.BackgroundColor3 = Color3.fromRGB(255, 204, 0)
-	banner.BorderSizePixel = 0
-	banner.Parent = screenGui
+	local bg = Instance.new("Frame")
+	bg.Name = "Background"
+	bg.Size = UDim2.new(1, 0, 1, 0)
+	bg.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- mặc định
+	bg.BackgroundTransparency = 0.2
+	bg.BorderSizePixel = 0
+	bg.Parent = billboardGui
 
-	local uiCorner = Instance.new("UICorner", banner)
-	uiCorner.CornerRadius = UDim.new(0, 8)
+	local iconBorder = Instance.new("Frame")
+	iconBorder.Name = "IconBorder"
+	iconBorder.Size = UDim2.new(0, 28, 0, 28)
+	iconBorder.Position = UDim2.new(0, 4, 0.5, -14)
+	iconBorder.BackgroundColor3 = Color3.new(1, 1, 1)
+	iconBorder.BorderSizePixel = 0
+	iconBorder.BackgroundTransparency = 0.1
+	iconBorder.Parent = bg
+	iconBorder.ZIndex = 2
+	iconBorder.ClipsDescendants = true
+	iconBorder:CreateCornerRadius(UDim.new(0, 6))
 
 	local icon = Instance.new("ImageLabel")
 	icon.Name = "DeviceIcon"
-	icon.Size = UDim2.new(0, 32, 0, 32)
-	icon.Position = UDim2.new(0, 4, 0.5, -16)
+	icon.Size = UDim2.new(1, 0, 1, 0)
+	icon.Position = UDim2.new(0, 0, 0, 0)
 	icon.BackgroundTransparency = 1
 	icon.Image = ""
-	icon.Parent = banner
+	icon.Parent = iconBorder
+	icon.ZIndex = 3
 
 	local textLabel = Instance.new("TextLabel")
 	textLabel.Name = "Info"
-	textLabel.Size = UDim2.new(1, -40, 1, 0)
-	textLabel.Position = UDim2.new(0, 40, 0, 0)
+	textLabel.Size = UDim2.new(1, -36, 1, 0)
+	textLabel.Position = UDim2.new(0, 36, 0, 0)
 	textLabel.BackgroundTransparency = 1
 	textLabel.Text = "FPS: ... | Device: ..."
 	textLabel.Font = Enum.Font.FredokaOne
-	textLabel.TextColor3 = Color3.new(1, 1, 1)
 	textLabel.TextScaled = true
+	textLabel.TextColor3 = Color3.new(1, 1, 1)
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
-	textLabel.Parent = banner
+	textLabel.Parent = bg
 
-	return textLabel, icon
+	return textLabel, icon, iconBorder, bg
 end
 
--- Cập nhật FPS và Icon
-local function startUpdating(label, icon)
+-- Cập nhật FPS và thiết bị
+local function startUpdating(label, icon, iconBorder, bg)
 	local frameCount, lastTime = 0, tick()
 	RunService.RenderStepped:Connect(function()
 		frameCount += 1
@@ -130,21 +146,25 @@ local function startUpdating(label, icon)
 			frameCount = 0
 			lastTime = now
 
-			local device, iconId = getDeviceInfo()
+			local device, iconId, deviceColor = getDeviceInfo()
 			label.Text = "FPS: " .. tostring(fps) .. " | Device: " .. device
-			label.TextColor3 = getColorFromFPS(fps)
+			local fpsColor = getColorFromFPS(fps)
+
+			label.TextColor3 = fpsColor
+			bg.BackgroundColor3 = fpsColor
 			icon.Image = iconId
+			iconBorder.BackgroundColor3 = deviceColor
 		end
 	end)
 end
 
--- Thêm nút trong Fluent GUI
+-- Nút trong Fluent UI
 Tabs.Game:AddButton({
-	Title = "📊 Show FPS + Device",
-	Description = "Hiển thị FPS + Thiết bị",
+	Title = "🎯 Show FPS Tag Above Head",
+	Description = "Hiển thị FPS và thiết bị trên đầu nhân vật",
 	Callback = function()
-		local label, icon = createBanner()
-		startUpdating(label, icon)
+		local label, icon, iconBorder, bg = createTag()
+		startUpdating(label, icon, iconBorder, bg)
 	end
 })
 
