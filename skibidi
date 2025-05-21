@@ -10,20 +10,21 @@ gui.ResetOnSpawn = false
 gui.Parent = CoreGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 250, 0, 80)
-frame.Position = UDim2.new(0.5, -125, 0.5, -40)
+frame.Size = UDim2.new(0, 100, 0, 100)
+frame.Position = UDim2.new(0, 20, 0.5, -50)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
-frame.BackgroundTransparency = 0.1
+frame.BackgroundTransparency = 0.05
 frame.Parent = gui
 frame.Active = true
 frame.Draggable = true
-frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.AnchorPoint = Vector2.new(0, 0.5)
 
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
+corner.CornerRadius = UDim.new(0, 100)
 corner.Parent = frame
 
+-- Shadow
 local shadow = Instance.new("ImageLabel")
 shadow.Name = "Shadow"
 shadow.BackgroundTransparency = 1
@@ -36,41 +37,30 @@ shadow.Position = UDim2.new(0, -15, 0, -15)
 shadow.ZIndex = 0
 shadow.Parent = frame
 
-local logo = Instance.new("ImageLabel")
-logo.Size = UDim2.new(0, 60, 0, 60)
-logo.Position = UDim2.new(0, 10, 0.5, -30)
+-- Logo
+local logo = Instance.new("ImageButton")
+logo.Size = UDim2.new(1, 0, 1, 0)
+logo.Position = UDim2.new(0, 0, 0, 0)
 logo.BackgroundTransparency = 1
-logo.Image = "rbxassetid://10172846277981"
+logo.Image = "rbxassetid://10172846277981" -- Anime ngầu bạn chọn
 logo.Parent = frame
 
+-- Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -80, 0, 30)
-title.Position = UDim2.new(0, 80, 0.5, -15)
+title.Size = UDim2.new(1, 0, 0, 20)
+title.Position = UDim2.new(0, 0, 1, -5)
 title.BackgroundTransparency = 1
 title.Text = "DucWare"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 22
+title.TextSize = 16
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextStrokeTransparency = 0.7
+title.TextYAlignment = Enum.TextYAlignment.Top
 title.Parent = frame
 
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0, 100, 0, 30)
-button.Position = UDim2.new(0.5, -50, 1, -35)
-button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-button.Text = "🔁 Toggle Hack"
-button.TextColor3 = Color3.new(1, 1, 1)
-button.Font = Enum.Font.GothamSemibold
-button.TextSize = 14
-button.Parent = frame
-
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 8)
-btnCorner.Parent = button
-
--- Toggle Hack GUI
-button.MouseButton1Click:Connect(function()
-    local existingUI = CoreGui:FindFirstChild("DucWareUI") -- Tên GUI chính
+-- Toggle GUI bằng logo
+logo.MouseButton1Click:Connect(function()
+    local existingUI = CoreGui:FindFirstChild("DucWareUI")
     if existingUI then
         existingUI:Destroy()
     else
