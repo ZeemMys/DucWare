@@ -1,38 +1,109 @@
--- LocalScript để đặt trong StarterGui
+local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
 
--- Giao diện GUI
-local screenGui = Instance.new("ScreenGui", playerGui)
-screenGui.Name = "DucWareLoader"
-screenGui.ResetOnSpawn = false
+-- GUI launcher
+local gui = Instance.new("ScreenGui")
+gui.Name = "DucWareLauncher"
+gui.ResetOnSpawn = false
+gui.Parent = CoreGui
 
--- Nút bật/tắt script
-local logoButton = Instance.new("ImageButton", screenGui)
-logoButton.Size = UDim2.new(0, 60, 0, 60)
-logoButton.Position = UDim2.new(0, 20, 0, 300) -- điều chỉnh theo nhu cầu
-logoButton.BackgroundTransparency = 1
-logoButton.Image = "rbxassetid://101728462779818" -- Thay bằng ID logo bạn thích (anime ngầu)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 250, 0, 80)
+frame.Position = UDim2.new(0.5, -125, 0.5, -40)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.BackgroundTransparency = 0.1
+frame.Parent = gui
+frame.Active = true
+frame.Draggable = true
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
 
--- Trạng thái script đã bật chưa
-local scriptLoaded = false
-local runningThread = nil
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = frame
 
-logoButton.MouseButton1Click:Connect(function()
-	if not scriptLoaded then
-		scriptLoaded = true
-		-- Tải và chạy script
-		coroutine.wrap(function()
-			local success, err = pcall(function()
-				loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/cccc"))()
-			end)
-			if not success then
-				warn("Lỗi khi tải script: ", err)
-				scriptLoaded = false
-			end
-		end)()
-	else
-		warn("Loaded!")
-	end
+local shadow = Instance.new("ImageLabel")
+shadow.Name = "Shadow"
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://1316045217"
+shadow.ImageColor3 = Color3.new(0, 0, 0)
+shadow.ScaleType = Enum.ScaleType.Slice
+shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+shadow.Size = UDim2.new(1, 30, 1, 30)
+shadow.Position = UDim2.new(0, -15, 0, -15)
+shadow.ZIndex = 0
+shadow.Parent = frame
+
+local logo = Instance.new("ImageLabel")
+logo.Size = UDim2.new(0, 60, 0, 60)
+logo.Position = UDim2.new(0, 10, 0.5, -30)
+logo.BackgroundTransparency = 1
+logo.Image = "rbxassetid://10172846277981"
+logo.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -80, 0, 30)
+title.Position = UDim2.new(0, 80, 0.5, -15)
+title.BackgroundTransparency = 1
+title.Text = "DucWare"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 100, 0, 30)
+button.Position = UDim2.new(0.5, -50, 1, -35)
+button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+button.Text = "🔁 Toggle Hack"
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Font = Enum.Font.GothamSemibold
+button.TextSize = 14
+button.Parent = frame
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 8)
+btnCorner.Parent = button
+
+-- Toggle Hack GUI
+button.MouseButton1Click:Connect(function()
+    local existingUI = CoreGui:FindFirstChild("DucWareUI") -- Tên GUI chính
+    if existingUI then
+        existingUI:Destroy()
+    else
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/cccc"))()
+        end)
+    end
+end)
+
+-- Mobile & Mouse drag
+local dragging = false
+local dragInput, mousePos, framePos
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        mousePos = input.Position
+        framePos = frame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - mousePos
+        frame.Position = UDim2.new(
+            framePos.X.Scale, framePos.X.Offset + delta.X,
+            framePos.Y.Scale, framePos.Y.Offset + delta.Y
+        )
+    end
 end)
