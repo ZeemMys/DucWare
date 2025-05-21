@@ -17,28 +17,26 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
--- Gán tên để dễ toggle
+-- Gán tên GUI để có thể toggle
 local fluentMain = Window:GetMain()
 fluentMain.Name = "DucWareUI"
+fluentMain.Enabled = false -- Bắt đầu ẩn
 
--- Tắt mặc định nếu muốn khởi đầu ẩn
-fluentMain.Enabled = false
-
--- 🎮 Tạo GUI launcher nhỏ gọn
+-- Tạo GUI launcher
 local launcherGui = Instance.new("ScreenGui")
 launcherGui.Name = "DucWareLauncher"
 launcherGui.ResetOnSpawn = false
 launcherGui.IgnoreGuiInset = true
 launcherGui.Parent = CoreGui
 
--- Button hình vuông nhỏ có viền LED
+-- Nút hình vuông
 local button = Instance.new("ImageButton")
 button.Name = "ToggleButton"
 button.Size = UDim2.new(0, 64, 0, 64)
 button.Position = UDim2.new(0, 20, 0.5, -32)
 button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 button.AutoButtonColor = false
-button.Image = "rbxassetid://84900502740413" -- Logo của bạn
+button.Image = "rbxassetid://84900502740413" -- Logo
 button.Parent = launcherGui
 
 -- Bo góc
@@ -46,14 +44,14 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 16)
 corner.Parent = button
 
--- Viền LED xanh dương
+-- Viền xanh dương
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 2
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Color = Color3.fromRGB(0, 170, 255)
 stroke.Parent = button
 
--- Tên DucWare
+-- Label tên
 local title = Instance.new("TextLabel")
 title.Name = "Title"
 title.Size = UDim2.new(1, 0, 0, 16)
@@ -62,11 +60,11 @@ title.BackgroundTransparency = 1
 title.Text = "DucWare"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 12
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextColor3 = Color3.new(1, 1, 1)
 title.TextStrokeTransparency = 0.5
 title.Parent = button
 
--- Kéo nút di chuyển
+-- Di chuyển nút
 local dragging = false
 local dragInput, startPos, startInputPos
 
@@ -94,7 +92,7 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- Toggle bật/tắt Fluent UI
+-- Toggle bật/tắt GUI Fluent
 button.MouseButton1Click:Connect(function()
 	local gui = CoreGui:FindFirstChild("DucWareUI")
 	if gui then
