@@ -1,15 +1,12 @@
 local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 
---⚠️ Load thư viện Fluent UI
+-- Load Fluent UI
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
-local Players = game:GetService("Players")
-
---⚙️ Tạo cửa sổ chính
+-- Tạo cửa sổ Fluent
 local Window = Fluent:CreateWindow({
     Title = "DucWare",
     SubTitle = "by Duck (Thanks To Fluent GUI)",
@@ -19,6 +16,91 @@ local Window = Fluent:CreateWindow({
     Theme = "Darker",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
+
+-- Gán tên để dễ toggle
+local fluentMain = Window:GetMain()
+fluentMain.Name = "DucWareUI"
+
+-- Tắt mặc định nếu muốn khởi đầu ẩn
+fluentMain.Enabled = false
+
+-- 🎮 Tạo GUI launcher nhỏ gọn
+local launcherGui = Instance.new("ScreenGui")
+launcherGui.Name = "DucWareLauncher"
+launcherGui.ResetOnSpawn = false
+launcherGui.IgnoreGuiInset = true
+launcherGui.Parent = CoreGui
+
+-- Button hình vuông nhỏ có viền LED
+local button = Instance.new("ImageButton")
+button.Name = "ToggleButton"
+button.Size = UDim2.new(0, 64, 0, 64)
+button.Position = UDim2.new(0, 20, 0.5, -32)
+button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+button.AutoButtonColor = false
+button.Image = "rbxassetid://84900502740413" -- Logo của bạn
+button.Parent = launcherGui
+
+-- Bo góc
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 16)
+corner.Parent = button
+
+-- Viền LED xanh dương
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Color = Color3.fromRGB(0, 170, 255)
+stroke.Parent = button
+
+-- Tên DucWare
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Size = UDim2.new(1, 0, 0, 16)
+title.Position = UDim2.new(0, 0, 1, 2)
+title.BackgroundTransparency = 1
+title.Text = "DucWare"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 12
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextStrokeTransparency = 0.5
+title.Parent = button
+
+-- Kéo nút di chuyển
+local dragging = false
+local dragInput, startPos, startInputPos
+
+button.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		startInputPos = input.Position
+		startPos = button.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - startInputPos
+		button.Position = UDim2.new(
+			startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- Toggle bật/tắt Fluent UI
+button.MouseButton1Click:Connect(function()
+	local gui = CoreGui:FindFirstChild("DucWareUI")
+	if gui then
+		gui.Enabled = not gui.Enabled
+	end
+end)
 
 --📁 Tabs
 local Tabs = {
@@ -45,76 +127,6 @@ Fluent:Notify({
     Duration = 6,
 })
 
--- Gán tên GUI để dễ toggle
-Window:GetMain().Name = "DucWareUI"
-
---🌟 Tạo GUI Launcher (nút bật tắt)
-local launcherGui = Instance.new("ScreenGui")
-launcherGui.Name = "DucWareLauncher"
-launcherGui.ResetOnSpawn = false
-launcherGui.IgnoreGuiInset = true
-launcherGui.Parent = CoreGui
-
-local button = Instance.new("ImageButton")
-button.Name = "ToggleButton"
-button.Size = UDim2.new(0, 60, 0, 60)
-button.Position = UDim2.new(0, 20, 0.5, -30)
-button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-button.AutoButtonColor = false
-button.Image = "rbxassetid://84900502740413" -- Thay logo nếu muốn
-button.Parent = launcherGui
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = button
-
-local title = Instance.new("TextLabel")
-title.Name = "Title"
-title.Size = UDim2.new(1, 0, 0, 14)
-title.Position = UDim2.new(0, 0, 1, 0)
-title.BackgroundTransparency = 1
-title.Text = "DucWare"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 12
-title.TextColor3 = Color3.new(1, 1, 1)
-title.TextStrokeTransparency = 0.5
-title.Parent = button
-
--- Di chuyển bằng chuột
-local dragging = false
-local startInputPos, startPos
-
-button.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		startInputPos = input.Position
-		startPos = button.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-		local delta = input.Position - startInputPos
-		button.Position = UDim2.new(
-			startPos.X.Scale, startPos.X.Offset + delta.X,
-			startPos.Y.Scale, startPos.Y.Offset + delta.Y
-		)
-	end
-end)
-
--- Nút toggle bật/tắt GUI chính
-button.MouseButton1Click:Connect(function()
-	local mainUI = CoreGui:FindFirstChild("DucWareUI")
-	if mainUI then
-		mainUI.Enabled = not mainUI.Enabled
-	end
-end)
 --------------Game---------------
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
