@@ -31,7 +31,10 @@ button.Size = UDim2.new(0, 64, 0, 64)
 button.Position = UDim2.new(0, 20, 0.5, -32)
 button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 button.AutoButtonColor = false
-button.Image = "rbxassetid://101728462779818" -- Logo của bạn
+local decal = game:GetObjects("rbxassetid://84900502740413")[1]
+local textureId = decal.Texture -- Đây là ID thật
+print("Texture ID:", textureId) -- Ví dụ: "rbxassetid://1234567890"
+button.Image = textureId
 button.Parent = launcherGui
 
 -- Bo góc
