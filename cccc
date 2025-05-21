@@ -88,13 +88,13 @@ UIS.InputChanged:Connect(function(input)
 end)
 
 -- Trạng thái hiện tại của Fluent GUI
-local isMinimized = true
-Window:SetMinimized(isMinimized)
+local isVisible = true
+Window.Enabled = isVisible
 
 -- Toggle bật/tắt Fluent GUI khi click
 button.MouseButton1Click:Connect(function()
-	isMinimized = not isMinimized
-	Window:SetMinimized(isMinimized)
+	isVisible = not isVisible
+	Window.Enabled = isVisible
 end)
 
 --📁 Tabs
