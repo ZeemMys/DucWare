@@ -87,18 +87,23 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
+-- Trạng thái hiện tại của Fluent GUI
+local isMinimized = true
+Window:SetMinimized(isMinimized)
+
 -- Toggle bật/tắt Fluent GUI khi click
 button.MouseButton1Click:Connect(function()
-	Window:SetMinimized(not Window:IsMinimized())
+	isMinimized = not isMinimized
+	Window:SetMinimized(isMinimized)
 end)
 
 --📁 Tabs
 local Tabs = {
     Game = Window:AddTab({ Title = "Game", Icon = "play" }),
     Player = Window:AddTab({ Title = "Player", Icon = "person-standing" }),
-    EspFruit = Window:AddTab({ Title = "Esp Enchant Fruit", Icon = "scan-eye" }),
+    EspFruit = Window:AddTab({ Title = "Esp Enchant Fruit", Icon = "view" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "cog" }),
-    Other = Window:AddTab({ Title = "Other", Icon = "ethernet-port" })
+    Other = Window:AddTab({ Title = "Other", Icon = "smile" })
 }
 
 -- Phát hiện executor
