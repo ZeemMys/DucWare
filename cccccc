@@ -1,12 +1,15 @@
-local CoreGui = game:GetService("CoreGui")
+-- Dịch vụ cần thiết
+local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Load Fluent UI
+-- ⚡ Load Fluent UI
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
--- Tạo cửa sổ Fluent
+-- 🪟 Tạo cửa sổ Fluent
 local Window = Fluent:CreateWindow({
     Title = "DucWare",
     SubTitle = "by Duck (Thanks To Fluent GUI)",
@@ -17,26 +20,46 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
--- Gán tên GUI để có thể toggle
+-- 🟦 Gán GUI chính để toggle
 local fluentMain = Window:GetMain()
 fluentMain.Name = "DucWareUI"
-fluentMain.Enabled = false -- Bắt đầu ẩn
+fluentMain.Enabled = false
 
--- Tạo GUI launcher
+-- 📁 Tabs
+local Tabs = {
+    Game = Window:AddTab({ Title = "Game", Icon = "sword" }),
+    Player = Window:AddTab({ Title = "Player", Icon = "box" }),
+    EspFruit = Window:AddTab({ Title = "Esp Enchant Fruit", Icon = "box" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+    Other = Window:AddTab({ Title = "Other", Icon = "settings" })
+}
+
+-- 📋 Hiển thị executor
+local executor = identifyexecutor and identifyexecutor() or "Không xác định"
+Tabs.Game:AddParagraph({ Title = "Executor đang dùng:", Content = executor })
+
+-- 🔔 Thông báo
+Fluent:Notify({
+    Title = "Chào mừng",
+    Content = "Grow a Garden Script ĐÃ CHẠY",
+    Duration = 6,
+})
+
+-- 🟦 GUI Launcher nhỏ
 local launcherGui = Instance.new("ScreenGui")
 launcherGui.Name = "DucWareLauncher"
 launcherGui.ResetOnSpawn = false
 launcherGui.IgnoreGuiInset = true
-launcherGui.Parent = CoreGui
+launcherGui.Parent = PlayerGui -- 👈 KHÔNG dùng CoreGui để tránh lỗi executor
 
--- Nút hình vuông
+-- 🔘 Nút bật/tắt
 local button = Instance.new("ImageButton")
 button.Name = "ToggleButton"
 button.Size = UDim2.new(0, 64, 0, 64)
 button.Position = UDim2.new(0, 20, 0.5, -32)
 button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 button.AutoButtonColor = false
-button.Image = "rbxassetid://84900502740413" -- Logo
+button.Image = "rbxassetid://84900502740413" -- ← thay logo nếu cần
 button.Parent = launcherGui
 
 -- Bo góc
@@ -44,14 +67,14 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 16)
 corner.Parent = button
 
--- Viền xanh dương
+-- Viền LED xanh dương
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 2
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Color = Color3.fromRGB(0, 170, 255)
 stroke.Parent = button
 
--- Label tên
+-- Tên DucWare
 local title = Instance.new("TextLabel")
 title.Name = "Title"
 title.Size = UDim2.new(1, 0, 0, 16)
@@ -64,9 +87,9 @@ title.TextColor3 = Color3.new(1, 1, 1)
 title.TextStrokeTransparency = 0.5
 title.Parent = button
 
--- Di chuyển nút
+-- 🚚 Kéo di chuyển
 local dragging = false
-local dragInput, startPos, startInputPos
+local startInputPos, startPos
 
 button.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -92,38 +115,10 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- Toggle bật/tắt GUI Fluent
+-- 🔄 Toggle Fluent GUI
 button.MouseButton1Click:Connect(function()
-	local gui = CoreGui:FindFirstChild("DucWareUI")
-	if gui then
-		gui.Enabled = not gui.Enabled
-	end
+	fluentMain.Enabled = not fluentMain.Enabled
 end)
-
---📁 Tabs
-local Tabs = {
-    Game = Window:AddTab({ Title = "Game", Icon = "sword" }),
-    Player = Window:AddTab({ Title = "Player", Icon = "box" }),
-    EspFruit = Window:AddTab({ Title = "Esp Enchant Fruit", Icon = "box"}),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings"}),
-    Other = Window:AddTab({ Title = "Other", Icon = "settings"})
-}
-
--- Phát hiện executor
-local executor = identifyexecutor and identifyexecutor() or "Không xác định"
-
--- Thêm nhãn executor vào GUI
-Tabs.Game:AddParagraph({
-    Title = "Executor đang dùng:",
-    Content = executor
-})
-
---🔔 Thông báo khởi động
-Fluent:Notify({
-    Title = "Chào mừng",
-    Content = "Grow a Garden Script ĐÃ CHẠY",
-    Duration = 6,
-})
 
 --------------Game---------------
 local Players = game:GetService("Players")
