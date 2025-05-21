@@ -98,11 +98,11 @@ end)
 
 --📁 Tabs
 local Tabs = {
-    Game = Window:AddTab({ Title = "Game", Icon = "sword" }),
-    Player = Window:AddTab({ Title = "Player", Icon = "box" }),
-    EspFruit = Window:AddTab({ Title = "Esp Enchant Fruit", Icon = "box" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
-    Other = Window:AddTab({ Title = "Other", Icon = "settings" })
+    Game = Window:AddTab({ Title = "Game", Icon = "play" }),
+    Player = Window:AddTab({ Title = "Player", Icon = "person-standing" }),
+    EspFruit = Window:AddTab({ Title = "Esp Enchant Fruit", Icon = "grape" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "cog" }),
+    Other = Window:AddTab({ Title = "Other", Icon = "ethernet-port" })
 }
 
 -- Phát hiện executor
