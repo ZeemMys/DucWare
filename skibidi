@@ -1,0 +1,38 @@
+-- LocalScript để đặt trong StarterGui
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Giao diện GUI
+local screenGui = Instance.new("ScreenGui", playerGui)
+screenGui.Name = "DucWareLoader"
+screenGui.ResetOnSpawn = false
+
+-- Nút bật/tắt script
+local logoButton = Instance.new("ImageButton", screenGui)
+logoButton.Size = UDim2.new(0, 60, 0, 60)
+logoButton.Position = UDim2.new(0, 20, 0, 300) -- điều chỉnh theo nhu cầu
+logoButton.BackgroundTransparency = 1
+logoButton.Image = "rbxassetid://INSERT_IMAGE_ID_HERE" -- Thay bằng ID logo bạn thích (anime ngầu)
+
+-- Trạng thái script đã bật chưa
+local scriptLoaded = false
+local runningThread = nil
+
+logoButton.MouseButton1Click:Connect(function()
+	if not scriptLoaded then
+		scriptLoaded = true
+		-- Tải và chạy script
+		coroutine.wrap(function()
+			local success, err = pcall(function()
+				loadstring(game:HttpGet("https://raw.githubusercontent.com/ZeemMys/DucWare/main/cccc"))()
+			end)
+			if not success then
+				warn("Lỗi khi tải script: ", err)
+				scriptLoaded = false
+			end
+		end)()
+	else
+		warn("Script đã chạy rồi!")
+	end
+end)
