@@ -18,6 +18,7 @@ local Window = Fluent:CreateWindow({
 })
 
 -- Quản lý bật/tắt Fluent GUI
+InterfaceManager.Library = Fluent
 InterfaceManager:BuildInterfaceSection(Window)
 Window:SetMinimized(true) -- Ẩn GUI lúc khởi động
 
