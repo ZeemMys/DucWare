@@ -17,11 +17,6 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
--- Quản lý bật/tắt Fluent GUI
-InterfaceManager.Library = Fluent
-InterfaceManager:BuildInterfaceSection(Window)
-Window:SetMinimized(true) -- Ẩn GUI lúc khởi động
-
 -- Tạo GUI launcher
 local launcherGui = Instance.new("ScreenGui")
 launcherGui.Name = "DucWareLauncher"
@@ -112,6 +107,13 @@ Tabs.Game:AddParagraph({
     Title = "Executor đang dùng:",
     Content = executor
 })
+
+-- Gán Fluent cho InterfaceManager và build UI
+InterfaceManager.Library = Fluent
+InterfaceManager:BuildInterfaceSection(Window)
+
+-- Ẩn Fluent GUI khi khởi động
+Window:SetMinimized(true)
 
 --🔔 Thông báo khởi động
 Fluent:Notify({
