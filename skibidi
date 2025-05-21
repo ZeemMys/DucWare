@@ -13,7 +13,7 @@ local logoButton = Instance.new("ImageButton", screenGui)
 logoButton.Size = UDim2.new(0, 60, 0, 60)
 logoButton.Position = UDim2.new(0, 20, 0, 300) -- điều chỉnh theo nhu cầu
 logoButton.BackgroundTransparency = 1
-logoButton.Image = "rbxassetid://INSERT_IMAGE_ID_HERE" -- Thay bằng ID logo bạn thích (anime ngầu)
+logoButton.Image = "rbxassetid://84900502740413" -- Thay bằng ID logo bạn thích (anime ngầu)
 
 -- Trạng thái script đã bật chưa
 local scriptLoaded = false
