@@ -141,7 +141,7 @@ end
 -- Thêm nút trong Fluent GUI
 Tabs.Game:AddButton({
 	Title = "📊 Show FPS + Device",
-	Description = "Hiển thị FPS + Thiết bị với icon",
+	Description = "Hiển thị FPS + Thiết bị",
 	Callback = function()
 		local label, icon = createBanner()
 		startUpdating(label, icon)
