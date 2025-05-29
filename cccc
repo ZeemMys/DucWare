@@ -103,7 +103,7 @@ end)
 local Tabs = {
     Game = Window:AddTab({ Title = "Game", Icon = "play" }),
     Player = Window:AddTab({ Title = "Player", Icon = "person-standing" }),
-    EspFruit = Window:AddTab({ Title = "Esp Enchant Fruit", Icon = "view" }),
+    Dupe = Window:AddTab({ Title = "Dupe", Icon = "view" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "cog" }),
     Other = Window:AddTab({ Title = "Other", Icon = "smile" })
 }
