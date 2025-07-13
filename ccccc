@@ -90,12 +90,12 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
+local minimized = true
+Window.Minimized = minimized
+
 button.MouseButton1Click:Connect(function()
-    if Window.Visible then
-        Window:Hide()
-    else
-        Window:Show()
-    end
+    minimized = not minimized
+    Window.Minimized = minimized
 end)
 
 --📁 Tabs
