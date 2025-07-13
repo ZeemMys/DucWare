@@ -1027,20 +1027,37 @@ Tabs.Other:AddButton({
             return
         end
 
-        -- Gắn vào người đó và xoay liên tục
-        task.spawn(function()
-            Fluent:Notify({
-                Title = "💥 Flinging...",
-                Content = "Đang thực hiện fling " .. target.Name,
-                Duration = 4
-            })
+        Fluent:Notify({
+            Title = "💥 Flinging...",
+            Content = "Đang thực hiện fling " .. target.Name,
+            Duration = 4
+        })
 
-            for i = 1, 100 do
-                HRP.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 0)
-                HRP.Velocity = Vector3.new(9999, 9999, 9999)
-                HRP.RotVelocity = Vector3.new(9999, 9999, 9999)
-                task.wait(0.05)
-            end
+        -- Tạo Part để Fling
+        local flingPart = Instance.new("Part")
+        flingPart.Size = Vector3.new(5, 5, 5)
+        flingPart.Anchored = false
+        flingPart.CanCollide = true
+        flingPart.Position = target.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+        flingPart.Name = "FlingBlock"
+        flingPart.Parent = workspace
+
+        -- Gắn flingPart vào người kia
+        local weld = Instance.new("WeldConstraint")
+        weld.Part0 = flingPart
+        weld.Part1 = target.Character.HumanoidRootPart
+        weld.Parent = flingPart
+
+        -- Gắn lực xoay cực mạnh
+        local bav = Instance.new("BodyAngularVelocity")
+        bav.AngularVelocity = Vector3.new(9999, 9999, 9999)
+        bav.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+        bav.P = 100000
+        bav.Parent = flingPart
+
+        -- Tự hủy sau vài giây để tránh lỗi
+        task.delay(5, function()
+            if flingPart then flingPart:Destroy() end
         end)
     end
 })
