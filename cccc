@@ -90,13 +90,16 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- Ẩn hiện GUI bằng nút launcher
-local minimized = true
-Window.Minimized = minimized
+local guiVisible = false
+Window:Hide()
 
 button.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    Window.Minimized = minimized
+    guiVisible = not guiVisible
+    if guiVisible then
+        Window:Show()
+    else
+        Window:Hide()
+    end
 end)
 
 --📁 Tabs
@@ -991,5 +994,57 @@ Tabs.Other:AddToggle("AntiAFKToggle", {
     Description = "Just Sleep",
     Callback = function(value)
         setAntiAFK(value)
+    end
+})
+
+Tabs.Other:AddButton({
+    Title = "💥 Fling Người Chơi",
+    Description = "Fling người gần nhất (chạm)",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local HRP = Character:WaitForChild("HumanoidRootPart")
+
+        local function getClosestPlayer()
+            local shortestDist = math.huge
+            local closest = nil
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local dist = (HRP.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                    if dist < shortestDist then
+                        shortestDist = dist
+                        closest = player
+                    end
+                end
+            end
+            return closest
+        end
+
+        local target = getClosestPlayer()
+        if not target then
+            Fluent:Notify({
+                Title = "❌ Không tìm thấy ai gần bạn!",
+                Content = "Đứng gần người chơi khác để fling.",
+                Duration = 4
+            })
+            return
+        end
+
+        -- Gắn vào người đó và xoay liên tục
+        task.spawn(function()
+            Fluent:Notify({
+                Title = "💥 Flinging...",
+                Content = "Đang thực hiện fling " .. target.Name,
+                Duration = 4
+            })
+
+            for i = 1, 100 do
+                HRP.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 0)
+                HRP.Velocity = Vector3.new(9999, 9999, 9999)
+                HRP.RotVelocity = Vector3.new(9999, 9999, 9999)
+                task.wait(0.05)
+            end
+        end)
     end
 })
