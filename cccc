@@ -90,15 +90,11 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
-local guiVisible = false
-Window:Hide()
-
 button.MouseButton1Click:Connect(function()
-    guiVisible = not guiVisible
-    if guiVisible then
-        Window:Show()
-    else
+    if Window.Visible then
         Window:Hide()
+    else
+        Window:Show()
     end
 end)
 
